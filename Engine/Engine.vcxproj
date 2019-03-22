@@ -10,6 +10,12 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\Window.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{2780D314-0FF6-4E33-8537-E2B0D27E32E8}</ProjectGuid>
