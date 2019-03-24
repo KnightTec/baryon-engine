@@ -11,9 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Engine.h" />
+    <ClInclude Include="source\RenderingEngine.h" />
+    <ClInclude Include="source\Viewport.h" />
     <ClInclude Include="source\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Engine.cpp" />
+    <ClCompile Include="source\RenderingEngine.cpp" />
+    <ClCompile Include="source\Viewport.cpp" />
     <ClCompile Include="source\Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -68,6 +74,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3d11.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -86,6 +95,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3d11.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

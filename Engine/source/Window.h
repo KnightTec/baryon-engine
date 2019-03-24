@@ -11,15 +11,15 @@ public:
 	{
 		WINDOWED = 0,
 		BORDERLESS = 1,
-		WINDOWED_UNLOCKED = 2	//TODO: remove this style
+		WINDOWED_SCALABLE = 2	//TODO: remove this style
 	};
 
-	Window(DirectX::XMINT2 clientSize, STYLE style);
+	Window(DirectX::XMUINT2 clientSize, STYLE style);
 
 	HWND getHwnd() const;
-	DirectX::XMINT2 getClientSize() const;
+	DirectX::XMUINT2 getClientSize() const;
 	void setStyle(STYLE newStyle);
-	void resize(DirectX::XMINT2 newSize);
+	void resize(DirectX::XMUINT2 newClientSize);
 private:
 	HWND windowHandle;
 };

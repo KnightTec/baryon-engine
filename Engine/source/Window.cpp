@@ -7,49 +7,50 @@ static const bool dpiAware = SetProcessDPIAware();
 
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-static DWORD styles[3] = {
-	WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, // windowed
-	WS_POPUP, // borderless
-	WS_OVERLAPPEDWINDOW // windowed unlocked
-};
-
-Window::Window(DirectX::XMINT2 clientSize, STYLE style)
+Window::Window(DirectX::XMUINT2 clientSize, STYLE style)
 	: windowHandle{nullptr}
 {
 	WNDCLASS wc = {};
 	wc.hInstance = GetModuleHandle(nullptr);
 	wc.lpfnWndProc = WindowProc;
 	wc.lpszClassName = L"BaryonWindow";
-	wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(GRAY_BRUSH));
+	wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 	RegisterClass(&wc);
 
-	HWND hwnd = CreateWindowW(wc.lpszClassName, L"Baryon Game", styles[style], 0, 0, 0, 0, nullptr,
+	HWND hwnd = CreateWindowW(wc.lpszClassName, L"Baryon Game", 0, 0, 0, 0, 0, nullptr,
 		nullptr, wc.hInstance, nullptr);
 	if (hwnd)
 	{
 		windowHandle = hwnd;
+		setStyle(style);
 		resize(clientSize);
 	}
 	else
 	{
-		MessageBoxW(nullptr, L"Error: Failed to create Window.", L"Baryon Engine", MB_OK | MB_ICONERROR);
+		MessageBoxW(nullptr, L"Error: Failed to create window.", L"Baryon Engine", MB_OK | MB_ICONERROR);
 		exit(1);
 	}
 }
-DirectX::XMINT2 Window::getClientSize() const
+DirectX::XMUINT2 Window::getClientSize() const
 {
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
-	return { clientRect.right, clientRect.bottom };
+	return {static_cast<uint32_t>(clientRect.right), static_cast<uint32_t>(clientRect.bottom)};
 }
 void Window::setStyle(STYLE newStyle)
 {
+	static DWORD styles[3] = {
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, // windowed
+		WS_POPUP, // borderless
+		WS_OVERLAPPEDWINDOW // windowed scalable
+	};
 	SetWindowLong(windowHandle, GWL_STYLE, styles[newStyle]);
 	ShowWindow(windowHandle, SW_SHOW);
 }
-void Window::resize(DirectX::XMINT2 newSize)
+void Window::resize(DirectX::XMUINT2 newClientSize)
 {
 	DirectX::XMINT2 screenSize = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
+	DirectX::XMINT2 newSize{ static_cast<int32_t>(newClientSize.x), static_cast<int32_t>(newClientSize.y) };
 
 	RECT rect;
 	rect.left = 0;
@@ -60,7 +61,7 @@ void Window::resize(DirectX::XMINT2 newSize)
 	AdjustWindowRect(&rect, dwStyle, false);
 
 	// Position window at the center of the screen
-	DirectX::XMINT2 position = {(screenSize.x - newSize.x) / 2, (screenSize.y - newSize.y) / 2};
+	DirectX::XMINT2 position = DirectX::XMINT2{(screenSize.x - newSize.x) / 2, (screenSize.y - newSize.y) / 2};
 
 	// If window is larger than the screen, the top left corner will stay on the screen
 	if (newSize.x <= screenSize.x && newSize.y <= screenSize.y)
