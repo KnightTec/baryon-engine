@@ -1,15 +1,15 @@
-#include "Viewport.h"
+#include "VirtualScreen.h"
+#include "GameWindow.h"
+#include "GraphicsDeviceInterface.h"
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
-Viewport::Viewport(const Window& window) : hwnd{window.getHwnd()}
-{
-}
-bool Viewport::init(ID3D11Device4& d3dDevice)
+#define HR(hr) if(FAILED(hr)) return false
+
+bool VirtualScreen::initialize(GameWindow& window)
 {
 	//TODO: Check MSAA support
-	//TODO: Handle errors
 
 	// Create the swap chain
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
@@ -25,30 +25,32 @@ bool Viewport::init(ID3D11Device4& d3dDevice)
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
+	ID3D11Device4& d3dDevice = getDevice();;
 	ComPtr<IDXGIDevice4> dxgiDevice;
 	ComPtr<IDXGIAdapter> adapter;
 	ComPtr<IDXGIFactory2> factory;
 	ComPtr<IDXGISwapChain1> swapChain;
-	d3dDevice.QueryInterface(__uuidof(IDXGIDevice4), static_cast<void**>(&dxgiDevice));
-	dxgiDevice->GetAdapter(adapter.GetAddressOf());
-	adapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(factory.GetAddressOf()));
+	HR(d3dDevice.QueryInterface(__uuidof(IDXGIDevice4), static_cast<void**>(&dxgiDevice)));
+	HR(dxgiDevice->GetAdapter(adapter.GetAddressOf()));
+	HR(adapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(factory.GetAddressOf())));
 
-	factory->CreateSwapChainForHwnd(&d3dDevice, hwnd, &swapChainDesc, nullptr, nullptr, &swapChain);
-	factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
-	swapChain.As(&d3dSwapChain);
-
-	swapChain->GetDesc1(&swapChainDesc);
+	HWND hwnd = window.windowHandle;
+	window.screen = this;
+	HR(factory->CreateSwapChainForHwnd(&d3dDevice, hwnd, &swapChainDesc, nullptr, nullptr, &swapChain));
+	HR(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
+	HR(swapChain.As(&d3dSwapChain));
 
 	// Create the render target view
 	ComPtr<ID3D11Texture2D> backBuffer;
-	d3dSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
+	HR(d3dSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
 	D3D11_RENDER_TARGET_VIEW_DESC desc;
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	desc.Texture2D.MipSlice = 0;
 	desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	d3dDevice.CreateRenderTargetView(backBuffer.Get(), &desc, renderTargetView.GetAddressOf());
+	HR(d3dDevice.CreateRenderTargetView(backBuffer.Get(), &desc, renderTargetView.GetAddressOf()));
 
 	// Create depth/stencil buffer and view
+	HR(swapChain->GetDesc1(&swapChainDesc));
 	D3D11_TEXTURE2D_DESC1 depthStencilDesc;
 	depthStencilDesc.Width = swapChainDesc.Width;
 	depthStencilDesc.Height = swapChainDesc.Height;
@@ -64,8 +66,8 @@ bool Viewport::init(ID3D11Device4& d3dDevice)
 	depthStencilDesc.TextureLayout = D3D11_TEXTURE_LAYOUT_UNDEFINED;
 
 	ComPtr<ID3D11Texture2D1> depthStencilBuffer;
-	d3dDevice.CreateTexture2D1(&depthStencilDesc, 0, &depthStencilBuffer);
-	d3dDevice.CreateDepthStencilView(depthStencilBuffer.Get(), 0, &depthStencilView);
+	HR(d3dDevice.CreateTexture2D1(&depthStencilDesc, 0, &depthStencilBuffer));
+	HR(d3dDevice.CreateDepthStencilView(depthStencilBuffer.Get(), 0, &depthStencilView));
 
 	return true;
 }

@@ -1,15 +1,15 @@
-#include "Window.h"
+#include "GameWindow.h"
 
 using namespace Baryon;
 
-// TODO: remove this variable
-static const bool dpiAware = SetProcessDPIAware();
-
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-Window::Window(DirectX::XMUINT2 clientSize, STYLE style)
-	: windowHandle{nullptr}
+GameWindow::GameWindow() : windowHandle {nullptr}, screen{nullptr}
 {
+}
+bool GameWindow::initialize(DirectX::XMUINT2 clientSize, STYLE style)
+{
+	assert(!windowHandle);
 	WNDCLASS wc = {};
 	wc.hInstance = GetModuleHandle(nullptr);
 	wc.lpfnWndProc = WindowProc;
@@ -17,28 +17,29 @@ Window::Window(DirectX::XMUINT2 clientSize, STYLE style)
 	wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 	RegisterClass(&wc);
 
-	HWND hwnd = CreateWindowW(wc.lpszClassName, L"Baryon Game", 0, 0, 0, 0, 0, nullptr,
+	HWND hwnd = CreateWindow(wc.lpszClassName, L"Baryon Game", 0, 0, 0, 0, 0, nullptr,
 		nullptr, wc.hInstance, nullptr);
 	if (hwnd)
 	{
 		windowHandle = hwnd;
 		setStyle(style);
 		resize(clientSize);
+		return true;
 	}
-	else
-	{
-		MessageBoxW(nullptr, L"Error: Failed to create window.", L"Baryon Engine", MB_OK | MB_ICONERROR);
-		exit(1);
-	}
+	MessageBoxW(nullptr, L"Error: Failed to create window.", L"Baryon Engine", MB_OK | MB_ICONERROR);
+	return false;
 }
-DirectX::XMUINT2 Window::getClientSize() const
+
+DirectX::XMUINT2 GameWindow::getClientSize() const
 {
+	assert(windowHandle);
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
 	return {static_cast<uint32_t>(clientRect.right), static_cast<uint32_t>(clientRect.bottom)};
 }
-void Window::setStyle(STYLE newStyle)
+void GameWindow::setStyle(STYLE newStyle)
 {
+	assert(windowHandle);
 	static DWORD styles[3] = {
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, // windowed
 		WS_POPUP, // borderless
@@ -47,10 +48,11 @@ void Window::setStyle(STYLE newStyle)
 	SetWindowLong(windowHandle, GWL_STYLE, styles[newStyle]);
 	ShowWindow(windowHandle, SW_SHOW);
 }
-void Window::resize(DirectX::XMUINT2 newClientSize)
+void GameWindow::resize(DirectX::XMUINT2 newClientSize)
 {
+	assert(windowHandle);
 	DirectX::XMINT2 screenSize = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
-	DirectX::XMINT2 newSize{ static_cast<int32_t>(newClientSize.x), static_cast<int32_t>(newClientSize.y) };
+	DirectX::XMINT2 newSize{static_cast<int32_t>(newClientSize.x), static_cast<int32_t>(newClientSize.y)};
 
 	RECT rect;
 	rect.left = 0;

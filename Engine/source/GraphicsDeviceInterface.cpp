@@ -1,12 +1,13 @@
-#include "RenderingEngine.h"
-#include <cassert>
+#include "GraphicsDeviceInterface.h"
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
-bool RenderingEngine::initialized = false;
+bool GraphicsDeviceInterface::initialized = false;
+ComPtr<ID3D11Device4> GraphicsDeviceInterface::d3dDevice;
+ComPtr<ID3D11DeviceContext4> GraphicsDeviceInterface::d3dContext;
 
-bool RenderingEngine::startUp()
+bool GraphicsDeviceInterface::initialize(Key<Engine>)
 {
 	assert(!initialized);
 	UINT flags = 0;
@@ -39,23 +40,4 @@ bool RenderingEngine::startUp()
 	context.As(&d3dContext);
 	initialized = true;
 	return true;
-}
-bool RenderingEngine::createViewport(const Window& window, Viewport* outViewport)
-{
-	assert(initialized);
-	viewports.emplace_back(Viewport{ window });
-	outViewport = &viewports[viewports.size() - 1];
-	return outViewport->init(*d3dDevice.Get());
-}
-void RenderingEngine::render()
-{
-	for (const Viewport& viewport : viewports)
-	{
-		d3dContext->OMSetRenderTargets(1, viewport.renderTargetView.GetAddressOf(), viewport.depthStencilView.Get());
-
-		const float clearColor[] = { 0.739f, 0.339f, 0.139f, 1.000f };
-		d3dContext->ClearRenderTargetView(viewport.renderTargetView.Get(), clearColor);
-
-		viewport.d3dSwapChain->Present(1, 0);
-	}
 }

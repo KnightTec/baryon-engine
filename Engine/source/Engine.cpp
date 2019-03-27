@@ -1,12 +1,17 @@
 #include "Engine.h"
+#include "GraphicsDeviceInterface.h"
+#include "PassKey.h"
+
+#include "windows.h"
 
 using namespace Baryon;
 
-bool Engine::startUp()
+bool Engine::initialize()
 {
-	if (!renderingEngine.startUp())
+	SetProcessDPIAware();
+	if (!GraphicsDeviceInterface::initialize(Key<Engine>()))
 	{
-		MessageBoxW(nullptr, L"Error: Failed to initialize rendering Engine.", L"Baryon Engine", MB_OK | MB_ICONERROR);
+		MessageBoxW(nullptr, L"Error: Failed to initialize GraphicsDeviceInterface.", L"Baryon Engine", MB_OK | MB_ICONERROR);
 		return false;
 	}
 	return true;
@@ -27,7 +32,7 @@ void Engine::run()
 		}
 		else
 		{
-			renderingEngine.render();
+			renderer.render();
 		}
 	}
 }

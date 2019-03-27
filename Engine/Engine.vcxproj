@@ -11,16 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
-    <ClInclude Include="source\RenderingEngine.h" />
-    <ClInclude Include="source\Viewport.h" />
-    <ClInclude Include="source\Window.h" />
+    <ClInclude Include="source\PassKey.h" />
+    <ClInclude Include="source\Renderer.h" />
+    <ClInclude Include="source\VirtualScreen.h" />
+    <ClInclude Include="source\GameWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
-    <ClCompile Include="source\RenderingEngine.cpp" />
-    <ClCompile Include="source\Viewport.cpp" />
-    <ClCompile Include="source\Window.cpp" />
+    <ClCompile Include="source\Renderer.cpp" />
+    <ClCompile Include="source\VirtualScreen.cpp" />
+    <ClCompile Include="source\GameWindow.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

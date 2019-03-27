@@ -1,18 +1,21 @@
 #pragma once
-#include "RenderingEngine.h"
+#include "Renderer.h"
 
 namespace Baryon
 {
 class Engine
 {
 public:
-	bool startUp();
+	// must be called before any other function
+	bool initialize();
 	void run();
-
-	RenderingEngine renderingEngine;
+	Renderer& getRenderer();
 private:
-	
-
-	
+	Renderer renderer;
 };
+
+inline Renderer& Engine::getRenderer()
+{
+	return renderer;
+}
 }
