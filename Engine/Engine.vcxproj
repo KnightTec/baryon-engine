@@ -11,19 +11,37 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
+    <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\PassKey.h" />
     <ClInclude Include="source\Renderer.h" />
     <ClInclude Include="source\VirtualScreen.h" />
     <ClInclude Include="source\GameWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
+    <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\VirtualScreen.cpp" />
     <ClCompile Include="source\GameWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="source\PixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="source\VertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

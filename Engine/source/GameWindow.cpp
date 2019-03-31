@@ -7,7 +7,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 GameWindow::GameWindow() : windowHandle {nullptr}, screen{nullptr}
 {
 }
-bool GameWindow::initialize(DirectX::XMUINT2 clientSize, STYLE style)
+bool GameWindow::initialize(const wchar_t* name, DirectX::XMUINT2 clientSize, STYLE style)
 {
 	assert(!windowHandle);
 	WNDCLASS wc = {};
@@ -17,7 +17,7 @@ bool GameWindow::initialize(DirectX::XMUINT2 clientSize, STYLE style)
 	wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 	RegisterClass(&wc);
 
-	HWND hwnd = CreateWindow(wc.lpszClassName, L"Baryon Game", 0, 0, 0, 0, 0, nullptr,
+	HWND hwnd = CreateWindow(wc.lpszClassName, name, 0, 0, 0, 0, 0, nullptr,
 		nullptr, wc.hInstance, nullptr);
 	if (hwnd)
 	{
@@ -89,7 +89,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			break;
+			return 0;
 		default:
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}

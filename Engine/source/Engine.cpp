@@ -14,19 +14,20 @@ bool Engine::initialize()
 		MessageBoxW(nullptr, L"Error: Failed to initialize GraphicsDeviceInterface.", L"Baryon Engine", MB_OK | MB_ICONERROR);
 		return false;
 	}
+	if (!renderer.initialize())
+	{
+		MessageBoxW(nullptr, L"Error: Failed to initialize Renderer.", L"Baryon Engine", MB_OK | MB_ICONERROR);
+		return false;
+	}
 	return true;
 }
 void Engine::run()
 {
 	MSG msg = {};
-	while (true)
+	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
-			if (msg.message == WM_QUIT)
-			{
-				break;
-			}
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}

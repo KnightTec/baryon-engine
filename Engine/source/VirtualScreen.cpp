@@ -1,12 +1,14 @@
 #include "VirtualScreen.h"
 #include "GameWindow.h"
-#include "GraphicsDeviceInterface.h"
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
 #define HR(hr) if(FAILED(hr)) return false
 
+VirtualScreen::VirtualScreen() : resolution{0, 0}
+{
+}
 bool VirtualScreen::initialize(GameWindow& window)
 {
 	//TODO: Check MSAA support
@@ -39,7 +41,7 @@ bool VirtualScreen::initialize(GameWindow& window)
 	HR(factory->CreateSwapChainForHwnd(&d3dDevice, hwnd, &swapChainDesc, nullptr, nullptr, &swapChain));
 	HR(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
 	HR(swapChain.As(&d3dSwapChain));
-
+	
 	// Create the render target view
 	ComPtr<ID3D11Texture2D> backBuffer;
 	HR(d3dSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
@@ -49,8 +51,10 @@ bool VirtualScreen::initialize(GameWindow& window)
 	desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	HR(d3dDevice.CreateRenderTargetView(backBuffer.Get(), &desc, renderTargetView.GetAddressOf()));
 
-	// Create depth/stencil buffer and view
 	HR(swapChain->GetDesc1(&swapChainDesc));
+	resolution = { swapChainDesc.Width, swapChainDesc.Height };
+
+	// Create depth/stencil buffer and view
 	D3D11_TEXTURE2D_DESC1 depthStencilDesc;
 	depthStencilDesc.Width = swapChainDesc.Width;
 	depthStencilDesc.Height = swapChainDesc.Height;
@@ -68,6 +72,15 @@ bool VirtualScreen::initialize(GameWindow& window)
 	ComPtr<ID3D11Texture2D1> depthStencilBuffer;
 	HR(d3dDevice.CreateTexture2D1(&depthStencilDesc, 0, &depthStencilBuffer));
 	HR(d3dDevice.CreateDepthStencilView(depthStencilBuffer.Get(), 0, &depthStencilView));
+
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	vp.Width = static_cast<float>(resolution.x);
+	vp.Height = static_cast<float>(resolution.y);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	getContext().RSSetViewports(1, &vp);
 
 	return true;
 }

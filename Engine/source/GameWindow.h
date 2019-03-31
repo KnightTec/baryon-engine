@@ -8,6 +8,7 @@ namespace Baryon
 {
 class GameWindow
 {
+	friend bool VirtualScreen::initialize(GameWindow& window);
 public:
 	enum STYLE
 	{
@@ -18,13 +19,12 @@ public:
 	};
 
 	GameWindow();
-	bool initialize(DirectX::XMUINT2 clientSize, STYLE style);
+	bool initialize(const wchar_t* name, DirectX::XMUINT2 clientSize, STYLE style);
 	DirectX::XMUINT2 getClientSize() const;
 	void setStyle(STYLE newStyle);
 	void resize(DirectX::XMUINT2 newClientSize);
 private:
 	HWND windowHandle;
 	VirtualScreen* screen;
-	friend bool VirtualScreen::initialize(GameWindow& window);
 };
 }
