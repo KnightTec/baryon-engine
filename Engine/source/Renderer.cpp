@@ -111,7 +111,6 @@ bool Renderer::initialize()
 	/*
 	 * TODO: Blend State
 	  Depth Stencil State
-	  Rasterizer State
 	  Sampler State
 	 */
 	 //
@@ -131,14 +130,8 @@ void Renderer::render()
 		UINT strides = sizeof(Vertex);
 		UINT offsets = 0;
 		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
-		//getContext().IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
-		//getContext().IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-		getContext().IASetInputLayout(nullptr);
-		ID3D11Buffer* vbs[] = { nullptr, };
-		unsigned int stride[] = { 0, }, offset[] = { 0, };
-		getContext().IASetVertexBuffers(0, 1, vbs, stride, offset);
-		getContext().IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		getContext().IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
+		getContext().IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 		for (VirtualScreen* screen : virtualScreens)
 		{
@@ -152,11 +145,10 @@ void Renderer::render()
 					D3D11_MAPPED_SUBRESOURCE mappedData;
 					getContext().Map(cbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData);
 					auto* v = reinterpret_cast<VS_CONSTANT_BUFFER*>(mappedData.pData);
-					XMStoreFloat4x4(&v->mWorldViewProj, cam->getViewProjMatrix());
+					XMStoreFloat4x4(&v->mWorldViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
 					getContext().Unmap(cbuffer.Get(), 0);
 
-					//getContext().DrawIndexed(mesh->getIndexCount(), 0, 0);
-					getContext().Draw(3, 0);
+					getContext().DrawIndexed(mesh->getIndexCount(), 0, 0);
 				}
 			}
 		}

@@ -33,7 +33,7 @@ private:
 };
 
 inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ)
-	: position{0, 0, -10}, fov{fov}, aspectRatio{aspectRatio}, nearZ{nearZ}, farZ{farZ}
+	: position{1, 0, -3}, fov{fov}, aspectRatio{aspectRatio}, nearZ{nearZ}, farZ{farZ}
 {
 	setFrustrum(fov, aspectRatio, nearZ, farZ);
 }
@@ -65,14 +65,18 @@ inline void Camera::setFrustrum(float fov, float aspectRatio, float nearZ, float
 }
 inline void Camera::setFov(float fov)
 {
+	this->fov = fov;
 	setFrustrum(fov, aspectRatio, nearZ, farZ);
 }
 inline void Camera::setAspectRatio(float aspectRatio)
 {
+	this->aspectRatio = aspectRatio;
 	setFrustrum(fov, aspectRatio, nearZ, farZ);
 }
 inline void Camera::setZPlanes(float nearZ, float farZ)
 {
+	this->nearZ = nearZ;
+	this->farZ = farZ;
 	setFrustrum(fov, aspectRatio, nearZ, farZ);
 }
 }
