@@ -6,7 +6,7 @@ namespace Baryon
 class Camera
 {
 public:
-	Camera(float fov, float aspectRatio, float nearZ, float farZ);
+	Camera(float fov, float aspectRatio, float nearZ, float farZ, DirectX::XMFLOAT3 position = { 0, 0, 0 });
 
 	void translate(DirectX::XMFLOAT3 vector);
 	void rotate();
@@ -32,8 +32,8 @@ private:
 	float farZ;
 };
 
-inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ)
-	: position{1, 0, -3}, fov{fov}, aspectRatio{aspectRatio}, nearZ{nearZ}, farZ{farZ}
+inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ, DirectX::XMFLOAT3 position)
+	: position{position}, fov{fov}, aspectRatio{aspectRatio}, nearZ{nearZ}, farZ{farZ}
 {
 	setFrustrum(fov, aspectRatio, nearZ, farZ);
 }

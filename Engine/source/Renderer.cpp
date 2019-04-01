@@ -12,6 +12,7 @@ using namespace Microsoft::WRL;
 struct VS_CONSTANT_BUFFER
 {
 	XMFLOAT4X4 mWorldViewProj;
+	XMFLOAT4X4 mWorldViewProjInv;
 };
 
 ComPtr<ID3D11Buffer> cbuffer;
@@ -121,9 +122,9 @@ void Renderer::render()
 	for (VirtualScreen* screen : virtualScreens)
 	{
 		if (screen) {
-			const float clearColor[] = { 0.739f, 0.339f, 0.139f, 1.000f };
+			const float clearColor[] = { 0, 0, 0, 1.000f };
 			getContext().ClearRenderTargetView(screen->getRenderTargetView(), clearColor);
-			getContext().ClearDepthStencilView(screen->getDepthStencilView(),D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+			getContext().ClearDepthStencilView(screen->getDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 		}
 	}
 	for (const Mesh* mesh : meshes) {
@@ -146,6 +147,7 @@ void Renderer::render()
 					getContext().Map(cbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData);
 					auto* v = reinterpret_cast<VS_CONSTANT_BUFFER*>(mappedData.pData);
 					XMStoreFloat4x4(&v->mWorldViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
+					XMStoreFloat4x4(&v->mWorldViewProjInv, XMMatrixInverse(nullptr, cam->getViewProjMatrix()));
 					getContext().Unmap(cbuffer.Get(), 0);
 
 					getContext().DrawIndexed(mesh->getIndexCount(), 0, 0);
