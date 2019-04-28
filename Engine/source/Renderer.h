@@ -10,7 +10,7 @@ class Mesh;
 /*
  * The core class of the rendering system
  */
-class Renderer : private GraphicsDeviceInterface
+class Renderer : GraphicsDeviceInterface
 {
 public:
 	bool initialize();
@@ -22,6 +22,10 @@ private:
 	std::vector<VirtualScreen*> virtualScreens;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Inline function implementations 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline void Renderer::bindVirtualScreen(VirtualScreen* virtualScreen)
 {
 	virtualScreens.push_back(virtualScreen);

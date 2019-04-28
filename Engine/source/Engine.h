@@ -1,5 +1,6 @@
 #pragma once
 #include "Renderer.h"
+#include <unordered_set>
 
 namespace Baryon
 {
@@ -18,12 +19,19 @@ public:
 	 */
 	void run();
 	Renderer& getRenderer();
+	void registerUpdateFunction(void(*update)());
 private:
 	Renderer renderer;
+	std::unordered_set<void(*)()> updateFunctions;
 };
 
 inline Renderer& Engine::getRenderer()
 {
 	return renderer;
 }
+inline void Engine::registerUpdateFunction(void (* update)())
+{
+	updateFunctions.insert(update);
+}
+
 }

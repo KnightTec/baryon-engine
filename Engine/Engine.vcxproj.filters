@@ -39,6 +39,12 @@
     <ClInclude Include="source\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\RenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\DXErr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Engine.cpp">
@@ -62,9 +68,12 @@
     <ClCompile Include="source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\RenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="source\VertexShader.hlsl" />
-    <FxCompile Include="source\PixelShader.hlsl" />
+    <None Include="shaders\PixelShader.hlsl" />
+    <None Include="shaders\VertexShader.hlsl" />
   </ItemGroup>
 </Project>

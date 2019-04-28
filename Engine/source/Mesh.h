@@ -14,7 +14,7 @@ struct Vertex
 	DirectX::XMFLOAT3 normal;
 };
 
-class Mesh : private GraphicsDeviceInterface
+class Mesh : GraphicsDeviceInterface
 {
 public:
 	Mesh();
@@ -32,6 +32,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Inline function implementations 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline ID3D11Buffer* Mesh::getVertexBuffer() const
 {
 	return vertexBuffer.Get();

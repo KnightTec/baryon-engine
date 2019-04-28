@@ -33,6 +33,10 @@ void Engine::run()
 		}
 		else
 		{
+			for (auto updateFunction : updateFunctions)
+			{
+				updateFunction();
+			}
 			renderer.render();
 		}
 	}

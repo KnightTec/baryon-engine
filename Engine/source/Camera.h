@@ -6,7 +6,7 @@ namespace Baryon
 class Camera
 {
 public:
-	Camera(float fov, float aspectRatio, float nearZ, float farZ, DirectX::XMFLOAT3 position = { 0, 0, 0 });
+	Camera(float fov, float aspectRatio, float nearZ, float farZ, DirectX::XMFLOAT3 position = {0, 0, 0});
 
 	void translate(DirectX::XMFLOAT3 vector);
 	void rotate();
@@ -32,6 +32,10 @@ private:
 	float farZ;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Inline function implementations 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ, DirectX::XMFLOAT3 position)
 	: position{position}, fov{fov}, aspectRatio{aspectRatio}, nearZ{nearZ}, farZ{farZ}
 {
@@ -39,9 +43,8 @@ inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ, Dir
 }
 inline void Camera::translate(DirectX::XMFLOAT3 vector)
 {
-	XMStoreFloat3(
-		&position, XMVector3Transform(XMLoadFloat3(&position),
-		                              DirectX::XMMatrixTranslationFromVector(XMLoadFloat3(&vector)))
+	XMStoreFloat3(&position, XMVector3Transform(XMLoadFloat3(&position),
+	                                            DirectX::XMMatrixTranslationFromVector(XMLoadFloat3(&vector)))
 	);
 }
 inline DirectX::XMMATRIX Camera::getViewMatrix()
@@ -59,9 +62,8 @@ inline DirectX::XMMATRIX Camera::getViewProjMatrix()
 }
 inline void Camera::setFrustrum(float fov, float aspectRatio, float nearZ, float farZ)
 {
-	XMStoreFloat4x4(
-		&projectionMatrix,
-		DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(fov), aspectRatio, nearZ, farZ));
+	XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(
+		DirectX::XMConvertToRadians(fov), aspectRatio, nearZ, farZ));
 }
 inline void Camera::setFov(float fov)
 {

@@ -1,10 +1,10 @@
 #include "VirtualScreen.h"
 #include "GameWindow.h"
+#include "DXErr.h"
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
-#define HR(hr) if(FAILED(hr)) return false
 
 VirtualScreen::VirtualScreen() : resolution{0, 0}
 {
@@ -70,8 +70,8 @@ bool VirtualScreen::initialize(GameWindow& window)
 	depthStencilDesc.TextureLayout = D3D11_TEXTURE_LAYOUT_UNDEFINED;
 
 	ComPtr<ID3D11Texture2D1> depthStencilBuffer;
-	HR(d3dDevice.CreateTexture2D1(&depthStencilDesc, 0, &depthStencilBuffer));
-	HR(d3dDevice.CreateDepthStencilView(depthStencilBuffer.Get(), 0, &depthStencilView));
+	HR(d3dDevice.CreateTexture2D1(&depthStencilDesc, nullptr, &depthStencilBuffer));
+	HR(d3dDevice.CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &depthStencilView));
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;
