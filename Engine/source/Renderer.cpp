@@ -2,6 +2,7 @@
 #include "VirtualScreen.h"
 #include "Mesh.h"
 #include "RenderPass.h"
+#include "DXErr.h"
 
 using namespace Baryon;
 using namespace DirectX;
@@ -14,7 +15,7 @@ struct VS_CONSTANT_BUFFER
 	XMFLOAT4X4 mWorldViewProjInv;
 };
 
-ComPtr<ID3D11RasterizerState1> g_pRasterState;
+ComPtr<ID3D11RasterizerState1> rasterState;
 
 static VertexShader vs{ L"../../Engine/shaders/VertexShader.hlsl" };
 static PixelShader ps{ L"../../Engine/shaders/PixelShader.hlsl" };
@@ -42,30 +43,25 @@ bool Renderer::initialize()
 	rasterizerState.MultisampleEnable = false;
 	rasterizerState.AntialiasedLineEnable = false;
 	rasterizerState.ForcedSampleCount = 0;
-	getDevice().CreateRasterizerState1(&rasterizerState, g_pRasterState.GetAddressOf());
-	getContext().RSSetState(g_pRasterState.Get());
+	HR(getDevice().CreateRasterizerState1(&rasterizerState, rasterState.GetAddressOf()));
+	getContext().RSSetState(rasterState.Get());
 
 	/*
 	 * TODO: Blend State
 	  Depth Stencil State
 	  Sampler State
 	 */
-	 //
 	return true;
 }
 void Renderer::render()
 {
 	for (VirtualScreen* screen : virtualScreens)
 	{
-		if (screen) {
-			const float clearColor[] = { 0, 0, 0, 1.000f };
-			getContext().ClearRenderTargetView(screen->getRenderTargetView(), clearColor);
-			getContext().ClearDepthStencilView(screen->getDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		}
+		screen->clear();
 	}
 	for (const Mesh* mesh : meshes) {
-		UINT strides = sizeof(Vertex);
-		UINT offsets = 0;
+		uint32_t strides = sizeof(Vertex);
+		uint32_t offsets = 0;
 		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
 		getContext().IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
 		getContext().IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);

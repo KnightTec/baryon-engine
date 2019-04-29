@@ -9,6 +9,7 @@ using namespace Microsoft::WRL;
 VirtualScreen::VirtualScreen() : resolution{0, 0}
 {
 }
+
 bool VirtualScreen::initialize(GameWindow& window)
 {
 	//TODO: Check MSAA support
@@ -23,11 +24,11 @@ bool VirtualScreen::initialize(GameWindow& window)
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	ID3D11Device4& d3dDevice = getDevice();;
+	ID3D11Device4& d3dDevice = getDevice();
 	ComPtr<IDXGIDevice4> dxgiDevice;
 	ComPtr<IDXGIAdapter> adapter;
 	ComPtr<IDXGIFactory2> factory;
@@ -39,19 +40,25 @@ bool VirtualScreen::initialize(GameWindow& window)
 	HWND hwnd = window.windowHandle;
 	window.screen = this;
 	HR(factory->CreateSwapChainForHwnd(&d3dDevice, hwnd, &swapChainDesc, nullptr, nullptr, &swapChain));
-	HR(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
+	HR(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES));
 	HR(swapChain.As(&d3dSwapChain));
-	
+
+	configureBuffers();
+
+	return true;
+}
+bool VirtualScreen::configureBuffers()
+{
 	// Create the render target view
-	ComPtr<ID3D11Texture2D> backBuffer;
 	HR(d3dSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
 	D3D11_RENDER_TARGET_VIEW_DESC desc;
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	desc.Texture2D.MipSlice = 0;
 	desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	HR(d3dDevice.CreateRenderTargetView(backBuffer.Get(), &desc, renderTargetView.GetAddressOf()));
+	HR(getDevice().CreateRenderTargetView(backBuffer.Get(), &desc, renderTargetView.GetAddressOf()));
 
-	HR(swapChain->GetDesc1(&swapChainDesc));
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+	HR(d3dSwapChain->GetDesc1(&swapChainDesc));
 	resolution = { swapChainDesc.Width, swapChainDesc.Height };
 
 	// Create depth/stencil buffer and view
@@ -69,9 +76,8 @@ bool VirtualScreen::initialize(GameWindow& window)
 	depthStencilDesc.MiscFlags = 0;
 	depthStencilDesc.TextureLayout = D3D11_TEXTURE_LAYOUT_UNDEFINED;
 
-	ComPtr<ID3D11Texture2D1> depthStencilBuffer;
-	HR(d3dDevice.CreateTexture2D1(&depthStencilDesc, nullptr, &depthStencilBuffer));
-	HR(d3dDevice.CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &depthStencilView));
+	HR(getDevice().CreateTexture2D1(&depthStencilDesc, nullptr, &depthStencilBuffer));
+	HR(getDevice().CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &depthStencilView));
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;
@@ -82,5 +88,34 @@ bool VirtualScreen::initialize(GameWindow& window)
 	vp.MaxDepth = 1.0f;
 	getContext().RSSetViewports(1, &vp);
 
+	return true;
+}
+void VirtualScreen::releaseBuffers()
+{
+	// Release the render target view based on the back buffer:
+	renderTargetView.Reset();
+
+	// Release the back buffer itself:
+	backBuffer.Reset();
+
+	// The depth stencil will need to be resized, so release it (and view):
+	depthStencilView.Reset();
+	depthStencilBuffer.Reset();
+
+	// After releasing references to these resources, we need to call Flush() to 
+	// ensure that Direct3D also releases any references it might still have to
+	// the same resources - such as pipeline bindings.
+	getContext().Flush();
+}
+
+
+
+bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
+{
+	this->resolution = resolution;
+	activeCamera->setAspectRatio(getAspectRatio());
+	releaseBuffers();
+	HR(d3dSwapChain->ResizeBuffers(0, resolution.x, resolution.y, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+	configureBuffers();
 	return true;
 }

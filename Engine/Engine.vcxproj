@@ -19,6 +19,7 @@
     <ClInclude Include="source\PassKey.h" />
     <ClInclude Include="source\Renderer.h" />
     <ClInclude Include="source\RenderPass.h" />
+    <ClInclude Include="source\Shader.h" />
     <ClInclude Include="source\VirtualScreen.h" />
     <ClInclude Include="source\GameWindow.h" />
   </ItemGroup>
@@ -28,7 +29,7 @@
     <ClCompile Include="source\Engine.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
-    <ClCompile Include="source\RenderPass.cpp" />
+    <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\VirtualScreen.cpp" />
     <ClCompile Include="source\GameWindow.cpp" />
   </ItemGroup>

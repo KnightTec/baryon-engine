@@ -11,7 +11,8 @@ bool Engine::initialize()
 	SetProcessDPIAware();
 	if (!GraphicsDeviceInterface::initialize(Key<Engine>()))
 	{
-		MessageBoxW(nullptr, L"Error: Failed to initialize GraphicsDeviceInterface.", L"Baryon Engine", MB_OK | MB_ICONERROR);
+		MessageBoxW(nullptr, L"Error: Failed to initialize GraphicsDeviceInterface.", L"Baryon Engine",
+		            MB_OK | MB_ICONERROR);
 		return false;
 	}
 	if (!renderer.initialize())
@@ -21,6 +22,7 @@ bool Engine::initialize()
 	}
 	return true;
 }
+
 void Engine::run()
 {
 	MSG msg = {};
@@ -31,13 +33,10 @@ void Engine::run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
+		for (auto updateFunction : updateFunctions)
 		{
-			for (auto updateFunction : updateFunctions)
-			{
-				updateFunction();
-			}
-			renderer.render();
+			updateFunction();
 		}
+		renderer.render();
 	}
 }
