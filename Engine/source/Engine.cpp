@@ -3,6 +3,7 @@
 #include "PassKey.h"
 
 #include "windows.h"
+#include "Input.h"
 
 using namespace Baryon;
 
@@ -33,10 +34,13 @@ void Engine::run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		for (auto updateFunction : updateFunctions)
-		{
-			updateFunction();
+		else {
+			Input::handleGameInput();
+			/*for (auto updateFunction : updateFunctions)
+			{
+				updateFunction();
+			}*/
+			renderer.render();
 		}
-		renderer.render();
 	}
 }

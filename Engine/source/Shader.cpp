@@ -1,10 +1,48 @@
 #include "Shader.h"
+#include "DXErr.h"
+
 #include "d3dcompiler.h"
 
 #include <vector>
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
+
+bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, uint32_t index)
+{
+	if (!initCBuffer)
+	{
+		cbuffers.emplace_back(Microsoft::WRL::ComPtr<ID3D11Buffer>());
+		// create the constant buffer
+		char* dummyData = new char[dataSizeInBytes];
+
+		D3D11_BUFFER_DESC cbDesc;
+		cbDesc.ByteWidth = dataSizeInBytes;
+		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		cbDesc.MiscFlags = 0;
+		cbDesc.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = &initData;
+		initData.SysMemPitch = 0;
+		initData.SysMemSlicePitch = 0;
+
+		HR(getDevice().CreateBuffer(&cbDesc, &initData, cbuffers[index].GetAddressOf()));
+		getContext().VSSetConstantBuffers(0, 1, cbuffers[index].GetAddressOf());
+
+		delete[] dummyData;
+
+		initCBuffer = true;
+	}
+	// update the constant buffer
+	D3D11_MAPPED_SUBRESOURCE mappedData;
+	HR(getContext().Map(cbuffers[index].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
+	memcpy_s(mappedData.pData, dataSizeInBytes, data, dataSizeInBytes);
+	getContext().Unmap(cbuffers[index].Get(), 0);
+	return true;
+}
 
 bool VertexShader::compile()
 {

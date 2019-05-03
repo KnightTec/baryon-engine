@@ -1,4 +1,5 @@
 #include "GameWindow.h"
+#include "Input.h"
 
 using namespace Baryon;
 
@@ -20,7 +21,6 @@ bool GameWindow::initialize(const wchar_t* name, DirectX::XMUINT2 clientSize, ST
 	if (hwnd)
 	{
 		SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
 		windowHandle = hwnd;
 		setStyle(style);
 		resize(clientSize);
@@ -85,11 +85,6 @@ void GameWindow::resize(DirectX::XMUINT2 newClientSize)
 	             SWP_SHOWWINDOW | SWP_NOZORDER);
 }
 
-LRESULT CALLBACK GameWindow::windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	auto ptr = reinterpret_cast<GameWindow*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
-	return ptr->handleMessage(hWnd, uMsg, wParam, lParam);
-}
 LRESULT GameWindow::handleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -103,8 +98,19 @@ LRESULT GameWindow::handleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			screen->resize({ LOWORD(lParam), HIWORD(lParam) });
 		}
 		return 0;
+	case WM_KEYDOWN:
+		Input::handleOSinput(wParam, true);
+		return 0;
+	case WM_KEYUP:
+		Input::handleOSinput(wParam, false);
+		return 0;
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 }
 
+LRESULT GameWindow::windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	auto wndInstance = reinterpret_cast<GameWindow*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
+	return wndInstance->handleMessage(hWnd, uMsg, wParam, lParam);
+}

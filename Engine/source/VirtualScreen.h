@@ -21,11 +21,11 @@ public:
 	bool initialize(GameWindow& window);
 	bool resize(DirectX::XMUINT2 resolution);
 	bool present();
+	void clear();
 
 	DirectX::XMUINT2 getResolution() const;
 	float getAspectRatio() const;
 	Camera* getActiveCamera() const;
-	void clear();
 	ID3D11RenderTargetView* getRenderTargetView() const;
 	ID3D11DepthStencilView* getDepthStencilView() const;
 
@@ -49,6 +49,8 @@ private:
 ///////////////////////////////////////////////////////////////////////////////////////////////
 inline bool VirtualScreen::present()
 {
+	// TODO: disable vsync
+	//return !(FAILED(d3dSwapChain->Present(0, 0)));
 	return !(FAILED(d3dSwapChain->Present(1, 0)));
 }
 

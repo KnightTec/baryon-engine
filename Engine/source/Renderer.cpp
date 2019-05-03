@@ -78,7 +78,7 @@ void Renderer::render()
 					VS_CONSTANT_BUFFER data;
 					XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
 					XMStoreFloat4x4(&data.mWorldViewProjInv, XMMatrixInverse(nullptr, cam->getViewProjMatrix()));
-					vs.updateConstantBuffer(data);
+					vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
 					getContext().DrawIndexed(mesh->getIndexCount(), 0, 0);
 				}

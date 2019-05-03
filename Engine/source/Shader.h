@@ -1,9 +1,8 @@
 #pragma once
 #include "GraphicsDeviceInterface.h"
-#include "DXErr.h"
 
 #include <string>
-
+#include <vector>
 
 namespace Baryon
 {
@@ -29,14 +28,13 @@ public:
 	 */
 	bool reload();
 	/*
-	 * Update the data in the constant buffer
+	 * Update the data in the constant buffer specified by its index
 	 */
-	template<typename CONSTANT_BUFFER>
-	bool updateConstantBuffer(const CONSTANT_BUFFER& data);
+	bool updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, uint32_t index);
 protected:
 	std::wstring sourcePath;
 private:
-	Microsoft::WRL::ComPtr<ID3D11Buffer> cbuffer;
+	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> cbuffers;
 	bool initCBuffer = false;
 };
 
@@ -83,44 +81,11 @@ inline Shader::Shader(const std::wstring& sourcePath) : sourcePath{sourcePath}
 
 inline bool Shader::reload()
 {
-	bool success = compile();
-	apply();
-	return success;
-}
-
-template <typename CONSTANT_BUFFER>
-bool Shader::updateConstantBuffer(const CONSTANT_BUFFER& data)
-{
-	
-	if (!initCBuffer)
+	if (!compile())
 	{
-		// create the constant buffer
-		CONSTANT_BUFFER constData = {};
-
-		D3D11_BUFFER_DESC cbDesc;
-		cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
-		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbDesc.MiscFlags = 0;
-		cbDesc.StructureByteStride = 0;
-
-		D3D11_SUBRESOURCE_DATA initData;
-		initData.pSysMem = &constData;
-		initData.SysMemPitch = 0;
-		initData.SysMemSlicePitch = 0;
-
-		HR(getDevice().CreateBuffer(&cbDesc, &initData, cbuffer.GetAddressOf()));
-		getContext().VSSetConstantBuffers(0, 1, cbuffer.GetAddressOf());
-
-		initCBuffer = true;
+		return false;
 	}
-	// update the constant buffer
-	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(getContext().Map(cbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));;
-	auto* cbData = reinterpret_cast<CONSTANT_BUFFER*>(mappedData.pData);
-	*cbData = data;
-	getContext().Unmap(cbuffer.Get(), 0);
+	apply();
 	return true;
 }
 

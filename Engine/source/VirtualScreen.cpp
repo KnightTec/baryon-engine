@@ -24,23 +24,21 @@ bool VirtualScreen::initialize(GameWindow& window)
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	ID3D11Device4& d3dDevice = getDevice();
 	ComPtr<IDXGIDevice4> dxgiDevice;
 	ComPtr<IDXGIAdapter> adapter;
 	ComPtr<IDXGIFactory2> factory;
 	ComPtr<IDXGISwapChain1> swapChain;
-	HR(d3dDevice.QueryInterface(__uuidof(IDXGIDevice4), static_cast<void**>(&dxgiDevice)));
+	HR(getDevice().QueryInterface(__uuidof(IDXGIDevice4), static_cast<void**>(&dxgiDevice)));
 	HR(dxgiDevice->GetAdapter(adapter.GetAddressOf()));
 	HR(adapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(factory.GetAddressOf())));
 
-	HWND hwnd = window.windowHandle;
 	window.screen = this;
-	HR(factory->CreateSwapChainForHwnd(&d3dDevice, hwnd, &swapChainDesc, nullptr, nullptr, &swapChain));
-	HR(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES));
+	HR(factory->CreateSwapChainForHwnd(&getDevice(), window.windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
+	HR(factory->MakeWindowAssociation(window.windowHandle, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES));
 	HR(swapChain.As(&d3dSwapChain));
 
 	configureBuffers();
@@ -108,14 +106,13 @@ void VirtualScreen::releaseBuffers()
 	getContext().Flush();
 }
 
-
-
 bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
 {
 	this->resolution = resolution;
 	activeCamera->setAspectRatio(getAspectRatio());
 	releaseBuffers();
 	HR(d3dSwapChain->ResizeBuffers(0, resolution.x, resolution.y, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+	d3dSwapChain->SetFullscreenState(true, nullptr);
 	configureBuffers();
 	return true;
 }

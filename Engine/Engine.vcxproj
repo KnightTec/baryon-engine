@@ -15,6 +15,7 @@
     <ClInclude Include="source\DXErr.h" />
     <ClInclude Include="source\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
+    <ClInclude Include="source\Input.h" />
     <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\PassKey.h" />
     <ClInclude Include="source\Renderer.h" />
@@ -27,6 +28,7 @@
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
+    <ClCompile Include="source\Input.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\Shader.cpp" />
