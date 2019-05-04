@@ -2,28 +2,28 @@
 
 using namespace Baryon;
 
-std::pair<bool, std::vector<void(*)(float)>> Input::inputCallbacks[10];
+std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
 
 void Input::bindFunctionToInput(void(* function)(float), TYPE type)
 {
 	inputCallbacks[type].second.push_back(function);
 }
 
-void Input::handleOSinput(int virtualKeyCode, bool pressed)
+void Input::handleOSinput(int virtualKeyCode, float value)
 {
 	switch (virtualKeyCode)
 	{
 	case VK_LEFT:
-		inputCallbacks[KEYBOARD_ARROW_LEFT].first = pressed;
+		inputCallbacks[KEYBOARD_ARROW_LEFT].first = value;
 		break;
 	case VK_RIGHT:
-		inputCallbacks[KEYBOARD_ARROW_RIGHT].first = pressed;
+		inputCallbacks[KEYBOARD_ARROW_RIGHT].first = value;
 		break;
 	case VK_UP:
-		inputCallbacks[KEYBOARD_ARROW_UP].first = pressed;
+		inputCallbacks[KEYBOARD_ARROW_UP].first = value;
 		break;
 	case VK_DOWN:
-		inputCallbacks[KEYBOARD_ARROW_DOWN].first = pressed;
+		inputCallbacks[KEYBOARD_ARROW_DOWN].first = value;
 		break;
 	}
 }

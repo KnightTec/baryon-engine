@@ -8,7 +8,7 @@
 
 namespace Baryon
 {
-class GameWindow;
+class Window;
 
 /*
  * A VirtualScreen represents a surface within a window that displays the current front buffer
@@ -18,7 +18,7 @@ class VirtualScreen : GraphicsDeviceInterface
 public:
 	VirtualScreen();
 
-	bool initialize(GameWindow& window);
+	bool initialize(const Window& window);
 	bool resize(DirectX::XMUINT2 resolution);
 	bool present();
 	void clear();
@@ -34,6 +34,7 @@ private:
 	bool configureBuffers();
 	void releaseBuffers();
 
+	bool initialized;
 	Camera* activeCamera;
 	DirectX::XMUINT2 resolution;
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> d3dSwapChain;
@@ -77,7 +78,7 @@ inline Camera* VirtualScreen::getActiveCamera() const
 
 inline void VirtualScreen::clear()
 {
-	static const float clearColor[] = { 0, 0, 0, 1.000f };
+	static const float clearColor[] = {0, 0, 0, 1.000f};
 	getContext().ClearRenderTargetView(renderTargetView.Get(), clearColor);
 	getContext().ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }

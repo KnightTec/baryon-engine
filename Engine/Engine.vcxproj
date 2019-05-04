@@ -22,7 +22,8 @@
     <ClInclude Include="source\RenderPass.h" />
     <ClInclude Include="source\Shader.h" />
     <ClInclude Include="source\VirtualScreen.h" />
-    <ClInclude Include="source\GameWindow.h" />
+    <ClInclude Include="source\Window.h" />
+    <ClInclude Include="source\WindowsApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Camera.cpp" />
@@ -33,7 +34,7 @@
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\VirtualScreen.cpp" />
-    <ClCompile Include="source\GameWindow.cpp" />
+    <ClCompile Include="source\WindowsApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\PixelShader.hlsl">

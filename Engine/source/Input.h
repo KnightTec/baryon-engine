@@ -26,9 +26,9 @@ public:
 	};
 
 	static void bindFunctionToInput(void(*function)(float), TYPE type);
-	static void handleOSinput(int virtualKeyCode, bool pressed);
+	static void handleOSinput(int virtualKeyCode, float value);
 	static void handleGameInput();
 private:
-	static std::pair<bool, std::vector<void(*)(float)>> inputCallbacks[10];
+	static std::pair<float, std::vector<void(*)(float)>> inputCallbacks[10];
 };
 }

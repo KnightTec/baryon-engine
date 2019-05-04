@@ -1,18 +1,20 @@
 #include "VirtualScreen.h"
-#include "GameWindow.h"
+#include "Window.h"
 #include "DXErr.h"
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
 
-VirtualScreen::VirtualScreen() : resolution{0, 0}
+VirtualScreen::VirtualScreen() : initialized{false}, resolution{0, 0}
 {
 }
 
-bool VirtualScreen::initialize(GameWindow& window)
+bool VirtualScreen::initialize(const Window& window)
 {
 	//TODO: Check MSAA support
+	assert(!initialized);
+	initialized = true;
 
 	// Create the swap chain
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
@@ -36,17 +38,18 @@ bool VirtualScreen::initialize(GameWindow& window)
 	HR(dxgiDevice->GetAdapter(adapter.GetAddressOf()));
 	HR(adapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(factory.GetAddressOf())));
 
-	window.screen = this;
-	HR(factory->CreateSwapChainForHwnd(&getDevice(), window.windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
-	HR(factory->MakeWindowAssociation(window.windowHandle, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES));
+	HR(factory->CreateSwapChainForHwnd(&getDevice(), window.getHwnd(), &swapChainDesc, nullptr, nullptr, &swapChain));
+	HR(factory->MakeWindowAssociation(window.getHwnd(), DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES));
 	HR(swapChain.As(&d3dSwapChain));
 
 	configureBuffers();
 
 	return true;
 }
+
 bool VirtualScreen::configureBuffers()
 {
+	assert(initialized);
 	// Create the render target view
 	HR(d3dSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
 	D3D11_RENDER_TARGET_VIEW_DESC desc;
@@ -57,7 +60,7 @@ bool VirtualScreen::configureBuffers()
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	HR(d3dSwapChain->GetDesc1(&swapChainDesc));
-	resolution = { swapChainDesc.Width, swapChainDesc.Height };
+	resolution = {swapChainDesc.Width, swapChainDesc.Height};
 
 	// Create depth/stencil buffer and view
 	D3D11_TEXTURE2D_DESC1 depthStencilDesc;
@@ -88,8 +91,10 @@ bool VirtualScreen::configureBuffers()
 
 	return true;
 }
+
 void VirtualScreen::releaseBuffers()
 {
+	assert(initialized);
 	// Release the render target view based on the back buffer:
 	renderTargetView.Reset();
 
@@ -108,11 +113,13 @@ void VirtualScreen::releaseBuffers()
 
 bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
 {
+	assert(initialized);
 	this->resolution = resolution;
-	activeCamera->setAspectRatio(getAspectRatio());
+	if (activeCamera) {
+		activeCamera->setAspectRatio(getAspectRatio());
+	}
 	releaseBuffers();
 	HR(d3dSwapChain->ResizeBuffers(0, resolution.x, resolution.y, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
-	d3dSwapChain->SetFullscreenState(true, nullptr);
 	configureBuffers();
 	return true;
 }

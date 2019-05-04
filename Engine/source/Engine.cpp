@@ -36,10 +36,6 @@ void Engine::run()
 		}
 		else {
 			Input::handleGameInput();
-			/*for (auto updateFunction : updateFunctions)
-			{
-				updateFunction();
-			}*/
 			renderer.render();
 		}
 	}
