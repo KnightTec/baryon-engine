@@ -123,3 +123,12 @@ bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
 	configureBuffers();
 	return true;
 }
+
+bool VirtualScreen::setFullscreen(bool fullscreen)
+{
+	HR(d3dSwapChain->SetFullscreenState(fullscreen, nullptr));
+	releaseBuffers();
+	HR(d3dSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0));
+	configureBuffers();
+	return true;
+}

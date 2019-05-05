@@ -15,7 +15,6 @@ class Engine;
 class GraphicsDeviceInterface
 {
 public:
-	virtual ~GraphicsDeviceInterface() = default;
 	static bool initialize(Key<Engine>);
 protected:
 	static ID3D11Device4& getDevice();

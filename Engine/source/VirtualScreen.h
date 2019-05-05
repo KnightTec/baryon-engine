@@ -22,6 +22,7 @@ public:
 	bool resize(DirectX::XMUINT2 resolution);
 	bool present();
 	void clear();
+	bool setFullscreen(bool fullscreen);
 
 	DirectX::XMUINT2 getResolution() const;
 	float getAspectRatio() const;

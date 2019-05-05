@@ -1,6 +1,7 @@
 #pragma once
 #include "windows.h"
 #include <vector>
+#include <DirectXMath.h>
 
 namespace Baryon
 {
@@ -23,6 +24,7 @@ public:
 	 * Create a unspecified window
 	 */
 	static HWND createEmptyWindow();
+	static DirectX::XMUINT2 getDisplayResolution();
 private:
 	static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

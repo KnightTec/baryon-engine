@@ -18,20 +18,29 @@ public:
 	{
 		WINDOWED = 0,
 		BORDERLESS = 1,
-		WINDOWED_SCALABLE = 2 //TODO: remove this style
-		//TODO: FULLSCREEN
+		FULLSCREEN = 2,
+		//WINDOWED_SCALABLE = 3 //TODO: remove this style
 	};
 
-	GameWindow() = default;
-	bool initialize(const wchar_t* name, Renderer* renderer, DirectX::XMUINT2 clientSize, STYLE style);
+	GameWindow();
+	bool initialize(const wchar_t* name, Renderer* renderer, DirectX::XMUINT2 resolution, STYLE style);
 
-	DirectX::XMUINT2 getClientSize() const;
 	void setStyle(STYLE newStyle);
-	void resize(DirectX::XMUINT2 newClientSize);
+	/*
+	 * Set the resolution of the back buffer
+	 */
+	void setResolution(DirectX::XMUINT2 resolution);
 	void setActiveCamera(Camera* camera);
 
 	bool handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam) override;
 private:
+	/*
+	 * Resize the windows client area
+	 */
+	void resize(DirectX::XMUINT2 clientSize);
+
+	STYLE style;
+	DirectX::XMUINT2 resolution;
 	VirtualScreen screen;
 };
 

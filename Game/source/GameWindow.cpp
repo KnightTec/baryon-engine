@@ -3,7 +3,11 @@
 
 using namespace Baryon;
 
-bool GameWindow::initialize(const wchar_t* name, Renderer* renderer, DirectX::XMUINT2 clientSize, STYLE style)
+GameWindow::GameWindow()
+{
+}
+
+bool GameWindow::initialize(const wchar_t* name, Renderer* renderer, DirectX::XMUINT2 resolution, STYLE style)
 {
 	assert(!hwnd);
 	hwnd = WindowsApplication::createEmptyWindow();
@@ -14,41 +18,70 @@ bool GameWindow::initialize(const wchar_t* name, Renderer* renderer, DirectX::XM
 	}
 	if (!screen.initialize(*this))
 	{
+		MessageBoxW(nullptr, L"Error: Failed to initialize VirtualScreen.", L"Baryon Engine", MB_OK | MB_ICONERROR);
 		return false;
 	}
 	WindowsApplication::registerEventHandler(this);
 	SetWindowTextW(hwnd, name);
+
+	setResolution(resolution);
 	setStyle(style);
-	resize(clientSize);
+
 	renderer->bindVirtualScreen(&screen);
 	return true;
-}
-
-DirectX::XMUINT2 GameWindow::getClientSize() const
-{
-	assert(hwnd);
-	RECT clientRect;
-	GetClientRect(hwnd, &clientRect);
-	return {static_cast<uint32_t>(clientRect.right), static_cast<uint32_t>(clientRect.bottom)};
 }
 
 void GameWindow::setStyle(STYLE newStyle)
 {
 	assert(hwnd);
-	static DWORD styles[3] = {
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, // windowed
+	static DWORD styles[] = {
+		WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, // windowed
 		WS_POPUP, // borderless
-		WS_OVERLAPPEDWINDOW // windowed scalable
+		WS_POPUP, // fullscreen
+		WS_OVERLAPPEDWINDOW, // windowed scalable
 	};
-	SetWindowLongW(hwnd, GWL_STYLE, styles[newStyle]);
-	ShowWindow(hwnd, SW_SHOW);
+	if (newStyle != style) {
+		SetWindowLongW(hwnd, GWL_STYLE, styles[newStyle]);
+		if (style != FULLSCREEN)
+		{
+			if (newStyle == FULLSCREEN) {
+				resize(WindowsApplication::getDisplayResolution());
+				screen.setFullscreen(true);
+			}
+			else
+			{
+				resize(resolution);
+			}
+		}
+		else
+		{
+			if (newStyle != FULLSCREEN)
+			{
+				screen.setFullscreen(false);
+				resize(resolution);
+			}
+		}
+		style = newStyle;
+	}
 }
 
-void GameWindow::resize(DirectX::XMUINT2 newClientSize)
+void GameWindow::setResolution(DirectX::XMUINT2 resolution)
+{
+	this->resolution = resolution;
+	if (style != FULLSCREEN)
+	{
+		resize(resolution);
+	}
+	screen.resize(resolution);
+
+	//TODO: test resolution switching
+}
+
+void GameWindow::resize(DirectX::XMUINT2 clientSize)
 {
 	assert(hwnd);
 	const DirectX::XMINT2 screenSize = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
-	const DirectX::XMINT2 newSize{static_cast<int32_t>(newClientSize.x), static_cast<int32_t>(newClientSize.y)};
+	const DirectX::XMINT2 newSize{static_cast<int32_t>(clientSize.x), static_cast<int32_t>(clientSize.y)};
 
 	RECT rect;
 	rect.left = 0;
@@ -75,7 +108,7 @@ void GameWindow::resize(DirectX::XMUINT2 newClientSize)
 	{
 		position.y = 0;
 	}
-	SetWindowPos(hwnd, 0, position.x, position.y, rect.right - rect.left, rect.bottom - rect.top,
+	SetWindowPos(hwnd, nullptr, position.x, position.y, rect.right - rect.left, rect.bottom - rect.top,
 	             SWP_SHOWWINDOW | SWP_NOZORDER);
 }
 
@@ -85,9 +118,11 @@ bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_SIZE:
 		// resize virtual screen
-		screen.resize({LOWORD(lParam), HIWORD(lParam)});
-
-		return true;
+		//screen.resize({LOWORD(lParam), HIWORD(lParam)});
+		return false;
+	case WM_ACTIVATE:
+		//TODO: handle fullscreen focus
+		return false;
 	default:
 		// message not handled here
 		return false;

@@ -34,7 +34,8 @@ void Engine::run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else {
+		else
+		{
 			Input::handleGameInput();
 			renderer.render();
 		}

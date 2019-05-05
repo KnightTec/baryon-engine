@@ -11,6 +11,8 @@ void Input::bindFunctionToInput(void(* function)(float), TYPE type)
 
 void Input::handleOSinput(int virtualKeyCode, float value)
 {
+	//TODO: handle WM_INPUT
+
 	switch (virtualKeyCode)
 	{
 	case VK_LEFT:
@@ -25,18 +27,28 @@ void Input::handleOSinput(int virtualKeyCode, float value)
 	case VK_DOWN:
 		inputCallbacks[KEYBOARD_ARROW_DOWN].first = value;
 		break;
+	case VK_SPACE:
+		//TODO: uncomment this line
+		//inputCallbacks[KEYBOARD_SPACE].first = value;
+		if (value == 1) {
+			inputCallbacks[KEYBOARD_SPACE].second.at(0)(0);
+		}
+		break;
+	case VK_RETURN:
+		inputCallbacks[KEYBOARD_ENTER].first = value;
+		break;
 	}
 }
 
 void Input::handleGameInput()
 {
-	for (int i = 0; i < 10; i++)
+	for (auto& inputCallback : inputCallbacks)
 	{
-		if (inputCallbacks[i].first)
+		if (inputCallback.first)
 		{
-			for (void(*callback)(float) : inputCallbacks[i].second)
+			for (void(*callback)(float) : inputCallback.second)
 			{
-				callback(0);
+				callback(inputCallback.first);
 			}
 		}
 	}

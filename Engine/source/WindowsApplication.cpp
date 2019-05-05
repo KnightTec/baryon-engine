@@ -33,6 +33,11 @@ HWND WindowsApplication::createEmptyWindow()
 	return CreateWindowExW(0, wc.lpszClassName, L"", 0, 0, 0, 0, 0, nullptr, nullptr, wc.hInstance, nullptr);
 }
 
+DirectX::XMUINT2 WindowsApplication::getDisplayResolution()
+{
+	return { static_cast<uint32_t>(GetSystemMetrics(SM_CXSCREEN)), static_cast<uint32_t>(GetSystemMetrics(SM_CYSCREEN)) };
+}
+
 LRESULT CALLBACK WindowsApplication::windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	assert(initialized);
@@ -40,6 +45,10 @@ LRESULT CALLBACK WindowsApplication::windowProc(HWND hWnd, UINT uMsg, WPARAM wPa
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
+		return 0;
+	case WM_INPUT:
+		//TODO:
+
 		return 0;
 	case WM_KEYDOWN:
 		Input::handleOSinput(wParam, 1);
