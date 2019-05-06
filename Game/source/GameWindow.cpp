@@ -40,29 +40,28 @@ void GameWindow::setStyle(STYLE newStyle)
 		WS_POPUP, // fullscreen
 		WS_OVERLAPPEDWINDOW, // windowed scalable
 	};
-	if (newStyle != style) {
-		SetWindowLongW(hwnd, GWL_STYLE, styles[newStyle]);
-		if (style != FULLSCREEN)
+	SetWindowLongW(hwnd, GWL_STYLE, styles[newStyle]);
+	if (style != FULLSCREEN)
+	{
+		if (newStyle == FULLSCREEN)
 		{
-			if (newStyle == FULLSCREEN) {
-				resize(WindowsApplication::getDisplayResolution());
-				screen.setFullscreen(true);
-			}
-			else
-			{
-				resize(resolution);
-			}
+			resize(WindowsApplication::getDisplayResolution());
+			screen.setFullscreen(true);
 		}
 		else
 		{
-			if (newStyle != FULLSCREEN)
-			{
-				screen.setFullscreen(false);
-				resize(resolution);
-			}
+			resize(resolution);
 		}
-		style = newStyle;
 	}
+	else
+	{
+		if (newStyle != FULLSCREEN)
+		{
+			screen.setFullscreen(false);
+			resize(resolution);
+		}
+	}
+	style = newStyle;
 }
 
 void GameWindow::setResolution(DirectX::XMUINT2 resolution)
@@ -116,15 +115,29 @@ bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMSg)
 	{
-	case WM_SIZE:
-		// resize virtual screen
-		//screen.resize({LOWORD(lParam), HIWORD(lParam)});
-		return false;
-	case WM_ACTIVATE:
-		//TODO: handle fullscreen focus
-		return false;
-	default:
-		// message not handled here
-		return false;
+		case WM_SIZE:
+			// resize virtual screen
+			//screen.resize({LOWORD(lParam), HIWORD(lParam)});
+			return false;
+		case WM_ACTIVATE:
+			if (style != FULLSCREEN)
+			{
+				return false;
+			}
+			if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE)
+			{
+				resize(WindowsApplication::getDisplayResolution());
+				screen.setFullscreen(true);
+				return true;
+			}
+			if (LOWORD(wParam) == WA_INACTIVE)
+			{
+				ShowWindow(hwnd, SW_MINIMIZE);
+				return true;
+			}
+			return false;
+		default:
+			// message not handled here
+			return false;
 	}
 }
