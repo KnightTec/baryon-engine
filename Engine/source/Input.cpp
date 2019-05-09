@@ -35,7 +35,10 @@ void Input::handleOSinput(int virtualKeyCode, float value)
 		}
 		break;
 	case VK_RETURN:
-		inputCallbacks[KEYBOARD_ENTER].first = value;
+		//inputCallbacks[KEYBOARD_ENTER].first = value;
+		if (value == 1) {
+			inputCallbacks[KEYBOARD_ENTER].second.at(0)(0);
+		}
 		break;
 	}
 }

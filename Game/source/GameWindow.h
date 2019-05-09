@@ -7,6 +7,10 @@
 #include "DirectXMath.h"
 
 
+/*
+ * TODO: renderer should own the virtual screen
+ */
+
 namespace Baryon
 {
 class Renderer;

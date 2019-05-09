@@ -29,8 +29,8 @@ bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, u
 		initData.SysMemPitch = 0;
 		initData.SysMemSlicePitch = 0;
 
-		HR(getDevice().CreateBuffer(&cbDesc, &initData, cbuffers[index].GetAddressOf()));
-		getContext().VSSetConstantBuffers(0, 1, cbuffers[index].GetAddressOf());
+		HR(getDevice()->CreateBuffer(&cbDesc, &initData, cbuffers[index].GetAddressOf()));
+		getContext()->VSSetConstantBuffers(0, 1, cbuffers[index].GetAddressOf());
 
 		delete[] dummyData;
 
@@ -38,9 +38,9 @@ bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, u
 	}
 	// update the constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(getContext().Map(cbuffers[index].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
+	HR(getContext()->Map(cbuffers[index].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
 	memcpy_s(mappedData.pData, dataSizeInBytes, data, dataSizeInBytes);
-	getContext().Unmap(cbuffers[index].Get(), 0);
+	getContext()->Unmap(cbuffers[index].Get(), 0);
 	return true;
 }
 
@@ -54,7 +54,7 @@ bool VertexShader::compile()
 	ComPtr<ID3DBlob> errorBlob = nullptr;
 	HR(D3DCompileFromFile(sourcePath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_5_0", flags, 0,
 		shaderBlob.GetAddressOf(), errorBlob.GetAddressOf()));
-	HR(getDevice().CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr,
+	HR(getDevice()->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr,
 		d3dvertexShader.GetAddressOf()));
 
 	// Reflect shader info
@@ -153,7 +153,7 @@ bool VertexShader::compile()
 		}
 		inputLayoutDesc.push_back(elementDesc);
 	}
-	HR(getDevice().CreateInputLayout(&inputLayoutDesc[0], inputLayoutDesc.size(), shaderBlob->GetBufferPointer(),
+	HR(getDevice()->CreateInputLayout(&inputLayoutDesc[0], inputLayoutDesc.size(), shaderBlob->GetBufferPointer(),
 	                              shaderBlob->GetBufferSize(), d3dinputLayout.GetAddressOf()));
 	return true;
 }
@@ -168,7 +168,7 @@ bool PixelShader::compile()
 	ComPtr<ID3DBlob> errorBlob = nullptr;
 	HR(D3DCompileFromFile(sourcePath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_5_0", flags, 0,
 		shaderBlob.GetAddressOf(), errorBlob.GetAddressOf()));
-	HR(getDevice().CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr,
+	HR(getDevice()->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr,
 		d3dpixelShader.GetAddressOf()));
 	return true;
 }

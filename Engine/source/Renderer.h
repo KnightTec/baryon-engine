@@ -14,6 +14,8 @@ class Renderer : GraphicsDeviceInterface
 {
 public:
 	bool initialize();
+
+	// TODO: replace with void createVirtualScreen(Window* target)
 	void bindVirtualScreen(VirtualScreen* virtualScreen);
 	void submitMesh(const Mesh& mesh);
 	void render();

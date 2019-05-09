@@ -7,8 +7,10 @@ class Window
 {
 public:
 	Window();
+	virtual ~Window() = 0;
 	HWND getHwnd() const;
 protected:
+	//TODO: add virtual screen ptr
 	HWND hwnd;
 };
 
@@ -16,6 +18,11 @@ protected:
 inline Window::Window() : hwnd{nullptr}
 {
 }
+
+inline Window::~Window()
+{
+}
+
 inline HWND Window::getHwnd() const
 {
 	return hwnd;

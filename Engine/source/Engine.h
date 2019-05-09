@@ -18,6 +18,7 @@ public:
 	 * Run the main loop of the game engine
 	 */
 	void run();
+	void terminate();
 	Renderer& getRenderer();
 private:
 	Renderer renderer;

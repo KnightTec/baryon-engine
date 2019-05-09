@@ -3,13 +3,14 @@
 
 using namespace Baryon;
 
-GameWindow::GameWindow()
+GameWindow::GameWindow() : style{WINDOWED}
 {
 }
 
 bool GameWindow::initialize(const wchar_t* name, Renderer* renderer, DirectX::XMUINT2 resolution, STYLE style)
 {
 	assert(!hwnd);
+	//TODO: move to constructor
 	hwnd = WindowsApplication::createEmptyWindow();
 	if (!hwnd)
 	{
@@ -24,12 +25,19 @@ bool GameWindow::initialize(const wchar_t* name, Renderer* renderer, DirectX::XM
 	WindowsApplication::registerEventHandler(this);
 	SetWindowTextW(hwnd, name);
 
-	setResolution(resolution);
+	// TODO: remove init function
+
 	setStyle(style);
+	setResolution(resolution);
+
+	
+	//TODO: fix exeption on alt+f4 exit from fullscreen
+
 
 	renderer->bindVirtualScreen(&screen);
 	return true;
 }
+
 
 void GameWindow::setStyle(STYLE newStyle)
 {
@@ -115,10 +123,6 @@ bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMSg)
 	{
-		case WM_SIZE:
-			// resize virtual screen
-			//screen.resize({LOWORD(lParam), HIWORD(lParam)});
-			return false;
 		case WM_ACTIVATE:
 			if (style != FULLSCREEN)
 			{
@@ -132,10 +136,10 @@ bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 			}
 			if (LOWORD(wParam) == WA_INACTIVE)
 			{
+				screen.setFullscreen(false);
 				ShowWindow(hwnd, SW_MINIMIZE);
 				return true;
 			}
-			return false;
 		default:
 			// message not handled here
 			return false;

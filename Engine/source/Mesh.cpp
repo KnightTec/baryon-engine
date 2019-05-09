@@ -53,7 +53,7 @@ Mesh::Mesh()
 	initData.SysMemPitch = 0;
 	initData.SysMemSlicePitch = 0;
 
-	getDevice().CreateBuffer(&bufferDesc, &initData, vertexBuffer.GetAddressOf());
+	getDevice()->CreateBuffer(&bufferDesc, &initData, vertexBuffer.GetAddressOf());
 
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -67,7 +67,7 @@ Mesh::Mesh()
 	initData.SysMemPitch = 0;
 	initData.SysMemSlicePitch = 0;
 
-	getDevice().CreateBuffer(&bufferDesc, &initData, indexBuffer.GetAddressOf());
+	getDevice()->CreateBuffer(&bufferDesc, &initData, indexBuffer.GetAddressOf());
 }
 bool Mesh::initialize(const char* filename)
 {

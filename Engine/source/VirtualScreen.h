@@ -5,6 +5,7 @@
 #include "wrl/client.h"
 #include "d3d11_4.h"
 #include "DirectXMath.h"
+#include <vector>
 
 namespace Baryon
 {
@@ -17,6 +18,7 @@ class VirtualScreen : GraphicsDeviceInterface
 {
 public:
 	VirtualScreen();
+	~VirtualScreen();
 
 	bool initialize(const Window& window);
 	bool resize(DirectX::XMUINT2 resolution);
@@ -29,20 +31,24 @@ public:
 	Camera* getActiveCamera() const;
 	ID3D11RenderTargetView* getRenderTargetView() const;
 	ID3D11DepthStencilView* getDepthStencilView() const;
-
 	void setActiveCamera(Camera* camera);
+
+	static const std::vector<DirectX::XMUINT2> supportedResolutions;
 private:
 	bool configureBuffers();
 	void releaseBuffers();
 
 	bool initialized;
+	bool fullscreen;
 	Camera* activeCamera;
 	DirectX::XMUINT2 resolution;
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> d3dSwapChain;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D1> backBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D1> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D1> depthStencilBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
+	
+	
 };
 
 
@@ -80,8 +86,8 @@ inline Camera* VirtualScreen::getActiveCamera() const
 inline void VirtualScreen::clear()
 {
 	static const float clearColor[] = {0, 0, 0, 1.000f};
-	getContext().ClearRenderTargetView(renderTargetView.Get(), clearColor);
-	getContext().ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	getContext()->ClearRenderTargetView(renderTargetView.Get(), clearColor);
+	getContext()->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 inline ID3D11RenderTargetView* VirtualScreen::getRenderTargetView() const

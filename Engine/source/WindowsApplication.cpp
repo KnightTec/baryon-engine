@@ -43,6 +43,10 @@ LRESULT CALLBACK WindowsApplication::windowProc(HWND hWnd, UINT uMsg, WPARAM wPa
 	assert(initialized);
 	switch (uMsg)
 	{
+	case WM_CLOSE:
+		eventHandlers.clear();
+		DestroyWindow(hWnd);
+		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;

@@ -91,12 +91,12 @@ inline bool Shader::reload()
 
 inline void VertexShader::apply()
 {
-	getContext().IASetInputLayout(d3dinputLayout.Get());
-	getContext().VSSetShader(d3dvertexShader.Get(), nullptr, 0);
+	getContext()->IASetInputLayout(d3dinputLayout.Get());
+	getContext()->VSSetShader(d3dvertexShader.Get(), nullptr, 0);
 }
 
 inline void PixelShader::apply()
 {
-	getContext().PSSetShader(d3dpixelShader.Get(), nullptr, 0);
+	getContext()->PSSetShader(d3dpixelShader.Get(), nullptr, 0);
 }
 } // namespace Baryon

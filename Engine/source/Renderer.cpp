@@ -28,7 +28,7 @@ bool Renderer::initialize()
 	vs.apply();
 	ps.apply();
 
-	getContext().IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Create rasterizer state
 	D3D11_RASTERIZER_DESC1 rasterizerState;
@@ -43,8 +43,8 @@ bool Renderer::initialize()
 	rasterizerState.MultisampleEnable = false;
 	rasterizerState.AntialiasedLineEnable = false;
 	rasterizerState.ForcedSampleCount = 0;
-	HR(getDevice().CreateRasterizerState1(&rasterizerState, rasterState.GetAddressOf()));
-	getContext().RSSetState(rasterState.Get());
+	HR(getDevice()->CreateRasterizerState1(&rasterizerState, rasterState.GetAddressOf()));
+	getContext()->RSSetState(rasterState.Get());
 
 	/*
 	 * TODO: Blend State
@@ -57,14 +57,16 @@ void Renderer::render()
 {
 	for (VirtualScreen* screen : virtualScreens)
 	{
-		screen->clear();
+		if (screen) {
+			screen->clear();
+		}
 	}
 	for (const Mesh* mesh : meshes) {
 		uint32_t strides = sizeof(Vertex);
 		uint32_t offsets = 0;
 		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
-		getContext().IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
-		getContext().IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+		getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
+		getContext()->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 		for (VirtualScreen* screen : virtualScreens)
 		{
@@ -72,7 +74,7 @@ void Renderer::render()
 				Camera* cam = screen->getActiveCamera();
 				if (cam) {
 					ID3D11RenderTargetView* rtv = screen->getRenderTargetView();
-					getContext().OMSetRenderTargets(1, &rtv, screen->getDepthStencilView());
+					getContext()->OMSetRenderTargets(1, &rtv, screen->getDepthStencilView());
 
 					// update constant buffer (matrices)
 					VS_CONSTANT_BUFFER data;
@@ -80,7 +82,7 @@ void Renderer::render()
 					XMStoreFloat4x4(&data.mWorldViewProjInv, XMMatrixInverse(nullptr, cam->getViewProjMatrix()));
 					vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
-					getContext().DrawIndexed(mesh->getIndexCount(), 0, 0);
+					getContext()->DrawIndexed(mesh->getIndexCount(), 0, 0);
 				}
 			}
 		}
