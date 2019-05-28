@@ -17,6 +17,7 @@ class GraphicsDeviceInterface
 {
 public:
 	static bool initialize(Key<Engine>);
+	static void terminate(Key<Engine>);
 protected:
 	GraphicsDeviceInterface();
 	static ID3D11Device4* getDevice();
@@ -24,9 +25,10 @@ protected:
 private:
 	static ID3D11Device4** getDevicePtr();
 	static ID3D11DeviceContext4** getContextPtr();
+	static ID3D11Device4* d3device;
+	static ID3D11DeviceContext4* d3dContext;
 	static bool initialized;
 };
-
 
 inline ID3D11Device4* GraphicsDeviceInterface::getDevice()
 {

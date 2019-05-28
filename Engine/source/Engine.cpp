@@ -40,4 +40,11 @@ void Engine::run()
 			renderer.render();
 		}
 	}
+	terminate();
 }
+void Engine::terminate()
+{
+	renderer.terminate();
+	GraphicsDeviceInterface::terminate(Key<Engine>());
+}
+

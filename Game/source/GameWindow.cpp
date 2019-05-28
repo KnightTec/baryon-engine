@@ -1,40 +1,24 @@
 #include "GameWindow.h"
 #include "../../Engine/source/Renderer.h"
+#include "../../Engine/source/VirtualScreen.h"
 
 using namespace Baryon;
 
-GameWindow::GameWindow() : style{WINDOWED}
+GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::supportedResolutions[0], STYLE style = WINDOWED) 
+	: style{WINDOWED}, resolution{resolution}
 {
-}
-
-bool GameWindow::initialize(const wchar_t* name, Renderer* renderer, DirectX::XMUINT2 resolution, STYLE style)
-{
-	assert(!hwnd);
-	//TODO: move to constructor
-	hwnd = WindowsApplication::createEmptyWindow();
-	if (!hwnd)
-	{
-		MessageBoxW(nullptr, L"Error: Failed to create window.", L"Baryon Engine", MB_OK | MB_ICONERROR);
-		return false;
-	}
-	if (!screen.initialize(*this))
-	{
-		MessageBoxW(nullptr, L"Error: Failed to initialize VirtualScreen.", L"Baryon Engine", MB_OK | MB_ICONERROR);
-		return false;
-	}
 	WindowsApplication::registerEventHandler(this);
 	SetWindowTextW(hwnd, name);
+}
+
+bool GameWindow::initialize()
+{
 
 	// TODO: remove init function
 
 	setStyle(style);
 	setResolution(resolution);
 
-	
-	//TODO: fix exeption on alt+f4 exit from fullscreen
-
-
-	renderer->bindVirtualScreen(&screen);
 	return true;
 }
 
@@ -54,7 +38,7 @@ void GameWindow::setStyle(STYLE newStyle)
 		if (newStyle == FULLSCREEN)
 		{
 			resize(WindowsApplication::getDisplayResolution());
-			screen.setFullscreen(true);
+			screen->setFullscreen(true);
 		}
 		else
 		{
@@ -65,7 +49,7 @@ void GameWindow::setStyle(STYLE newStyle)
 	{
 		if (newStyle != FULLSCREEN)
 		{
-			screen.setFullscreen(false);
+			screen->setFullscreen(false);
 			resize(resolution);
 		}
 	}
@@ -79,9 +63,7 @@ void GameWindow::setResolution(DirectX::XMUINT2 resolution)
 	{
 		resize(resolution);
 	}
-	screen.resize(resolution);
-
-	//TODO: test resolution switching
+	screen->resize(resolution);
 }
 
 void GameWindow::resize(DirectX::XMUINT2 clientSize)
@@ -131,12 +113,12 @@ bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 			if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE)
 			{
 				resize(WindowsApplication::getDisplayResolution());
-				screen.setFullscreen(true);
+				screen->setFullscreen(true);
 				return true;
 			}
 			if (LOWORD(wParam) == WA_INACTIVE)
 			{
-				screen.setFullscreen(false);
+				screen->setFullscreen(false);
 				ShowWindow(hwnd, SW_MINIMIZE);
 				return true;
 			}

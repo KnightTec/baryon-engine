@@ -5,6 +5,9 @@ using namespace Microsoft::WRL;
 
 bool GraphicsDeviceInterface::initialized = false;
 
+ID3D11DeviceContext4* GraphicsDeviceInterface::d3dContext;
+ID3D11Device4* GraphicsDeviceInterface::d3device;
+
 
 GraphicsDeviceInterface::GraphicsDeviceInterface()
 {
@@ -49,12 +52,18 @@ bool GraphicsDeviceInterface::initialize(Key<Engine>)
 		return false;
 	}
 	device->QueryInterface(__uuidof(getDevice()), reinterpret_cast<void**>(getDevicePtr()));
-	auto d3dContext = getContextPtr();
 	context->QueryInterface(__uuidof(getContext()), reinterpret_cast<void**>(getContextPtr()));
-	initialized = true;
 
 	device->Release();
 	context->Release();
 
+	initialized = true;
 	return true;
 }
+void GraphicsDeviceInterface::terminate(Key<Engine>)
+{
+	//TODO: use raw pointers instead of comptr and release here
+	//d3dContext->Release();
+	//d3device->Release();
+}
+

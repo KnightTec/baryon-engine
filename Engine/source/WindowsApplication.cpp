@@ -18,7 +18,7 @@ bool WindowsApplication::initialize(HINSTANCE hInstance)
 	wc.lpszClassName = L"BaryonWindow";
 	wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 
-	return static_cast<bool>(RegisterClassW(&wc));
+	return RegisterClassW(&wc) && createEmptyWindow();
 }
 
 void WindowsApplication::registerEventHandler(WindowsEventHandler* eventHandler)

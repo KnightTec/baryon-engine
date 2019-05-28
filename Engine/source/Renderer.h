@@ -1,5 +1,7 @@
 #pragma once
 #include "GraphicsDeviceInterface.h"
+#include "Window.h"
+#include "VirtualScreen.h"
 
 #include <vector>
 
@@ -14,24 +16,19 @@ class Renderer : GraphicsDeviceInterface
 {
 public:
 	bool initialize();
+	void terminate();
 
-	// TODO: replace with void createVirtualScreen(Window* target)
-	void bindVirtualScreen(VirtualScreen* virtualScreen);
+	bool createVirtualScreen(Window& targetWindow);
 	void submitMesh(const Mesh& mesh);
 	void render();
 private:
 	std::vector<const Mesh*> meshes;
-	std::vector<VirtualScreen*> virtualScreens;
+	std::vector<VirtualScreen> virtualScreens;
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Inline function implementations 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-inline void Renderer::bindVirtualScreen(VirtualScreen* virtualScreen)
-{
-	virtualScreens.push_back(virtualScreen);
-}
 inline void Renderer::submitMesh(const Mesh& mesh)
 {
 	meshes.push_back(&mesh);

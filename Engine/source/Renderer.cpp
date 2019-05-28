@@ -17,8 +17,8 @@ struct VS_CONSTANT_BUFFER
 
 ComPtr<ID3D11RasterizerState1> rasterState;
 
-static VertexShader vs{ L"../../Engine/shaders/VertexShader.hlsl" };
-static PixelShader ps{ L"../../Engine/shaders/PixelShader.hlsl" };
+static VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl"};
+static PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
 
 bool Renderer::initialize()
 {
@@ -53,45 +53,62 @@ bool Renderer::initialize()
 	 */
 	return true;
 }
+
+void Renderer::terminate()
+{
+	for (VirtualScreen& screen : virtualScreens)
+	{
+		screen.terminate();
+	}
+}
+
+bool Renderer::createVirtualScreen(Window& targetWindow)
+{
+	virtualScreens.emplace_back(VirtualScreen{});
+	if (!virtualScreens.back().initialize(targetWindow))
+	{
+		virtualScreens.pop_back();
+		return false;
+	}
+	targetWindow.screen = &virtualScreens.back();
+	targetWindow.initialize();
+	return true;
+}
+
 void Renderer::render()
 {
-	for (VirtualScreen* screen : virtualScreens)
+	for (VirtualScreen& screen : virtualScreens)
 	{
-		if (screen) {
-			screen->clear();
-		}
+		screen.clear();
 	}
-	for (const Mesh* mesh : meshes) {
+	for (const Mesh* mesh : meshes)
+	{
 		uint32_t strides = sizeof(Vertex);
 		uint32_t offsets = 0;
 		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
 		getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
 		getContext()->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
-		for (VirtualScreen* screen : virtualScreens)
+		for (VirtualScreen& screen : virtualScreens)
 		{
-			if (screen) {
-				Camera* cam = screen->getActiveCamera();
-				if (cam) {
-					ID3D11RenderTargetView* rtv = screen->getRenderTargetView();
-					getContext()->OMSetRenderTargets(1, &rtv, screen->getDepthStencilView());
+			Camera* cam = screen.getActiveCamera();
+			if (cam)
+			{
+				ID3D11RenderTargetView* rtv = screen.getRenderTargetView();
+				getContext()->OMSetRenderTargets(1, &rtv, screen.getDepthStencilView());
 
-					// update constant buffer (matrices)
-					VS_CONSTANT_BUFFER data;
-					XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
-					XMStoreFloat4x4(&data.mWorldViewProjInv, XMMatrixInverse(nullptr, cam->getViewProjMatrix()));
-					vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
+				// update constant buffer (matrices)
+				VS_CONSTANT_BUFFER data;
+				XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
+				XMStoreFloat4x4(&data.mWorldViewProjInv, XMMatrixInverse(nullptr, cam->getViewProjMatrix()));
+				vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
-					getContext()->DrawIndexed(mesh->getIndexCount(), 0, 0);
-				}
+				getContext()->DrawIndexed(mesh->getIndexCount(), 0, 0);
 			}
 		}
 	}
-	for (VirtualScreen* screen : virtualScreens)
+	for (VirtualScreen& screen : virtualScreens)
 	{
-		if (screen)
-		{
-			screen->present();
-		}
+		screen.present();
 	}
 }

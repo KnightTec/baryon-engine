@@ -61,10 +61,7 @@ const std::vector<DirectX::XMUINT2> VirtualScreen::supportedResolutions = getSup
 VirtualScreen::VirtualScreen() : initialized{ false }, fullscreen{ false }, activeCamera{ nullptr }, resolution{ 0, 0 }
 {
 }
-VirtualScreen::~VirtualScreen()
-{
-	d3dSwapChain->SetFullscreenState(false, nullptr);
-}
+
 bool VirtualScreen::initialize(const Window& window)
 {
 	assert(!initialized);
@@ -101,6 +98,12 @@ bool VirtualScreen::initialize(const Window& window)
 	configureBuffers();
 
 	return true;
+}
+
+void VirtualScreen::terminate()
+{
+	d3dSwapChain->SetFullscreenState(false, nullptr);
+	releaseBuffers();
 }
 
 bool VirtualScreen::configureBuffers()

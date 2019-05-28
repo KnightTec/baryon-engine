@@ -18,9 +18,10 @@ class VirtualScreen : GraphicsDeviceInterface
 {
 public:
 	VirtualScreen();
-	~VirtualScreen();
 
 	bool initialize(const Window& window);
+	void terminate();
+
 	bool resize(DirectX::XMUINT2 resolution);
 	bool present();
 	void clear();
