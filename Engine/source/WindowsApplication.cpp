@@ -1,6 +1,7 @@
 #include "WindowsApplication.h"
 #include "Input.h"
 #include <cassert>
+#include "Windowsx.h"
 
 using namespace Baryon;
 
@@ -39,6 +40,8 @@ DirectX::XMUINT2 WindowsApplication::getDisplayResolution()
 
 LRESULT CALLBACK WindowsApplication::windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	int xPosAbsolute;
+	int yPosAbsolute;
 	assert(initialized);
 	switch (uMsg)
 	{
@@ -49,15 +52,18 @@ LRESULT CALLBACK WindowsApplication::windowProc(HWND hWnd, UINT uMsg, WPARAM wPa
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
+	case WM_MOUSEMOVE:
+		xPosAbsolute = GET_X_LPARAM(lParam);
+		yPosAbsolute = GET_Y_LPARAM(lParam);
+		return 0;
 	case WM_INPUT:
-		//TODO:
-
+		Input::handleOSInput(wParam, lParam);
 		return 0;
 	case WM_KEYDOWN:
-		Input::handleOSinput(wParam, 1);
+		//Input::handleOSInputOld(wParam, 1);
 		return 0;
 	case WM_KEYUP:
-		Input::handleOSinput(wParam, 0);
+		//Input::handleOSInputOld(wParam, 0);
 		return 0;
 	default:
 		bool handledMessage = false;

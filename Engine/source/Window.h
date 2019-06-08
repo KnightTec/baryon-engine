@@ -3,6 +3,7 @@
 #include "WindowsApplication.h"
 #include "VirtualScreen.h"
 
+
 namespace Baryon
 {
 class Window

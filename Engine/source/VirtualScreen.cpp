@@ -34,7 +34,7 @@ static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 	for (UINT i = 1; i < numModes; i++)
 	{
 #if defined(_DEBUG) || defined(DEBUG)
-		std::string s = "Resolution: ";
+		/*std::string s = "Resolution: ";
 		s += std::to_string(displayModes[i].Width);
 		s += "x";
 		s += std::to_string(displayModes[i].Height);
@@ -43,7 +43,7 @@ static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 		s += '/';
 		s += std::to_string(displayModes[i].RefreshRate.Denominator);
 		OutputDebugStringA(s.c_str());
-		OutputDebugStringA("\n");
+		OutputDebugStringA("\n");*/
 #endif
 		if (displayModes[i].Width != displayModes[i-1].Width && displayModes[i].Height != displayModes[i - 1].Height)
 		{

@@ -24,11 +24,17 @@ public:
 		MOUSE_LEFT_BUTTON,
 		MOUSE_RIGHT_BUTTON
 	};
-
+	
+	static void initialize();
 	static void bindFunctionToInput(void(*function)(float), TYPE type);
-	static void handleOSinput(int virtualKeyCode, float value);
+
+	static void handleOSInput(WPARAM wParam, LPARAM lParam);
+	static void handleOSInputOld(int virtualKeyCode, float value);
+
 	static void handleGameInput();
 private:
 	static std::pair<float, std::vector<void(*)(float)>> inputCallbacks[10];
+
+	// TODO: add following callback types: InputAction, InputAxis1D, InputAxis2D
 };
 }

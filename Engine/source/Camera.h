@@ -23,6 +23,7 @@ private:
 	void updateViewMatrix();
 
 	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT4 orientationQuaternion;
 	DirectX::XMFLOAT4X4 projectionMatrix;
 	DirectX::XMFLOAT4X4 viewMatrix;
 
@@ -39,6 +40,7 @@ private:
 inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ, DirectX::XMFLOAT3 position)
 	: position{position}, fov{fov}, aspectRatio{aspectRatio}, nearZ{nearZ}, farZ{farZ}
 {
+	XMStoreFloat4(&orientationQuaternion, DirectX::XMQuaternionIdentity());
 	setFrustrum(fov, aspectRatio, nearZ, farZ);
 }
 inline void Camera::translate(DirectX::XMFLOAT3 vector)

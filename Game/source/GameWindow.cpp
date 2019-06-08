@@ -20,7 +20,6 @@ bool GameWindow::initialize()
 	return true;
 }
 
-
 void GameWindow::setStyle(STYLE newStyle)
 {
 	assert(hwnd);
@@ -61,7 +60,9 @@ void GameWindow::setResolution(DirectX::XMUINT2 resolution)
 	{
 		resize(resolution);
 	}
-	screen->resize(resolution);
+	if (screen) {
+		screen->resize(resolution);
+	}
 }
 
 void GameWindow::resize(DirectX::XMUINT2 clientSize)

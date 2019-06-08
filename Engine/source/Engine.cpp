@@ -10,6 +10,7 @@ using namespace Baryon;
 bool Engine::initialize()
 {
 	SetProcessDPIAware();
+	Input::initialize();
 	if (!GraphicsDeviceInterface::initialize(Key<Engine>()))
 	{
 		MessageBoxW(nullptr, L"Error: Failed to initialize GraphicsDeviceInterface.", L"Baryon Engine",

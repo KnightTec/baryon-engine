@@ -6,6 +6,7 @@ using namespace DirectX;
 void Camera::updateViewMatrix()
 {
 	//TODO: rotation
-	XMVECTOR posInverse = -XMLoadFloat3(&position);
-	XMStoreFloat4x4(&viewMatrix, XMMatrixTranslationFromVector(posInverse));
+	XMMATRIX viewMat = XMMatrixRotationQuaternion(XMLoadFloat4(&orientationQuaternion));
+	viewMat *= XMMatrixTranslationFromVector(-XMLoadFloat3(&position));
+	XMStoreFloat4x4(&viewMatrix, viewMat);
 }
