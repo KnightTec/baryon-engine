@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+
 namespace Baryon
 {
 struct Empty
@@ -13,7 +14,8 @@ struct Empty
 class Shader : protected GraphicsDeviceInterface
 {
 public:
-	explicit Shader(const std::wstring& sourcePath);
+	explicit Shader(const std::wstring& sourcePath, uint32_t numConstantBuffers = 0);
+	~Shader();
 	/*
 	 * Compile HLSL vertex shader file located at sourcePath
 	 */
@@ -33,9 +35,7 @@ public:
 	bool updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, uint32_t index);
 protected:
 	std::wstring sourcePath;
-private:
-	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> cbuffers;
-	bool initCBuffer = false;
+	std::vector<ID3D11Buffer*> cBuffers;
 };
 
 class VertexShader : public Shader
@@ -75,8 +75,16 @@ private:
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Inline function implementations 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-inline Shader::Shader(const std::wstring& sourcePath) : sourcePath{sourcePath}
+inline Shader::Shader(const std::wstring& sourcePath, uint32_t numConstantBuffers)
+	: sourcePath{ sourcePath }, cBuffers(numConstantBuffers, nullptr)
 {
+}
+inline Shader::~Shader()
+{
+	for (ID3D11Buffer* cBuffer : cBuffers)
+	{
+		cBuffer->Release();
+	}
 }
 
 inline bool Shader::reload()
@@ -91,12 +99,14 @@ inline bool Shader::reload()
 
 inline void VertexShader::apply()
 {
+	getContext()->VSSetConstantBuffers(0, 1, cBuffers.data());
 	getContext()->IASetInputLayout(d3dinputLayout.Get());
 	getContext()->VSSetShader(d3dvertexShader.Get(), nullptr, 0);
 }
 
 inline void PixelShader::apply()
 {
+	getContext()->PSGetConstantBuffers(0, cBuffers.size(), cBuffers.data());
 	getContext()->PSSetShader(d3dpixelShader.Get(), nullptr, 0);
 }
 } // namespace Baryon

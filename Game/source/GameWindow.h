@@ -31,7 +31,7 @@ public:
 
 	bool handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam) override;
 private:
-	virtual bool initialize() override;
+	bool initialize() override;
 	/*
 	 * Resize the windows client area
 	 */

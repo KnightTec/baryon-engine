@@ -4,23 +4,10 @@ using namespace Baryon;
 using namespace Microsoft::WRL;
 
 bool GraphicsDeviceInterface::initialized = false;
-
+ID3D11Device4* GraphicsDeviceInterface::d3dDevice;
 ID3D11DeviceContext4* GraphicsDeviceInterface::d3dContext;
-ID3D11Device4* GraphicsDeviceInterface::d3device;
+Microsoft::WRL::ComPtr<ID3D11Device4> GraphicsDeviceInterface::dev;
 
-
-GraphicsDeviceInterface::GraphicsDeviceInterface()
-{
-	// ensure that static variables are initialized once the first object that uses GraphicsDeviceInterface is constructed
-	// therefore the static variables will only be destroyed after the last object that uses GraphicsDeviceInterface is destroyed
-	static bool firstUse = true;
-	if (firstUse)
-	{
-		getDevicePtr();
-		getContextPtr();
-		firstUse = false;
-	}
-}
 
 bool GraphicsDeviceInterface::initialize(Key<Engine>)
 {
@@ -51,8 +38,8 @@ bool GraphicsDeviceInterface::initialize(Key<Engine>)
 		MessageBoxW(nullptr, L"Error: Device does not support feature level 11_1.", L"DirectX", MB_OK | MB_ICONERROR);
 		return false;
 	}
-	device->QueryInterface(__uuidof(getDevice()), reinterpret_cast<void**>(getDevicePtr()));
-	context->QueryInterface(__uuidof(getContext()), reinterpret_cast<void**>(getContextPtr()));
+	device->QueryInterface(__uuidof(d3dDevice), reinterpret_cast<void**>(dev.GetAddressOf()));
+	context->QueryInterface(__uuidof(d3dContext), reinterpret_cast<void**>(&d3dContext));
 
 	device->Release();
 	context->Release();
@@ -62,8 +49,6 @@ bool GraphicsDeviceInterface::initialize(Key<Engine>)
 }
 void GraphicsDeviceInterface::terminate(Key<Engine>)
 {
-	//TODO: use raw pointers instead of comptr and release here
-	//d3dContext->Release();
-	//d3device->Release();
+	d3dContext->Release();
+	//d3dDevice->Release();
 }
-

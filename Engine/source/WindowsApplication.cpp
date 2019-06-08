@@ -23,7 +23,6 @@ bool WindowsApplication::initialize(HINSTANCE hInstance)
 
 void WindowsApplication::registerEventHandler(WindowsEventHandler* eventHandler)
 {
-	assert(initialized);
 	eventHandlers.push_back(eventHandler);
 }
 

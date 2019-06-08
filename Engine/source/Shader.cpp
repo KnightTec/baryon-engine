@@ -8,11 +8,11 @@
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
+
 bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, uint32_t index)
 {
-	if (!initCBuffer)
-	{
-		cbuffers.emplace_back(Microsoft::WRL::ComPtr<ID3D11Buffer>());
+	assert(index < cBuffers.size());	
+	if (!cBuffers[index]) {
 		// create the constant buffer
 		char* dummyData = new char[dataSizeInBytes];
 
@@ -29,18 +29,14 @@ bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, u
 		initData.SysMemPitch = 0;
 		initData.SysMemSlicePitch = 0;
 
-		HR(getDevice()->CreateBuffer(&cbDesc, &initData, cbuffers[index].GetAddressOf()));
-		getContext()->VSSetConstantBuffers(0, 1, cbuffers[index].GetAddressOf());
-
+		HR(getDevice()->CreateBuffer(&cbDesc, &initData, &cBuffers[index]));
 		delete[] dummyData;
-
-		initCBuffer = true;
 	}
 	// update the constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(getContext()->Map(cbuffers[index].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
+	HR(getContext()->Map(cBuffers[index], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
 	memcpy_s(mappedData.pData, dataSizeInBytes, data, dataSizeInBytes);
-	getContext()->Unmap(cbuffers[index].Get(), 0);
+	getContext()->Unmap(cBuffers[index], 0);
 	return true;
 }
 
@@ -65,7 +61,7 @@ bool VertexShader::compile()
 	// Get shader info
 	D3D11_SHADER_DESC shaderDesc;
 	vertexShaderReflection->GetDesc(&shaderDesc);
-
+	
 	// Read input layout description from shader info
 	std::vector<D3D11_INPUT_ELEMENT_DESC> inputLayoutDesc;
 	const uint32_t inputParamCount = shaderDesc.InputParameters;

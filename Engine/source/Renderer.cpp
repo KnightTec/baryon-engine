@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "RenderPass.h"
 #include "DXErr.h"
+#include "Window.h"
 
 using namespace Baryon;
 using namespace DirectX;
@@ -17,7 +18,7 @@ struct VS_CONSTANT_BUFFER
 
 ComPtr<ID3D11RasterizerState1> rasterState;
 
-static VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl"};
+static VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl", 1};
 static PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
 
 bool Renderer::initialize()
@@ -25,8 +26,7 @@ bool Renderer::initialize()
 	vs.compile();
 	ps.compile();
 
-	vs.apply();
-	ps.apply();
+	
 
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -77,6 +77,8 @@ bool Renderer::createVirtualScreen(Window& targetWindow)
 
 void Renderer::render()
 {
+	vs.apply();
+	ps.apply();
 	for (VirtualScreen& screen : virtualScreens)
 	{
 		screen.clear();

@@ -10,7 +10,7 @@ using namespace Microsoft::WRL;
 
 static DXGI_FORMAT swapChainFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-static std::vector<DirectX::XMUINT2> getSupportedResolutions()
+static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 {
 	ComPtr<IDXGIFactory> factory;
 	CreateDXGIFactory1(__uuidof(IDXGIFactory), reinterpret_cast<void**>(factory.GetAddressOf()));
@@ -55,8 +55,12 @@ static std::vector<DirectX::XMUINT2> getSupportedResolutions()
 	return resolutions;
 
 }
-const std::vector<DirectX::XMUINT2> VirtualScreen::supportedResolutions = getSupportedResolutions();
 
+const std::vector<DirectX::XMUINT2>& VirtualScreen::getSupportedResolutions()
+{
+	static const std::vector<DirectX::XMUINT2> supportedResolutions = retrieveSupportedResolutions();
+	return supportedResolutions;
+}
 
 VirtualScreen::VirtualScreen() : initialized{ false }, fullscreen{ false }, activeCamera{ nullptr }, resolution{ 0, 0 }
 {
@@ -70,8 +74,8 @@ bool VirtualScreen::initialize(const Window& window)
 	// Create the swap chain
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
-	swapChainDesc.Width = supportedResolutions[0].x;
-	swapChainDesc.Height = supportedResolutions[0].y;
+	swapChainDesc.Width = getSupportedResolutions()[0].x;
+	swapChainDesc.Height = getSupportedResolutions()[0].y;
 	swapChainDesc.Format = swapChainFormat;
 	swapChainDesc.Stereo = false;
 	swapChainDesc.SampleDesc.Count = 1;

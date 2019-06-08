@@ -4,7 +4,7 @@
 
 using namespace Baryon;
 
-GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::supportedResolutions[0], STYLE style = WINDOWED) 
+GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0], STYLE style = WINDOWED) 
 	: style{WINDOWED}, resolution{resolution}
 {
 	WindowsApplication::registerEventHandler(this);
@@ -13,12 +13,10 @@ GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = Virtua
 
 bool GameWindow::initialize()
 {
-
 	// TODO: remove init function
 
 	setStyle(style);
 	setResolution(resolution);
-
 	return true;
 }
 

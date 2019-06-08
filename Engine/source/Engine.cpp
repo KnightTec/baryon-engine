@@ -42,6 +42,7 @@ void Engine::run()
 	}
 	terminate();
 }
+
 void Engine::terminate()
 {
 	renderer.terminate();

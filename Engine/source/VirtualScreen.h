@@ -34,7 +34,7 @@ public:
 	ID3D11DepthStencilView* getDepthStencilView() const;
 	void setActiveCamera(Camera* camera);
 
-	static const std::vector<DirectX::XMUINT2> supportedResolutions;
+	static const std::vector<DirectX::XMUINT2>& getSupportedResolutions();
 private:
 	bool configureBuffers();
 	void releaseBuffers();

@@ -1,6 +1,5 @@
 #pragma once
 #include "GraphicsDeviceInterface.h"
-#include "Window.h"
 #include "VirtualScreen.h"
 
 #include <vector>
@@ -18,6 +17,7 @@ public:
 	bool initialize();
 	void terminate();
 
+	//TODO: use factory for window
 	bool createVirtualScreen(Window& targetWindow);
 	void submitMesh(const Mesh& mesh);
 	void render();
