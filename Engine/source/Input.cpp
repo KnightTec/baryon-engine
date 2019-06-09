@@ -1,5 +1,12 @@
 #include "Input.h"
 #include <string>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+
+/*
+ * Usage tables source: https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
+ */
 
 #ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -10,6 +17,29 @@
 #ifndef HID_USAGE_GENERIC_KEYBOARD
 #define HID_USAGE_GENERIC_KEYBOARD     ((USHORT) 0x06)
 #endif
+#ifndef HID_USAGE_GENERIC_GAMEPAD
+#define HID_USAGE_GENERIC_GAMEPAD      ((USHORT) 0x04)
+#endif
+
+#ifndef HID_USAGE_PAGE_GAME
+#define HID_USAGE_PAGE_GAME            ((USHORT) 0x05)
+#endif
+#ifndef HID_USAGE_GAME_GAMEPAD_TRIGGER
+#define HID_USAGE_GAME_GAMEPAD_TRIGGER ((USHORT) 0x37)
+#endif
+
+#ifndef VK_W
+#define VK_W	0x57
+#endif
+#ifndef VK_A
+#define VK_A	0x41
+#endif
+#ifndef VK_S
+#define VK_S	0x53
+#endif
+#ifndef VK_D
+#define VK_D	0x44
+#endif
 
 using namespace Baryon;
 
@@ -18,7 +48,7 @@ std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
 
 void Input::initialize()
 {
-	const UINT numDevices = 2;
+	const UINT numDevices = 3;
 	RAWINPUTDEVICE rid[numDevices];
 	// keyboard
 	rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
@@ -32,7 +62,13 @@ void Input::initialize()
 	rid[1].dwFlags = 0;
 	rid[1].hwndTarget = nullptr;
 
-	if (!RegisterRawInputDevices(rid, 2, sizeof(RAWINPUTDEVICE)))
+	// gamepad
+	rid[2].usUsagePage = HID_USAGE_PAGE_GENERIC;
+	rid[2].usUsage = HID_USAGE_GENERIC_GAMEPAD;
+	rid[2].dwFlags = 0;
+	rid[2].hwndTarget = nullptr;
+
+	if (!RegisterRawInputDevices(rid, numDevices, sizeof(RAWINPUTDEVICE)))
 	{
 		OutputDebugStringA("Input device registration failed!\n");
 	}
@@ -43,6 +79,8 @@ void Input::bindFunctionToInput(void(* function)(float), TYPE type)
 	inputCallbacks[type].second.push_back(function);
 }
 
+
+
 void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 {
 	unsigned size = sizeof(RAWINPUT);
@@ -51,26 +89,29 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 
 	LONG xPosRelative;
 	LONG yPosRelative;
+	UINT s = 128;
+	BYTE* buffer;
+	std::stringstream ss;
+	ss.clear();
 	
 	USHORT flags;
 	switch (raw.header.dwType)
 	{
 	case RIM_TYPEMOUSE:
-
 		//TODO: handle mouse input
 		xPosRelative = raw.data.mouse.lLastX;
 		yPosRelative = raw.data.mouse.lLastY;
 
-
-		if (xPosRelative) {
-			OutputDebugStringA(("Mouse x: " + std::to_string(xPosRelative) + "\n").c_str());
+		if (!inputCallbacks[MOUSE_X].second.empty()) {
+			inputCallbacks[MOUSE_X].second.at(0)(xPosRelative);
 		}
-		if (yPosRelative) {
-			OutputDebugStringA(("Mouse y: " + std::to_string(yPosRelative) + "\n").c_str());
+		if (!inputCallbacks[MOUSE_Y].second.empty()) {
+			inputCallbacks[MOUSE_Y].second.at(0)(yPosRelative);
 		}
 
 		break;
 	case RIM_TYPEKEYBOARD:
+		// handle keyboard input
 		if (raw.data.keyboard.Flags & RI_KEY_BREAK)
 		{
 			Input::handleOSInputOld(raw.data.keyboard.VKey, 0);
@@ -80,8 +121,26 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 			Input::handleOSInputOld(raw.data.keyboard.VKey, 1);
 		}
 		break;
+	case RIM_TYPEHID:
+		RAWHID hid = raw.data.hid;
+
+		s = raw.data.hid.dwCount * raw.data.hid.dwSizeHid;
+		buffer = new BYTE[s];
+		memcpy_s(buffer, s, raw.data.hid.bRawData, s);
+
+		OutputDebugStringA("HID input detected: \n");
+
+		
+		for (int i = 0; i < s; i++)
+		{
+			ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
+		}
+		delete[] buffer;
+		OutputDebugStringA((ss.str() + "\n").c_str());
+		break;
 	default:
 		break;
+
 	}
 }
 
@@ -91,15 +150,19 @@ void Input::handleOSInputOld(int virtualKeyCode, float value)
 	switch (virtualKeyCode)
 	{
 	case VK_LEFT:
+	case VK_A:
 		inputCallbacks[KEYBOARD_ARROW_LEFT].first = value;
 		break;
 	case VK_RIGHT:
+	case VK_D:
 		inputCallbacks[KEYBOARD_ARROW_RIGHT].first = value;
 		break;
 	case VK_UP:
+	case VK_W:
 		inputCallbacks[KEYBOARD_ARROW_UP].first = value;
 		break;
 	case VK_DOWN:
+	case VK_S:
 		inputCallbacks[KEYBOARD_ARROW_DOWN].first = value;
 		break;
 	case VK_SPACE:
