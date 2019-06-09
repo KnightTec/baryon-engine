@@ -3,13 +3,19 @@
 
 namespace Baryon
 {
+	enum class SPACE
+	{
+		LOCAL,
+		GLOBAL	
+	};
+
 class Camera
 {
 public:
 	Camera(float fov, float aspectRatio, float nearZ, float farZ, DirectX::XMFLOAT3 position = {0, 0, 0});
 
-	void translate(DirectX::XMFLOAT3 vector);
-	void rotate();
+	void translate(DirectX::XMFLOAT3 vector, SPACE space = SPACE::LOCAL);
+	void rotate(float pitch, float yaw, float roll, SPACE space = SPACE::LOCAL);
 
 	DirectX::XMMATRIX getViewMatrix();
 	DirectX::XMMATRIX getProjectionMatrix() const;
@@ -42,12 +48,6 @@ inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ, Dir
 {
 	XMStoreFloat4(&orientationQuaternion, DirectX::XMQuaternionIdentity());
 	setFrustrum(fov, aspectRatio, nearZ, farZ);
-}
-inline void Camera::translate(DirectX::XMFLOAT3 vector)
-{
-	XMStoreFloat3(&position, XMVector3Transform(XMLoadFloat3(&position),
-	                                            DirectX::XMMatrixTranslationFromVector(XMLoadFloat3(&vector)))
-	);
 }
 inline DirectX::XMMATRIX Camera::getViewMatrix()
 {
