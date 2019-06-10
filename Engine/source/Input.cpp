@@ -1,6 +1,5 @@
 #include "Input.h"
 #include <string>
-#include <iostream>
 #include <iomanip>
 #include <sstream>
 
@@ -43,6 +42,11 @@
 
 using namespace Baryon;
 
+class HIDKeyboard
+{
+	
+};
+
 std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
 
 
@@ -74,11 +78,10 @@ void Input::initialize()
 	}
 }
 
-void Input::bindFunctionToInput(void(* function)(float), TYPE type)
+void Input::bindFunctionToInput(void (* function)(float), TYPE type)
 {
 	inputCallbacks[type].second.push_back(function);
 }
-
 
 
 void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
@@ -87,28 +90,23 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 	static RAWINPUT raw;
 	GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER));
 
-	LONG xPosRelative;
-	LONG yPosRelative;
-	UINT s = 128;
-	BYTE* buffer;
-	std::stringstream ss;
-	ss.clear();
-	
-	USHORT flags;
 	switch (raw.header.dwType)
 	{
 	case RIM_TYPEMOUSE:
-		//TODO: handle mouse input
-		xPosRelative = raw.data.mouse.lLastX;
-		yPosRelative = raw.data.mouse.lLastY;
+		{
+			// handle mouse input
+			LONG xPosRelative = raw.data.mouse.lLastX;
+			LONG yPosRelative = raw.data.mouse.lLastY;
 
-		if (!inputCallbacks[MOUSE_X].second.empty()) {
-			inputCallbacks[MOUSE_X].second.at(0)(xPosRelative);
+			if (!inputCallbacks[MOUSE_X].second.empty())
+			{
+				inputCallbacks[MOUSE_X].second.at(0)(xPosRelative);
+			}
+			if (!inputCallbacks[MOUSE_Y].second.empty())
+			{
+				inputCallbacks[MOUSE_Y].second.at(0)(yPosRelative);
+			}
 		}
-		if (!inputCallbacks[MOUSE_Y].second.empty()) {
-			inputCallbacks[MOUSE_Y].second.at(0)(yPosRelative);
-		}
-
 		break;
 	case RIM_TYPEKEYBOARD:
 		// handle keyboard input
@@ -122,25 +120,38 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case RIM_TYPEHID:
-		RAWHID hid = raw.data.hid;
-
-		s = raw.data.hid.dwCount * raw.data.hid.dwSizeHid;
-		buffer = new BYTE[s];
-		memcpy_s(buffer, s, raw.data.hid.bRawData, s);
-
-		OutputDebugStringA("HID input detected: \n");
-
-		
-		for (int i = 0; i < s; i++)
 		{
-			ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
+			UINT bufSize = raw.data.hid.dwCount * raw.data.hid.dwSizeHid;
+			BYTE* buffer = raw.data.hid.bRawData;
+
+			//OutputDebugStringA("HID input detected: \n");
+			std::stringstream ss;
+			for (int i = 0; i < bufSize; i++)
+			{
+				ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
+			}
+
+			//TODO: clean this mess up
+			float xRate = (float(buffer[3]) - 127.5) / 32.0f;
+			float deadZone = 0.5;
+			if (abs(xRate) < deadZone)
+			{
+				xRate = 0;
+			}
+			float yRate = (float(buffer[4]) - 127.5) / 32.0f;
+			if (abs(yRate) < deadZone)
+			{
+				yRate = 0;
+			}
+			inputCallbacks[MOUSE_X].first = xRate;
+			inputCallbacks[MOUSE_Y].first = yRate;
+
+			OutputDebugStringA((ss.str() + "\n").c_str());
 		}
-		delete[] buffer;
-		OutputDebugStringA((ss.str() + "\n").c_str());
 		break;
+
 	default:
 		break;
-
 	}
 }
 
@@ -168,15 +179,19 @@ void Input::handleOSInputOld(int virtualKeyCode, float value)
 	case VK_SPACE:
 		//TODO: uncomment this line
 		//inputCallbacks[KEYBOARD_SPACE].first = value;
-		if (value == 1) {
+		if (value == 1)
+		{
 			inputCallbacks[KEYBOARD_SPACE].second.at(0)(0);
 		}
 		break;
 	case VK_RETURN:
 		//inputCallbacks[KEYBOARD_ENTER].first = value;
-		if (value == 1) {
+		if (value == 1)
+		{
 			inputCallbacks[KEYBOARD_ENTER].second.at(0)(0);
 		}
+		break;
+	default:
 		break;
 	}
 }
@@ -187,7 +202,7 @@ void Input::handleGameInput()
 	{
 		if (inputCallback.first)
 		{
-			for (void(*callback)(float) : inputCallback.second)
+			for (void (*callback)(float) : inputCallback.second)
 			{
 				callback(inputCallback.first);
 			}

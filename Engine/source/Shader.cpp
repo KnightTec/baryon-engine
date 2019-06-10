@@ -14,7 +14,6 @@ bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, u
 	assert(index < cBuffers.size());	
 	if (!cBuffers[index]) {
 		// create the constant buffer
-		char* dummyData = new char[dataSizeInBytes];
 
 		D3D11_BUFFER_DESC cbDesc;
 		cbDesc.ByteWidth = dataSizeInBytes;
@@ -24,13 +23,14 @@ bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, u
 		cbDesc.MiscFlags = 0;
 		cbDesc.StructureByteStride = 0;
 
+		char dummyData[1];
+
 		D3D11_SUBRESOURCE_DATA initData;
-		initData.pSysMem = &initData;
+		initData.pSysMem = dummyData;
 		initData.SysMemPitch = 0;
 		initData.SysMemSlicePitch = 0;
 
 		HR(getDevice()->CreateBuffer(&cbDesc, &initData, &cBuffers[index]));
-		delete[] dummyData;
 	}
 	// update the constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedData;

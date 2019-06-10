@@ -2,6 +2,9 @@
 #include "windows.h"
 #include <utility>
 #include <vector>
+#include <unordered_map>
+
+//TODO: create HID classes (Keyboard, Mouse, Gamepad)
 
 namespace Baryon
 {
@@ -35,6 +38,8 @@ public:
 private:
 	static std::pair<float, std::vector<void(*)(float)>> inputCallbacks[10];
 
+	//std::unordered_map<std::string, std::vector<void(*)(float)>> inputAxes;
+	//std::unordered_map<Input::TYPE, std::string> inputMappings;
 	// TODO: add following callback types: InputAction, InputAxis1D, InputAxis2D
 };
 }
