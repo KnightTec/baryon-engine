@@ -23,7 +23,6 @@ protected:
 	static ID3D11DeviceContext4* getContext();
 private:
 	static bool initialized;
-	static Microsoft::WRL::ComPtr<ID3D11Device4> dev;
 	static ID3D11Device4* d3dDevice;
 	static ID3D11DeviceContext4* d3dContext;
 };
@@ -31,7 +30,7 @@ private:
 
 inline ID3D11Device4* GraphicsDeviceInterface::getDevice()
 {
-	return dev.Get();
+	return d3dDevice;
 }
 inline ID3D11DeviceContext4* GraphicsDeviceInterface::getContext()
 {

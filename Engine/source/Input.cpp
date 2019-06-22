@@ -2,6 +2,7 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
+#include "HID.h"
 
 /*
  * Usage tables source: https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
@@ -18,13 +19,6 @@
 #endif
 #ifndef HID_USAGE_GENERIC_GAMEPAD
 #define HID_USAGE_GENERIC_GAMEPAD      ((USHORT) 0x04)
-#endif
-
-#ifndef HID_USAGE_PAGE_GAME
-#define HID_USAGE_PAGE_GAME            ((USHORT) 0x05)
-#endif
-#ifndef HID_USAGE_GAME_GAMEPAD_TRIGGER
-#define HID_USAGE_GAME_GAMEPAD_TRIGGER ((USHORT) 0x37)
 #endif
 
 #ifndef VK_W
@@ -44,11 +38,32 @@ using namespace Baryon;
 
 class HIDKeyboard
 {
-	
 };
 
 std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
 
+struct ControllerInputReport
+{
+	unsigned int : 8;
+	unsigned int leftX : 8;
+	unsigned int leftY : 8;
+	unsigned int rightX : 8;
+	unsigned int rightY: 8;
+
+	unsigned int dPad : 4;
+	unsigned int button1 : 1;
+	unsigned int button2 : 1;
+	unsigned int button3 : 1;
+	unsigned int button4 : 1;
+
+	unsigned int button5 : 1;
+	unsigned int button6 : 1;
+	unsigned int button7 : 1;
+	unsigned int button8 : 1;
+	unsigned int button9 : 1;
+	unsigned int button10 : 1;
+	unsigned int : 10;
+};
 
 void Input::initialize()
 {
@@ -83,11 +98,14 @@ void Input::bindFunctionToInput(void (* function)(float), TYPE type)
 	inputCallbacks[type].second.push_back(function);
 }
 
+bool mouseInput= false;
+LONG xPosRelative = 0;
+LONG yPosRelative = 0;
 
 void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 {
 	unsigned size = sizeof(RAWINPUT);
-	static RAWINPUT raw;
+	RAWINPUT raw;
 	GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER));
 
 	switch (raw.header.dwType)
@@ -95,17 +113,12 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 	case RIM_TYPEMOUSE:
 		{
 			// handle mouse input
-			LONG xPosRelative = raw.data.mouse.lLastX;
-			LONG yPosRelative = raw.data.mouse.lLastY;
+			xPosRelative += raw.data.mouse.lLastX;
+			yPosRelative += raw.data.mouse.lLastY;
 
-			if (!inputCallbacks[MOUSE_X].second.empty())
-			{
-				inputCallbacks[MOUSE_X].second.at(0)(xPosRelative);
-			}
-			if (!inputCallbacks[MOUSE_Y].second.empty())
-			{
-				inputCallbacks[MOUSE_Y].second.at(0)(yPosRelative);
-			}
+			inputCallbacks[MOUSE_X].first = xPosRelative;
+			inputCallbacks[MOUSE_Y].first = yPosRelative;
+			mouseInput = true;
 		}
 		break;
 	case RIM_TYPEKEYBOARD:
@@ -124,6 +137,10 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 			UINT bufSize = raw.data.hid.dwCount * raw.data.hid.dwSizeHid;
 			BYTE* buffer = raw.data.hid.bRawData;
 
+
+			ControllerInputReport report = {};
+			memcpy_s(&report, sizeof report, buffer, sizeof report);
+
 			//OutputDebugStringA("HID input detected: \n");
 			std::stringstream ss;
 			for (int i = 0; i < bufSize; i++)
@@ -131,14 +148,26 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 				ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
 			}
 
+			OutputDebugStringA(("D-Pad: " + std::to_string(report.dPad) + "\n").c_str());
+			OutputDebugStringA(("Button1: " + std::to_string(report.button1) + "\n").c_str());
+			OutputDebugStringA(("Button2: " + std::to_string(report.button2) + "\n").c_str());
+			OutputDebugStringA(("Button3: " + std::to_string(report.button3) + "\n").c_str());
+			OutputDebugStringA(("Button4: " + std::to_string(report.button4) + "\n").c_str());
+			OutputDebugStringA(("Button5: " + std::to_string(report.button5) + "\n").c_str());
+			OutputDebugStringA(("Button6: " + std::to_string(report.button6) + "\n").c_str());
+			OutputDebugStringA(("Button7: " + std::to_string(report.button7) + "\n").c_str());
+			OutputDebugStringA(("Button8: " + std::to_string(report.button8) + "\n").c_str());
+			OutputDebugStringA(("Button9: " + std::to_string(report.button9) + "\n").c_str());
+			OutputDebugStringA(("Button10: " + std::to_string(report.button10) + "\n").c_str());
+
 			//TODO: clean this mess up
-			float xRate = (float(buffer[3]) - 127.5) / 32.0f;
+			float xRate = (report.rightX - 127.5) / 16.0f;
 			float deadZone = 0.5;
 			if (abs(xRate) < deadZone)
 			{
 				xRate = 0;
 			}
-			float yRate = (float(buffer[4]) - 127.5) / 32.0f;
+			float yRate = (report.rightY - 127.5) / 16.0f;
 			if (abs(yRate) < deadZone)
 			{
 				yRate = 0;
@@ -162,6 +191,7 @@ void Input::handleOSInputOld(int virtualKeyCode, float value)
 	{
 	case VK_LEFT:
 	case VK_A:
+
 		inputCallbacks[KEYBOARD_ARROW_LEFT].first = value;
 		break;
 	case VK_RIGHT:
@@ -198,6 +228,14 @@ void Input::handleOSInputOld(int virtualKeyCode, float value)
 
 void Input::handleGameInput()
 {
+	if (!mouseInput)
+	{
+		inputCallbacks[MOUSE_X].first = 0;
+		inputCallbacks[MOUSE_Y].first = 0;
+	}
+	xPosRelative = 0;
+	yPosRelative = 0;
+	mouseInput = false;
 	for (auto& inputCallback : inputCallbacks)
 	{
 		if (inputCallback.first)

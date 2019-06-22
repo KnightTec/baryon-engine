@@ -26,13 +26,13 @@ public:
 	bool present();
 	void clear();
 	bool setFullscreen(bool fullscreen);
+	void setActiveCamera(Camera* camera);
 
 	DirectX::XMUINT2 getResolution() const;
 	float getAspectRatio() const;
 	Camera* getActiveCamera() const;
 	ID3D11RenderTargetView* getRenderTargetView() const;
 	ID3D11DepthStencilView* getDepthStencilView() const;
-	void setActiveCamera(Camera* camera);
 
 	static const std::vector<DirectX::XMUINT2>& getSupportedResolutions();
 private:
@@ -48,8 +48,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D1> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
-	
-	
 };
 
 

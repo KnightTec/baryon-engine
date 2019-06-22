@@ -13,7 +13,7 @@ using namespace Microsoft::WRL;
 struct VS_CONSTANT_BUFFER
 {
 	XMFLOAT4X4 mWorldViewProj;
-	XMFLOAT4X4 mWorldViewProjInv;
+	XMFLOAT4X4 mWorldNormals;
 };
 
 ComPtr<ID3D11RasterizerState1> rasterState;
@@ -25,8 +25,6 @@ bool Renderer::initialize()
 {
 	vs.compile();
 	ps.compile();
-
-	
 
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -46,6 +44,7 @@ bool Renderer::initialize()
 	HR(getDevice()->CreateRasterizerState1(&rasterizerState, rasterState.GetAddressOf()));
 	getContext()->RSSetState(rasterState.Get());
 
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	/*
 	 * TODO: Blend State
 	  Depth Stencil State
@@ -91,6 +90,8 @@ void Renderer::render()
 		getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
 		getContext()->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
+		XMMATRIX worldMatrix = XMMatrixIdentity();
+
 		for (VirtualScreen& screen : virtualScreens)
 		{
 			Camera* cam = screen.getActiveCamera();
@@ -101,8 +102,8 @@ void Renderer::render()
 
 				// update constant buffer (matrices)
 				VS_CONSTANT_BUFFER data;
-				XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
-				XMStoreFloat4x4(&data.mWorldViewProjInv, XMMatrixInverse(nullptr, cam->getViewProjMatrix()));
+				XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(worldMatrix * cam->getViewProjMatrix()));
+				XMStoreFloat4x4(&data.mWorldNormals, XMMatrixInverse(nullptr, worldMatrix));
 				vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
 				getContext()->DrawIndexed(mesh->getIndexCount(), 0, 0);

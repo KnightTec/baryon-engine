@@ -8,6 +8,9 @@ using namespace DirectX;
 
 Mesh::Mesh()
 {
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+
 	// create cube
 	vertices.emplace_back(Vertex{{1, 1, 1}, {0.5773f, 0.5773f, 0.5773f}});
 	vertices.emplace_back(Vertex{{1, 1, -1}, {0.5773f, 0.5773f, -0.5773f}});
@@ -71,58 +74,7 @@ Mesh::Mesh()
 }
 bool Mesh::initialize(const char* filename)
 {
-	//std::ifstream stream{filename};
-	//if (!stream)
-	//{
-	//	return false;
-	//}
-	//char buffer[128];
-	//while (stream.good())
-	//{
-	//	int nextChar = stream.get();
-	//	switch (nextChar)
-	//	{
-	//	case '#':
-	//		// ignore comments
-	//		stream.ignore(256, '\n');
-	//		break;
-	//	case 'v':
-	//		// parse vertex data
-	//		nextChar = stream.get();
-	//			switch (nextChar)
-	//			{
-	//			case ' ':
-	//				// vertex position
-	//				vertices.emplace_back(Vertex());
-	//				Vertex& vertex = vertices.back();
-	//				stream >> vertex.position.x >> vertex.position.y >> vertex.position.z;
-	//				stream.ignore(256, '\n');
-	//				break;
-	//			case 'n':
-	//				// vertex normal
-	//				vertices.emplace_back(Vertex());
-	//				Vertex& vertex = vertices.back();
-	//				stream >> vertex.position.x >> vertex.position.y >> vertex.position.z;
-	//				stream.ignore(256, '\n');
-	//				break;
-	//			case 't':
-	//				// texture coordinates
+	////TODO: parse imported file
 
-	//				break;
-	//			default:
-	//				return false;
-	//			}
-	//		break;
-	//	case 'f':
-	//		break;
-	//	default:
-	//		// invalid file
-	//		return false;
-	//	}
-	//}
-	//stream.get();
-	////TODO: parse file
-
-	//return true;
 	return false;
 }

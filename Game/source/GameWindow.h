@@ -18,7 +18,6 @@ public:
 		WINDOWED = 0,
 		BORDERLESS = 1,
 		FULLSCREEN = 2,
-		//WINDOWED_SCALABLE = 3 //TODO: remove this style
 	};
 
 	GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution, STYLE style);
@@ -38,6 +37,8 @@ private:
 	void resize(DirectX::XMUINT2 clientSize);
 
 	STYLE style;
+
+	//TODO: move this member to Window.h
 	DirectX::XMUINT2 resolution;
 };
 

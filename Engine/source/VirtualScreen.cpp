@@ -8,7 +8,7 @@
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
-static DXGI_FORMAT swapChainFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+static const DXGI_FORMAT swapChainFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 {
@@ -198,6 +198,10 @@ bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
 
 bool VirtualScreen::setFullscreen(bool fullscreen)
 {
+	if (fullscreen == this->fullscreen)
+	{
+		return true;
+	}
 	HR(d3dSwapChain->SetFullscreenState(fullscreen, nullptr));
 	releaseBuffers();
 	if (d3dSwapChain)

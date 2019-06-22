@@ -25,8 +25,6 @@ public:
 	uint32_t getIndexCount() const;
 private:
 	uint32_t indexCount;
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;

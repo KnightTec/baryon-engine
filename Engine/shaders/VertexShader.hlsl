@@ -1,7 +1,7 @@
 cbuffer VS_CONSTANT_BUFFER : register(b0)
 {
 	matrix worldViewProj;
-	matrix worldViewProjInv;
+    matrix mWorldNormals;
 };
 
 struct VSInput
@@ -20,7 +20,7 @@ VSOutput main(in VSInput input)
 {
 	VSOutput output;
 	output.pos = mul(float4(input.pos, 1), worldViewProj);
-	output.nor = mul(float4(input.nor, 0), worldViewProjInv).xyz;
+    output.nor = mul(float4(input.nor, 0), mWorldNormals).xyz;
 	output.wPos = input.pos;
 	return output;
 }

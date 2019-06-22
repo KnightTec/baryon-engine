@@ -54,6 +54,12 @@
     <ClInclude Include="source\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\HID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\HID.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Engine.cpp">

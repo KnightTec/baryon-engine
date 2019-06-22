@@ -2,7 +2,7 @@
 #include "windows.h"
 #include <utility>
 #include <vector>
-#include <unordered_map>
+#include "HID.h"
 
 //TODO: create HID classes (Keyboard, Mouse, Gamepad)
 
@@ -38,8 +38,11 @@ public:
 private:
 	static std::pair<float, std::vector<void(*)(float)>> inputCallbacks[10];
 
+	static Keyboard keyboard;
+
 	//std::unordered_map<std::string, std::vector<void(*)(float)>> inputAxes;
 	//std::unordered_map<Input::TYPE, std::string> inputMappings;
+	//
 	// TODO: add following callback types: InputAction, InputAxis1D, InputAxis2D
 };
 }

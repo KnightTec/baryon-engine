@@ -30,16 +30,15 @@ void Engine::run()
 	MSG msg = {};
 	while (msg.message != WM_QUIT)
 	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
-			Input::handleGameInput();
-			renderer.render();
-		}
+
+		Input::handleGameInput();
+		renderer.render();
+
 	}
 	terminate();
 }

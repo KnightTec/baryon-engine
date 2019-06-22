@@ -11,7 +11,7 @@ using namespace Microsoft::WRL;
 
 bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, uint32_t index)
 {
-	assert(index < cBuffers.size());	
+	assert(index < cBuffers.size());
 	if (!cBuffers[index]) {
 		// create the constant buffer
 

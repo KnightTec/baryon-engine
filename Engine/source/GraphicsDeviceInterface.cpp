@@ -6,8 +6,6 @@ using namespace Microsoft::WRL;
 bool GraphicsDeviceInterface::initialized = false;
 ID3D11Device4* GraphicsDeviceInterface::d3dDevice;
 ID3D11DeviceContext4* GraphicsDeviceInterface::d3dContext;
-Microsoft::WRL::ComPtr<ID3D11Device4> GraphicsDeviceInterface::dev;
-
 
 bool GraphicsDeviceInterface::initialize(Key<Engine>)
 {
@@ -38,7 +36,7 @@ bool GraphicsDeviceInterface::initialize(Key<Engine>)
 		MessageBoxW(nullptr, L"Error: Device does not support feature level 11_1.", L"DirectX", MB_OK | MB_ICONERROR);
 		return false;
 	}
-	device->QueryInterface(__uuidof(d3dDevice), reinterpret_cast<void**>(dev.GetAddressOf()));
+	device->QueryInterface(__uuidof(d3dDevice), reinterpret_cast<void**>(&d3dDevice));
 	context->QueryInterface(__uuidof(d3dContext), reinterpret_cast<void**>(&d3dContext));
 
 	device->Release();
@@ -50,5 +48,5 @@ bool GraphicsDeviceInterface::initialize(Key<Engine>)
 void GraphicsDeviceInterface::terminate(Key<Engine>)
 {
 	d3dContext->Release();
-	//d3dDevice->Release();
+	d3dDevice->Release();
 }
