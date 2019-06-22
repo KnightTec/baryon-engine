@@ -5,27 +5,27 @@ enum class EMPTY_ENUM
 {
 };
 
-template<int NUM_BUTTONS, int NUM_AXES/*, typename BUTTON_ENUM, typename AXIS_ENUM*/>
+template<int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS = EMPTY_ENUM>
 class HID
 {
-	//static_assert(std::is_enum<BUTTON_ENUM>::value, "BUTTON_ENUM must be an enum type!");
-	//static_assert(std::is_enum<BUTTON_ENUM>::value, "AXIS_ENUM must be an enum type!");
+	static_assert(std::is_enum<BUTTON>::value, "BUTTON must be an enum type!");
+	static_assert(std::is_enum<BUTTON>::value, "AXIS must be an enum type!");
 public:
 	HID();
-	virtual ~HID() = 0;
+
+	void onButtonPressed(BUTTON buttonId);
+	void onButtonReleased(BUTTON buttonId);
+	bool isButtonPressed(BUTTON buttonId);
+	bool isButtonReleased(BUTTON buttonId);
+	bool isButtonDown(BUTTON buttonId);
+
+	void onAxisInput(AXIS axisId, float value);
+	float getAxis(AXIS axisId);
+
 	/*
 	 * called after input has been handled by the game
 	 */
 	void tick();
-protected:
-	void onButtonPressed(int buttonId);
-	void onButtonReleased(int buttonId);
-	bool isButtonPressed(int buttonId);
-	bool isButtonReleased(int buttonId);
-	bool isButtonDown(int buttonId);
-
-	void onAxisInput(int axisId, float value);
-	float getAxis(int axisId);
 private:
 	bool* buttonStates;
 	bool* buttonStatesLast;
@@ -38,49 +38,85 @@ private:
 
 
 
-class Keyboard : public HID<128, 0>
-{
-	typedef HID<128, 0> super;
-public:
-	enum KEY : int
+enum class KEY : int
 {
 		A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 		ARROW_LEFT, ARROW_RIGHT, ARROW_UP, ARROW_DOWN,
 		SPACE, ENTER
-	};
-
-	void onButtonPressed(KEY key);
-	void onButtonReleased(KEY key);
-
-	bool isButtonPressed(KEY key);
-	bool isButtonReleased(KEY key);
-	bool isButtonDown(KEY key);
 };
+typedef HID<128, 0, KEY> Keyboard;
 
-
-class Mouse : public HID<2, 2>
+inline int foo()
 {
-	typedef HID<2, 2> super;
-public:
-	enum BUTTON
-	{
-		LEFT,
-		RIGHT
-	};
-	enum AXIS
-	{
-		X,
-		Y
-	};
+	Keyboard k;
+	bool b = k.isButtonDown(KEY::A);
+	return 0;
+}
 
-	void onButtonPressed(BUTTON key);
-	void onButtonReleased(BUTTON key);
 
-	bool isButtonPressed(BUTTON key);
-	bool isButtonReleased(BUTTON key);
-	bool isButtonDown(BUTTON key);
-
-	void onAxisInput(AXIS axis, float value);
-	float getAxis(AXIS axis);
+enum class MOUSE_BUTTON
+{
+	LEFT,
+	RIGHT
 };
-#include "HID.inl"
+enum class MOUSE_AXIS
+{
+	X,
+	Y
+};
+typedef HID<4, 2, MOUSE_BUTTON, MOUSE_AXIS> Mouse;
+
+
+
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::HID() : buttonStates(&buttonBuffer0[0]), buttonStatesLast(&buttonBuffer1[0])
+{
+}
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+void HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::onButtonPressed(BUTTON buttonId)
+{
+	buttonStates[static_cast<int>(buttonId)] = true;
+}
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+void HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::onButtonReleased(BUTTON buttonId)
+{
+	buttonStates[static_cast<int>(buttonId)] = false;
+}
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+bool HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::isButtonPressed(BUTTON buttonId)
+{
+	return buttonStates[static_cast<int>(buttonId)] && !buttonStatesLast[static_cast<int>(buttonId)];
+}
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+bool HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::isButtonReleased(BUTTON buttonId)
+{
+	return !buttonStates[static_cast<int>(buttonId)] && buttonStatesLast[static_cast<int>(buttonId)];
+}
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+bool HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::isButtonDown(BUTTON buttonId)
+{
+	return buttonStates[static_cast<int>(buttonId)];
+}
+
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+void HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::onAxisInput(AXIS axisId, float value)
+{
+	axisValues[static_cast<int>(axisId)] = value;
+	axisReveivedInput[static_cast<int>(axisId)] = true;
+}
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+float HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::getAxis(AXIS axisId)
+{
+	if (axisReveivedInput[static_cast<int>(axisId)]) {
+		return axisValues[static_cast<int>(axisId)];
+	}
+	return 0;
+}
+template <int NUM_BUTTONS, int NUM_AXES, typename BUTTON, typename AXIS>
+void HID<NUM_BUTTONS, NUM_AXES, BUTTON, AXIS>::tick()
+{
+	bool* tmp = buttonStatesLast;
+	buttonStatesLast = buttonStates;
+	buttonStates = tmp;
+	memset(axisReveivedInput, 0, sizeof(axisReveivedInput));
+}
