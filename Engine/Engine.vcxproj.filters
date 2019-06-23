@@ -24,9 +24,6 @@
     <ClInclude Include="source\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\PassKey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\GraphicsDeviceInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,16 +42,22 @@
     <ClInclude Include="source\RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\WindowsApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\HID.h">
+    <ClInclude Include="source\core\Observer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\input\HID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\input\Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\core\PassKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,10 +83,10 @@
     <ClCompile Include="source\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Input.cpp">
+    <ClCompile Include="source\WindowsApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\WindowsApplication.cpp">
+    <ClCompile Include="source\input\Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

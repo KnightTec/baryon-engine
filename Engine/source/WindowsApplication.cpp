@@ -51,7 +51,7 @@ LRESULT CALLBACK WindowsApplication::windowProc(HWND hWnd, UINT uMsg, WPARAM wPa
 		PostQuitMessage(0);
 		return 0;
 	case WM_INPUT:
-		Input::handleOSInput(wParam, lParam);
+		Input::processOSInput(wParam, lParam);
 		return 0;
 	default:
 		bool handledMessage = false;

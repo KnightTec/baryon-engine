@@ -33,23 +33,10 @@ static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 	resolutions.emplace_back(DirectX::XMUINT2{ displayModes[0].Width, displayModes[0].Height });
 	for (UINT i = 1; i < numModes; i++)
 	{
-#if defined(_DEBUG) || defined(DEBUG)
-		/*std::string s = "Resolution: ";
-		s += std::to_string(displayModes[i].Width);
-		s += "x";
-		s += std::to_string(displayModes[i].Height);
-		s += ", Refresh rate: ";
-		s += std::to_string(displayModes[i].RefreshRate.Numerator);
-		s += '/';
-		s += std::to_string(displayModes[i].RefreshRate.Denominator);
-		OutputDebugStringA(s.c_str());
-		OutputDebugStringA("\n");*/
-#endif
 		if (displayModes[i].Width != displayModes[i-1].Width && displayModes[i].Height != displayModes[i - 1].Height)
 		{
 			resolutions.emplace_back(DirectX::XMUINT2{ displayModes[i].Width, displayModes[i].Height });
 		}
-
 	}
 	delete[] displayModes;
 	return resolutions;
@@ -158,19 +145,10 @@ bool VirtualScreen::configureBuffers()
 void VirtualScreen::releaseBuffers()
 {
 	assert(initialized);
-	// Release the render target view based on the back buffer:
 	renderTargetView.Reset();
-
-	// Release the back buffer itself:
 	backBuffer.Reset();
-
-	// The depth stencil will need to be resized, so release it (and view):
 	depthStencilView.Reset();
 	depthStencilBuffer.Reset();
-
-	// After releasing references to these resources, we need to call Flush() to 
-	// ensure that Direct3D also releases any references it might still have to
-	// the same resources - such as pipeline bindings.
 	getContext()->Flush();
 }
 

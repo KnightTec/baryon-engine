@@ -1,5 +1,9 @@
 #include "GraphicsDeviceInterface.h"
 
+#include "wrl/client.h"
+#include <cassert>
+
+
 using namespace Baryon;
 using namespace Microsoft::WRL;
 

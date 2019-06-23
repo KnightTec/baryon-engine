@@ -4,43 +4,32 @@
 #include <sstream>
 #include "HID.h"
 
+
+namespace
+{
 /*
- * Usage tables source: https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
- */
+* Usage tables source: https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
+*/
+struct HID_USAGE_PAGE_GENERIC
+{
+	static const USHORT ID = 0x01;
 
-#ifndef HID_USAGE_PAGE_GENERIC
-#define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
-#endif
-#ifndef HID_USAGE_GENERIC_MOUSE
-#define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
-#endif
-#ifndef HID_USAGE_GENERIC_KEYBOARD
-#define HID_USAGE_GENERIC_KEYBOARD     ((USHORT) 0x06)
-#endif
-#ifndef HID_USAGE_GENERIC_GAMEPAD
-#define HID_USAGE_GENERIC_GAMEPAD      ((USHORT) 0x04)
-#endif
-
-#ifndef VK_W
-#define VK_W	0x57
-#endif
-#ifndef VK_A
-#define VK_A	0x41
-#endif
-#ifndef VK_S
-#define VK_S	0x53
-#endif
-#ifndef VK_D
-#define VK_D	0x44
-#endif
+	enum USAGE : USHORT
+	{
+		MOUSE = 0x02,
+		GAMEPAD = 0x04,
+		KEYBOARD = 0x06
+	};
+};
+}
 
 using namespace Baryon;
 
-class HIDKeyboard
-{
-};
 
 std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
+Keyboard Input::keyboard;
+Mouse Input::mouse;
+Controller Input::controller;
 
 struct ControllerInputReport
 {
@@ -69,21 +58,22 @@ void Input::initialize()
 {
 	const UINT numDevices = 3;
 	RAWINPUTDEVICE rid[numDevices];
+
 	// keyboard
-	rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
-	rid[0].usUsage = HID_USAGE_GENERIC_KEYBOARD;
+	rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC::ID;
+	rid[0].usUsage = HID_USAGE_PAGE_GENERIC::KEYBOARD;
 	rid[0].dwFlags = 0;
 	rid[0].hwndTarget = nullptr;
 
 	// mouse
-	rid[1].usUsagePage = HID_USAGE_PAGE_GENERIC;
-	rid[1].usUsage = HID_USAGE_GENERIC_MOUSE;
+	rid[1].usUsagePage = HID_USAGE_PAGE_GENERIC::ID;
+	rid[1].usUsage = HID_USAGE_PAGE_GENERIC::MOUSE;
 	rid[1].dwFlags = 0;
 	rid[1].hwndTarget = nullptr;
 
 	// gamepad
-	rid[2].usUsagePage = HID_USAGE_PAGE_GENERIC;
-	rid[2].usUsage = HID_USAGE_GENERIC_GAMEPAD;
+	rid[2].usUsagePage = HID_USAGE_PAGE_GENERIC::ID;
+	rid[2].usUsage = HID_USAGE_PAGE_GENERIC::GAMEPAD;
 	rid[2].dwFlags = 0;
 	rid[2].hwndTarget = nullptr;
 
@@ -98,11 +88,8 @@ void Input::bindFunctionToInput(void (* function)(float), TYPE type)
 	inputCallbacks[type].second.push_back(function);
 }
 
-bool mouseInput= false;
-LONG xPosRelative = 0;
-LONG yPosRelative = 0;
 
-void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
+void Input::processOSInput(WPARAM wParam, LPARAM lParam)
 {
 	unsigned size = sizeof(RAWINPUT);
 	RAWINPUT raw;
@@ -113,23 +100,19 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 	case RIM_TYPEMOUSE:
 		{
 			// handle mouse input
-			xPosRelative += raw.data.mouse.lLastX;
-			yPosRelative += raw.data.mouse.lLastY;
-
-			inputCallbacks[MOUSE_X].first = xPosRelative;
-			inputCallbacks[MOUSE_Y].first = yPosRelative;
-			mouseInput = true;
+			inputCallbacks[MOUSE_X].first += raw.data.mouse.lLastX;
+			inputCallbacks[MOUSE_Y].first += raw.data.mouse.lLastY;
 		}
 		break;
 	case RIM_TYPEKEYBOARD:
 		// handle keyboard input
 		if (raw.data.keyboard.Flags & RI_KEY_BREAK)
 		{
-			Input::handleOSInputOld(raw.data.keyboard.VKey, 0);
+			handleKeyboard(raw.data.keyboard.VKey, 0);
 		}
 		else
 		{
-			Input::handleOSInputOld(raw.data.keyboard.VKey, 1);
+			handleKeyboard(raw.data.keyboard.VKey, 1);
 		}
 		break;
 	case RIM_TYPEHID:
@@ -185,25 +168,26 @@ void Input::handleOSInput(WPARAM wParam, LPARAM lParam)
 }
 
 
-void Input::handleOSInputOld(int virtualKeyCode, float value)
+void Input::handleKeyboard(int virtualKeyCode, float value)
 {
+	// handle character keys
+	if (virtualKeyCode >= 0x41 && virtualKeyCode <= 0x5A)
+	{
+		keyboard.onInput(static_cast<KEYBOARD_INPUT>(virtualKeyCode - 0x41), value);
+		return;
+	}
 	switch (virtualKeyCode)
 	{
 	case VK_LEFT:
-	case VK_A:
-
-		inputCallbacks[KEYBOARD_ARROW_LEFT].first = value;
+		keyboard.onInput(KEYBOARD_INPUT::ARROW_LEFT, value);
 		break;
 	case VK_RIGHT:
-	case VK_D:
-		inputCallbacks[KEYBOARD_ARROW_RIGHT].first = value;
+		keyboard.onInput(KEYBOARD_INPUT::ARROW_RIGHT, value);
 		break;
 	case VK_UP:
-	case VK_W:
-		inputCallbacks[KEYBOARD_ARROW_UP].first = value;
+		keyboard.onInput(KEYBOARD_INPUT::ARROW_UP, value);
 		break;
 	case VK_DOWN:
-	case VK_S:
 		inputCallbacks[KEYBOARD_ARROW_DOWN].first = value;
 		break;
 	case VK_SPACE:
@@ -228,14 +212,6 @@ void Input::handleOSInputOld(int virtualKeyCode, float value)
 
 void Input::handleGameInput()
 {
-	if (!mouseInput)
-	{
-		inputCallbacks[MOUSE_X].first = 0;
-		inputCallbacks[MOUSE_Y].first = 0;
-	}
-	xPosRelative = 0;
-	yPosRelative = 0;
-	mouseInput = false;
 	for (auto& inputCallback : inputCallbacks)
 	{
 		if (inputCallback.first)
@@ -246,4 +222,10 @@ void Input::handleGameInput()
 			}
 		}
 	}
+	inputCallbacks[MOUSE_X].first = 0;
+	inputCallbacks[MOUSE_Y].first = 0;
+
+	keyboard.tick();
+	mouse.tick();
+	controller.tick();
 }

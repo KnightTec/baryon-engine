@@ -15,10 +15,11 @@
     <ClInclude Include="source\DXErr.h" />
     <ClInclude Include="source\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
-    <ClInclude Include="source\HID.h" />
-    <ClInclude Include="source\Input.h" />
+    <ClInclude Include="source\input\HID.h" />
+    <ClInclude Include="source\input\Input.h" />
     <ClInclude Include="source\Mesh.h" />
-    <ClInclude Include="source\PassKey.h" />
+    <ClInclude Include="source\core\Observer.h" />
+    <ClInclude Include="source\core\PassKey.h" />
     <ClInclude Include="source\Renderer.h" />
     <ClInclude Include="source\RenderPass.h" />
     <ClInclude Include="source\Shader.h" />
@@ -30,7 +31,7 @@
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
-    <ClCompile Include="source\Input.cpp" />
+    <ClCompile Include="source\input\Input.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\Shader.cpp" />
@@ -101,6 +102,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -121,6 +123,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

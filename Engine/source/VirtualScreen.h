@@ -84,7 +84,7 @@ inline Camera* VirtualScreen::getActiveCamera() const
 
 inline void VirtualScreen::clear()
 {
-	static const float clearColor[] = {0, 0, 0, 1.000f};
+	static const float clearColor[] = {0.01, 0.01, 0.01, 1.000f};
 	getContext()->ClearRenderTargetView(renderTargetView.Get(), clearColor);
 	getContext()->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
