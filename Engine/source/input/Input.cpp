@@ -1,8 +1,72 @@
 #include "Input.h"
+#include "HID.h"
+
 #include <string>
 #include <iomanip>
 #include <sstream>
-#include "HID.h"
+
+
+using namespace Baryon;
+
+void Input::Axis::setInputBinding(KEYBOARD_INPUT inputId, float scale)
+{
+	for (auto& input : keyboardBindings)
+	{
+		if (inputId == input.first)
+		{
+			input.second = scale;
+			return;
+		}
+	}
+	keyboardBindings.emplace_back(inputId, scale);
+}
+
+void Input::Axis::setInputBinding(MOUSE_INPUT inputId, float scale)
+{
+	for (auto& input : mouseBindings)
+	{
+		if (inputId == input.first)
+		{
+			input.second = scale;
+			return;
+		}
+	}
+	mouseBindings.emplace_back(inputId, scale);
+}
+
+void Input::Axis::setInputBinding(CONTROLLER_INPUT inputId, float scale)
+{
+	for (auto& input : controllerBindings)
+	{
+		if (inputId == input.first)
+		{
+			input.second = scale;
+			return;
+		}
+	}
+	controllerBindings.emplace_back(inputId, scale);
+}
+
+void Input::Axis::handleInput()
+{
+	for (const auto& input : keyboardBindings)
+	{
+		axisValue += keyboard.getInputValue(input.first) * input.second;
+	}
+	for (const auto& input : mouseBindings)
+	{
+		axisValue += mouse.getInputValue(input.first) * input.second;
+	}
+	for (const auto& input : controllerBindings)
+	{
+		axisValue += controller.getInputValue(input.first) * input.second;
+	}
+	for (auto function : callbacks)
+	{
+		function(axisValue);
+	}
+	axisValue = 0;
+}
 
 
 namespace
@@ -21,15 +85,6 @@ struct HID_USAGE_PAGE_GENERIC
 		KEYBOARD = 0x06
 	};
 };
-}
-
-using namespace Baryon;
-
-
-std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
-Keyboard Input::keyboard;
-Mouse Input::mouse;
-Controller Input::controller;
 
 struct ControllerInputReport
 {
@@ -53,6 +108,14 @@ struct ControllerInputReport
 	unsigned int button10 : 1;
 	unsigned int : 10;
 };
+}
+
+
+std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
+Keyboard Input::keyboard;
+Mouse Input::mouse;
+Controller Input::controller;
+std::unordered_map<std::string, Input::Axis> Input::inputAxes;
 
 void Input::initialize()
 {
@@ -79,7 +142,7 @@ void Input::initialize()
 
 	if (!RegisterRawInputDevices(rid, numDevices, sizeof(RAWINPUTDEVICE)))
 	{
-		OutputDebugStringA("Input device registration failed!\n");
+		OutputDebugStringA("[Warning] Input device registration failed!\n");
 	}
 }
 
@@ -88,6 +151,16 @@ void Input::bindFunctionToInput(void (* function)(float), TYPE type)
 	inputCallbacks[type].second.push_back(function);
 }
 
+bool Input::bindAxis(const std::string& axisName, void (* function)(float))
+{
+	auto axis = inputAxes.find(axisName);
+	if (axis == inputAxes.end())
+	{
+		return false;
+	}
+	axis->second.callbacks.push_back(function);
+	return true;
+}
 
 void Input::processOSInput(WPARAM wParam, LPARAM lParam)
 {
@@ -98,52 +171,39 @@ void Input::processOSInput(WPARAM wParam, LPARAM lParam)
 	switch (raw.header.dwType)
 	{
 	case RIM_TYPEMOUSE:
-		{
-			// handle mouse input
-			inputCallbacks[MOUSE_X].first += raw.data.mouse.lLastX;
-			inputCallbacks[MOUSE_Y].first += raw.data.mouse.lLastY;
-		}
+		handleMouse(raw.data.mouse);
 		break;
 	case RIM_TYPEKEYBOARD:
-		// handle keyboard input
-		if (raw.data.keyboard.Flags & RI_KEY_BREAK)
-		{
-			handleKeyboard(raw.data.keyboard.VKey, 0);
-		}
-		else
-		{
-			handleKeyboard(raw.data.keyboard.VKey, 1);
-		}
+		handleKeyboard(raw.data.keyboard.VKey, 1 - (raw.data.keyboard.Flags & RI_KEY_BREAK));
 		break;
 	case RIM_TYPEHID:
 		{
 			UINT bufSize = raw.data.hid.dwCount * raw.data.hid.dwSizeHid;
 			BYTE* buffer = raw.data.hid.bRawData;
 
-
+			//TODO add stick press down to report
 			ControllerInputReport report = {};
 			memcpy_s(&report, sizeof report, buffer, sizeof report);
 
-			//OutputDebugStringA("HID input detected: \n");
 			std::stringstream ss;
 			for (int i = 0; i < bufSize; i++)
 			{
 				ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
 			}
 
-			OutputDebugStringA(("D-Pad: " + std::to_string(report.dPad) + "\n").c_str());
-			OutputDebugStringA(("Button1: " + std::to_string(report.button1) + "\n").c_str());
-			OutputDebugStringA(("Button2: " + std::to_string(report.button2) + "\n").c_str());
-			OutputDebugStringA(("Button3: " + std::to_string(report.button3) + "\n").c_str());
-			OutputDebugStringA(("Button4: " + std::to_string(report.button4) + "\n").c_str());
-			OutputDebugStringA(("Button5: " + std::to_string(report.button5) + "\n").c_str());
-			OutputDebugStringA(("Button6: " + std::to_string(report.button6) + "\n").c_str());
-			OutputDebugStringA(("Button7: " + std::to_string(report.button7) + "\n").c_str());
-			OutputDebugStringA(("Button8: " + std::to_string(report.button8) + "\n").c_str());
-			OutputDebugStringA(("Button9: " + std::to_string(report.button9) + "\n").c_str());
-			OutputDebugStringA(("Button10: " + std::to_string(report.button10) + "\n").c_str());
+			//OutputDebugStringA(("D-Pad: " + std::to_string(report.dPad) + "\n").c_str());
+			//OutputDebugStringA(("Button1: " + std::to_string(report.button1) + "\n").c_str());
+			//OutputDebugStringA(("Button2: " + std::to_string(report.button2) + "\n").c_str());
+			//OutputDebugStringA(("Button3: " + std::to_string(report.button3) + "\n").c_str());
+			//OutputDebugStringA(("Button4: " + std::to_string(report.button4) + "\n").c_str());
+			//OutputDebugStringA(("Button5: " + std::to_string(report.button5) + "\n").c_str());
+			//OutputDebugStringA(("Button6: " + std::to_string(report.button6) + "\n").c_str());
+			//OutputDebugStringA(("Button7: " + std::to_string(report.button7) + "\n").c_str());
+			//OutputDebugStringA(("Button8: " + std::to_string(report.button8) + "\n").c_str());
+			//OutputDebugStringA(("Button9: " + std::to_string(report.button9) + "\n").c_str());
+			//OutputDebugStringA(("Button10: " + std::to_string(report.button10) + "\n").c_str());
 
-			//TODO: clean this mess up
+			//TODO: Handle controller input
 			float xRate = (report.rightX - 127.5) / 16.0f;
 			float deadZone = 0.5;
 			if (abs(xRate) < deadZone)
@@ -155,8 +215,6 @@ void Input::processOSInput(WPARAM wParam, LPARAM lParam)
 			{
 				yRate = 0;
 			}
-			inputCallbacks[MOUSE_X].first = xRate;
-			inputCallbacks[MOUSE_Y].first = yRate;
 
 			OutputDebugStringA((ss.str() + "\n").c_str());
 		}
@@ -167,6 +225,31 @@ void Input::processOSInput(WPARAM wParam, LPARAM lParam)
 	}
 }
 
+void Input::handleMouse(RAWMOUSE data)
+{
+	if (data.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_LEFT, 1);
+	}
+	if (data.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_LEFT, 0);
+	}
+	if (data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_RIGHT, 1);
+	}
+	if (data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_RIGHT, 0);
+	}
+	if (!data.usFlags)
+	{
+		// handle relative mouse movement
+		mouse.onInput(MOUSE_INPUT::AXIS_X, data.lLastX);
+		mouse.onInput(MOUSE_INPUT::AXIS_Y, data.lLastY);
+	}
+}
 
 void Input::handleKeyboard(int virtualKeyCode, float value)
 {
@@ -188,7 +271,7 @@ void Input::handleKeyboard(int virtualKeyCode, float value)
 		keyboard.onInput(KEYBOARD_INPUT::ARROW_UP, value);
 		break;
 	case VK_DOWN:
-		inputCallbacks[KEYBOARD_ARROW_DOWN].first = value;
+		keyboard.onInput(KEYBOARD_INPUT::ARROW_DOWN, value);;
 		break;
 	case VK_SPACE:
 		//TODO: uncomment this line
@@ -212,6 +295,7 @@ void Input::handleKeyboard(int virtualKeyCode, float value)
 
 void Input::handleGameInput()
 {
+	//TODO: remove this loop
 	for (auto& inputCallback : inputCallbacks)
 	{
 		if (inputCallback.first)
@@ -222,9 +306,11 @@ void Input::handleGameInput()
 			}
 		}
 	}
-	inputCallbacks[MOUSE_X].first = 0;
-	inputCallbacks[MOUSE_Y].first = 0;
 
+	for (auto& axis : inputAxes)
+	{
+		axis.second.handleInput();
+	}
 	keyboard.tick();
 	mouse.tick();
 	controller.tick();

@@ -6,7 +6,7 @@ namespace Baryon
 
 enum class KEYBOARD_INPUT : int
 {
-	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z = 0,
+	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 	ARROW_LEFT, ARROW_RIGHT, ARROW_UP, ARROW_DOWN,
 	SPACE, ENTER,
 	ENUM_SIZE
@@ -35,7 +35,7 @@ public:
 	HID();
 	virtual ~HID() = default;
 
-	void onInput(INPUT axis, float value);
+	virtual void onInput(INPUT inputId, float value);
 
 	bool isInputStart(INPUT inputId);
 	bool isInputEnd(INPUT inputId);
@@ -45,36 +45,33 @@ public:
 	 * called after input has been handled by the game
 	 */
 	virtual void tick();
-private:
-	float* inputs;
-	float* lastInputs;
-	float inputBuffer0[NUM_INPUTS + 1] = {0};
-	float inputBuffer1[NUM_INPUTS + 1] = {0};
+protected:
+	float inputs[NUM_INPUTS + 1] = {0};
+	float lastInputs[NUM_INPUTS + 1] = {0};
 };
 
 
 typedef HID<KEYBOARD_INPUT, static_cast<int>(KEYBOARD_INPUT::ENUM_SIZE)> Keyboard;
 
-
 class Mouse : public HID<MOUSE_INPUT, static_cast<int>(MOUSE_INPUT::ENUM_SIZE)>
 {
 	typedef HID<MOUSE_INPUT, static_cast<int>(MOUSE_INPUT::ENUM_SIZE)> super;
 public:
+	void onInput(MOUSE_INPUT inputId, float value) override;
 	void tick() override;
 };
-
 
 typedef HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPUT::ENUM_SIZE)> Controller;
 
 
 template <typename INPUT, int NUM_INPUTS>
-HID<INPUT, NUM_INPUTS>::HID() : inputs(inputBuffer0), lastInputs(inputBuffer1)
+HID<INPUT, NUM_INPUTS>::HID()
 {
 }
 template <typename INPUT, int NUM_INPUTS>
-void HID<INPUT, NUM_INPUTS>::onInput(INPUT axis, float value)
+void HID<INPUT, NUM_INPUTS>::onInput(INPUT inputId, float value)
 {
-	inputs[static_cast<int>(axis)] = value;
+	inputs[static_cast<int>(inputId)] = value;
 }
 template <typename INPUT, int NUM_INPUTS>
 bool HID<INPUT, NUM_INPUTS>::isInputStart(INPUT inputId)
@@ -94,17 +91,24 @@ float HID<INPUT, NUM_INPUTS>::getInputValue(INPUT inputId)
 template <typename INPUT, int NUM_INPUTS>
 void HID<INPUT, NUM_INPUTS>::tick()
 {
-	float* tmp = lastInputs;
-	lastInputs = inputs;
-	inputs = tmp;
+	memcpy_s(lastInputs, sizeof(lastInputs), inputs, sizeof(inputs));
 }
 
-
+inline void Mouse::onInput(MOUSE_INPUT inputId, float value)
+{
+	if (inputId == MOUSE_INPUT::AXIS_X || inputId == MOUSE_INPUT::AXIS_Y)
+	{
+		inputs[static_cast<int>(inputId)] += value;
+	} 
+	else
+	{
+		super::onInput(inputId, value);
+	}
+}
 inline void Mouse::tick()
 {
 	super::tick();
-	onInput(MOUSE_INPUT::AXIS_X, 0);
-	onInput(MOUSE_INPUT::AXIS_Y, 0);
+	inputs[static_cast<int>(MOUSE_INPUT::AXIS_X)] = 0;
+	inputs[static_cast<int>(MOUSE_INPUT::AXIS_Y)] = 0;
 }
-
 }

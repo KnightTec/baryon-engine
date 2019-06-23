@@ -4,7 +4,6 @@
 #include "HID.h"
 
 #include <unordered_map>
-#include <set>
 #include <vector>
 
 
@@ -16,45 +15,16 @@ namespace Baryon
 class Input
 {
 public:
-	class InputAxis
+	class Axis
 	{
+		friend class Input;
 	public:
-		void setInputBinding(KEYBOARD_INPUT inputId, float scale)
-		{
-			for (auto& input : keyboardBindings)
-			{
-				if (inputId == input.first)
-				{
-					input.second = scale;
-					return;
-				}
-			}
-			keyboardBindings.emplace_back(inputId, scale);
-		}
+		void setInputBinding(KEYBOARD_INPUT inputId, float scale);
 		void setInputBinding(MOUSE_INPUT inputId, float scale);
 		void setInputBinding(CONTROLLER_INPUT inputId, float scale);
-
-		void handleInput()
-		{
-			for (const auto& input : keyboardBindings)
-			{
-				axisValue += keyboard.getInputValue(input.first) * input.second;
-			}
-			for (const auto& input : mouseBindings)
-			{
-				axisValue += mouse.getInputValue(input.first) * input.second;
-			}
-			for (const auto& input : controllerBindings)
-			{
-				axisValue += controller.getInputValue(input.first) * input.second;
-			}
-			for (auto function : callbacks)
-			{
-				function(axisValue);
-			}
-			axisValue = 0;
-		}
 	private:
+		void handleInput();
+
 		float axisValue = 0;
 		std::vector<void(*)(float)> callbacks;
 		std::vector<std::pair<KEYBOARD_INPUT, float>> keyboardBindings;
@@ -62,39 +32,37 @@ public:
 		std::vector<std::pair<CONTROLLER_INPUT, float>> controllerBindings;
 	};
 
-
 	enum TYPE
 	{
-		KEYBOARD_ARROW_LEFT,
-		KEYBOARD_ARROW_RIGHT,
-		KEYBOARD_ARROW_UP,
-		KEYBOARD_ARROW_DOWN,
 		KEYBOARD_SPACE,
 		KEYBOARD_ENTER,
-		MOUSE_X,
-		MOUSE_Y,
-		MOUSE_LEFT_BUTTON,
-		MOUSE_RIGHT_BUTTON
 	};
 
 	static void initialize();
 	static void bindFunctionToInput(void (*function)(float), TYPE type);
 
-	static bool bindAxis(std::string axisName, void (*function)(float));
-	static InputAxis& addAxis(std::string axisName);
-	static InputAxis& getAxis(std::string axisName);
+	/*
+	 * returns false if axis does not exist
+	 */
+	static bool bindAxis(const std::string& axisName, void (*function)(float));
+	static Axis& addAxis(const std::string& axisName);
 
 	static void processOSInput(WPARAM wParam, LPARAM lParam);
 	static void handleGameInput();
 private:
-	
 	static void handleKeyboard(int virtualKeyCode, float value);
+	static void handleMouse(RAWMOUSE data);
 
 	static std::pair<float, std::vector<void(*)(float)>> inputCallbacks[10];
 
 	static Keyboard keyboard;
 	static Mouse mouse;
 	static Controller controller;
-	//static std::unordered_map<std::string, InputAxis> inputAxes;
+	static std::unordered_map<std::string, Axis> inputAxes;
 };
+
+inline Input::Axis& Input::addAxis(const std::string& axisName)
+{
+	return inputAxes[axisName];
+}
 }
