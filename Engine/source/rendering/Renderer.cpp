@@ -1,9 +1,9 @@
 #include "Renderer.h"
 #include "VirtualScreen.h"
-#include "Mesh.h"
+#include "../Mesh.h"
 #include "RenderPass.h"
 #include "DXErr.h"
-#include "Window.h"
+#include "../Window.h"
 
 using namespace Baryon;
 using namespace DirectX;
@@ -17,16 +17,22 @@ struct VS_CONSTANT_BUFFER
 };
 
 ComPtr<ID3D11RasterizerState1> rasterState;
+ComPtr<ID3D11SamplerState> samplerState;
 
 static VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl", 1};
 static PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
+
+static VertexShader postVS{L"../../Engine/shaders/FullscreenVS.hlsl"};
+static PixelShader lightPS{L"../../Engine/shaders/LightPS.hlsl"};
 
 bool Renderer::initialize()
 {
 	vs.compile();
 	ps.compile();
 
-	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	postVS.compile();
+	lightPS.compile();
+
 
 	// Create rasterizer state
 	D3D11_RASTERIZER_DESC1 rasterizerState;
@@ -45,6 +51,16 @@ bool Renderer::initialize()
 	getContext()->RSSetState(rasterState.Get());
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	HR(getDevice()->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf()));
+
+	getContext()->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 	/*
 	 * TODO: Blend State
 	  Depth Stencil State
@@ -82,6 +98,9 @@ void Renderer::render()
 	{
 		screen.clear();
 	}
+
+	// render geometry pass
+	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const Mesh* mesh : meshes)
 	{
 		uint32_t strides = sizeof(Vertex);
@@ -97,11 +116,10 @@ void Renderer::render()
 			Camera* cam = screen.getActiveCamera();
 			if (cam)
 			{
-				ID3D11RenderTargetView* rtv = screen.getRenderTargetView();
-				getContext()->OMSetRenderTargets(1, &rtv, screen.getDepthStencilView());
+				screen.setupGeometryPass();
 
 				// update constant buffer (matrices)
-				VS_CONSTANT_BUFFER data;
+				VS_CONSTANT_BUFFER data = {};
 				XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(worldMatrix * cam->getViewProjMatrix()));
 				XMStoreFloat4x4(&data.mWorldNormals, XMMatrixInverse(nullptr, worldMatrix));
 				vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
@@ -110,8 +128,23 @@ void Renderer::render()
 			}
 		}
 	}
+
+	// render light pass
+	postVS.apply();
+	lightPS.apply();
+
+	getContext()->IASetInputLayout(nullptr);
+	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
 	for (VirtualScreen& screen : virtualScreens)
 	{
+		screen.setupLightPass();
+		ID3D11ShaderResourceView* srvs[] = {screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView()};
+		getContext()->PSSetShaderResources(0, 2, srvs);
+		
+		getContext()->Draw(3, 0);
 		screen.present();
 	}
+	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr};
+	getContext()->PSSetShaderResources(0, 2, nulls);
 }

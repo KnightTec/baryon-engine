@@ -1,6 +1,9 @@
 #include "Input.h"
 #include "HID.h"
 
+//#include "Xinput.h"
+#include "hidsdi.h"
+
 #include <string>
 #include <iomanip>
 #include <sstream>
@@ -74,19 +77,20 @@ namespace
 /*
 * Usage tables source: https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
 */
-struct HID_USAGE_PAGE_GENERIC
+struct STRUCT_HID_USAGE_PAGE_GENERIC
 {
 	static const USHORT ID = 0x01;
 
 	enum USAGE : USHORT
 	{
 		MOUSE = 0x02,
-		GAMEPAD = 0x04,
+		JOYSTICK = 0x04,
+		GAMEPAD = 0x05,
 		KEYBOARD = 0x06
 	};
 };
 
-struct ControllerInputReport
+struct GamepadInputReport
 {
 	unsigned int : 8;
 	unsigned int leftX : 8;
@@ -106,7 +110,9 @@ struct ControllerInputReport
 	unsigned int button8 : 1;
 	unsigned int button9 : 1;
 	unsigned int button10 : 1;
-	unsigned int : 10;
+	unsigned int leftStick : 1;
+	unsigned int rightStick: 1;
+	unsigned int : 8;
 };
 }
 
@@ -119,26 +125,28 @@ std::unordered_map<std::string, Input::Axis> Input::inputAxes;
 
 void Input::initialize()
 {
-	const UINT numDevices = 3;
+	const UINT numDevices = 4;
 	RAWINPUTDEVICE rid[numDevices];
-
-	// keyboard
-	rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC::ID;
-	rid[0].usUsage = HID_USAGE_PAGE_GENERIC::KEYBOARD;
+	rid[0].usUsagePage = STRUCT_HID_USAGE_PAGE_GENERIC::ID;
+	rid[0].usUsage = STRUCT_HID_USAGE_PAGE_GENERIC::KEYBOARD;
 	rid[0].dwFlags = 0;
 	rid[0].hwndTarget = nullptr;
 
-	// mouse
-	rid[1].usUsagePage = HID_USAGE_PAGE_GENERIC::ID;
-	rid[1].usUsage = HID_USAGE_PAGE_GENERIC::MOUSE;
+	rid[1].usUsagePage = STRUCT_HID_USAGE_PAGE_GENERIC::ID;
+	rid[1].usUsage = STRUCT_HID_USAGE_PAGE_GENERIC::MOUSE;
 	rid[1].dwFlags = 0;
 	rid[1].hwndTarget = nullptr;
 
-	// gamepad
-	rid[2].usUsagePage = HID_USAGE_PAGE_GENERIC::ID;
-	rid[2].usUsage = HID_USAGE_PAGE_GENERIC::GAMEPAD;
+	rid[2].usUsagePage = STRUCT_HID_USAGE_PAGE_GENERIC::ID;
+	rid[2].usUsage = STRUCT_HID_USAGE_PAGE_GENERIC::JOYSTICK;
 	rid[2].dwFlags = 0;
 	rid[2].hwndTarget = nullptr;
+
+	rid[3].usUsagePage = STRUCT_HID_USAGE_PAGE_GENERIC::ID;
+	rid[3].usUsage = STRUCT_HID_USAGE_PAGE_GENERIC::GAMEPAD;
+	rid[3].dwFlags = 0;
+	rid[3].hwndTarget = nullptr;
+
 
 	if (!RegisterRawInputDevices(rid, numDevices, sizeof(RAWINPUTDEVICE)))
 	{
@@ -164,102 +172,87 @@ bool Input::bindAxis(const std::string& axisName, void (* function)(float))
 
 void Input::processOSInput(WPARAM wParam, LPARAM lParam)
 {
+	unsigned sizeHeader = sizeof(RAWINPUTHEADER);
 	unsigned size = sizeof(RAWINPUT);
+	RAWINPUTHEADER rawHeader;
 	RAWINPUT raw;
+	GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_HEADER, &rawHeader, &sizeHeader, sizeof(RAWINPUTHEADER));
 	GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER));
 
-	switch (raw.header.dwType)
+	switch (rawHeader.dwType)
 	{
 	case RIM_TYPEMOUSE:
-		handleMouse(raw.data.mouse);
+		handleMouse(&raw.data.mouse);
 		break;
 	case RIM_TYPEKEYBOARD:
-		handleKeyboard(raw.data.keyboard.VKey, 1 - (raw.data.keyboard.Flags & RI_KEY_BREAK));
+		handleKeyboard(&raw.data.keyboard);
 		break;
 	case RIM_TYPEHID:
-		{
-			UINT bufSize = raw.data.hid.dwCount * raw.data.hid.dwSizeHid;
-			BYTE* buffer = raw.data.hid.bRawData;
+		//HidP_GetButtonCaps
+		/*{
+			HidP_GetButtonCaps()
+			//TODO: dualshock 4
 
-			//TODO add stick press down to report
-			ControllerInputReport report = {};
-			memcpy_s(&report, sizeof report, buffer, sizeof report);
+			BYTE* buffer = new BYTE[128];
 
+			unsigned s = 256;
+			char str[256];
+			GetRawInputDeviceInfoA(rawHeader.hDevice, RIDI_DEVICENAME, &str, &s);
+
+
+			OutputDebugStringA(str);
+			HANDLE hid_device = CreateFileA(str, GENERIC_READ | GENERIC_WRITE,
+			                                FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+			                                OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+
+			unsigned long sn;
+			//OVERLAPPED o = {};
+			//bool b = ReadFile(hid_device, buffer, 64, &sn, &o);
+			OVERLAPPED ov =  {};
 			std::stringstream ss;
-			for (int i = 0; i < bufSize; i++)
+			for (int i = 0; i < 64; i++)
 			{
 				ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
 			}
-
-			//OutputDebugStringA(("D-Pad: " + std::to_string(report.dPad) + "\n").c_str());
-			//OutputDebugStringA(("Button1: " + std::to_string(report.button1) + "\n").c_str());
-			//OutputDebugStringA(("Button2: " + std::to_string(report.button2) + "\n").c_str());
-			//OutputDebugStringA(("Button3: " + std::to_string(report.button3) + "\n").c_str());
-			//OutputDebugStringA(("Button4: " + std::to_string(report.button4) + "\n").c_str());
-			//OutputDebugStringA(("Button5: " + std::to_string(report.button5) + "\n").c_str());
-			//OutputDebugStringA(("Button6: " + std::to_string(report.button6) + "\n").c_str());
-			//OutputDebugStringA(("Button7: " + std::to_string(report.button7) + "\n").c_str());
-			//OutputDebugStringA(("Button8: " + std::to_string(report.button8) + "\n").c_str());
-			//OutputDebugStringA(("Button9: " + std::to_string(report.button9) + "\n").c_str());
-			//OutputDebugStringA(("Button10: " + std::to_string(report.button10) + "\n").c_str());
-
-			//TODO: Handle controller input
-			float xRate = (report.rightX - 127.5) / 16.0f;
-			float deadZone = 0.5;
-			if (abs(xRate) < deadZone)
-			{
-				xRate = 0;
-			}
-			float yRate = (report.rightY - 127.5) / 16.0f;
-			if (abs(yRate) < deadZone)
-			{
-				yRate = 0;
-			}
-
 			OutputDebugStringA((ss.str() + "\n").c_str());
-		}
+
+			uint8_t buf[32];
+			memset(buf, 0, sizeof(buf));
+			buf[0] = 0x05;
+			buf[1] = 0xFF;
+			buf[4] = 0; // 0-255
+			buf[5] = 0; // 0-255
+			buf[6] = 0; // 0-255
+			buf[7] = 255; // 0-255
+			buf[8] = 255; // 0-255
+			DWORD bytes_written;
+			WriteFile(hid_device, buf, sizeof(buf), &bytes_written, &ov);
+			//	
+		}*/
+
+		//OutputDebugStringA(("Hid input " + std::to_string(c++) + "\n").c_str());
+		handleController(&raw.data.hid);
 		break;
 
 	default:
+		//OutputDebugStringA((std::to_string(rawHeader.dwType) + "\n").c_str());
 		break;
 	}
 }
 
-void Input::handleMouse(RAWMOUSE data)
-{
-	if (data.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
-	{
-		mouse.onInput(MOUSE_INPUT::BUTTON_LEFT, 1);
-	}
-	if (data.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
-	{
-		mouse.onInput(MOUSE_INPUT::BUTTON_LEFT, 0);
-	}
-	if (data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
-	{
-		mouse.onInput(MOUSE_INPUT::BUTTON_RIGHT, 1);
-	}
-	if (data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
-	{
-		mouse.onInput(MOUSE_INPUT::BUTTON_RIGHT, 0);
-	}
-	if (!data.usFlags)
-	{
-		// handle relative mouse movement
-		mouse.onInput(MOUSE_INPUT::AXIS_X, data.lLastX);
-		mouse.onInput(MOUSE_INPUT::AXIS_Y, data.lLastY);
-	}
-}
 
-void Input::handleKeyboard(int virtualKeyCode, float value)
+
+void Input::handleKeyboard(RAWKEYBOARD* data)
 {
+	float value = 1 - data->Flags & RI_KEY_BREAK;
+
 	// handle character keys
-	if (virtualKeyCode >= 0x41 && virtualKeyCode <= 0x5A)
+	if (data->VKey >= 0x41 && data->VKey <= 0x5A)
 	{
-		keyboard.onInput(static_cast<KEYBOARD_INPUT>(virtualKeyCode - 0x41), value);
+		keyboard.onInput(static_cast<KEYBOARD_INPUT>(data->VKey - 0x41), value);
 		return;
 	}
-	switch (virtualKeyCode)
+	switch (data->VKey)
 	{
 	case VK_LEFT:
 		keyboard.onInput(KEYBOARD_INPUT::ARROW_LEFT, value);
@@ -291,6 +284,80 @@ void Input::handleKeyboard(int virtualKeyCode, float value)
 	default:
 		break;
 	}
+}
+
+void Input::handleMouse(RAWMOUSE* data)
+{
+	if (data->usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_LEFT, 1);
+	}
+	if (data->usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_LEFT, 0);
+	}
+	if (data->usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_RIGHT, 1);
+	}
+	if (data->usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
+	{
+		mouse.onInput(MOUSE_INPUT::BUTTON_RIGHT, 0);
+	}
+	if (!data->usFlags)
+	{
+		// handle relative mouse movement
+		mouse.onInput(MOUSE_INPUT::AXIS_X, data->lLastX);
+		mouse.onInput(MOUSE_INPUT::AXIS_Y, data->lLastY);
+		OutputDebugStringA((std::to_string(data->lLastX) + "\n").c_str());
+	}
+}
+
+void Input::handleController(RAWHID* data)
+{
+	// TODO: get device info
+	UINT bufSize = data->dwCount * data->dwSizeHid;
+	BYTE* buffer = data->bRawData;
+
+	auto* report = reinterpret_cast<GamepadInputReport*>(buffer);
+
+	std::stringstream ss;
+	for (int i = 0; i < bufSize; i++)
+	{
+		ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
+	}
+	OutputDebugStringA((ss.str() + "\n").c_str());
+	//OutputDebugStringA(("D-Pad: " + std::to_string(report->dPad) + "\n").c_str());
+	//OutputDebugStringA(("Button1: " + std::to_string(report->button1) + "\n").c_str());
+	//OutputDebugStringA(("Button2: " + std::to_string(report->button2) + "\n").c_str());
+	//OutputDebugStringA(("Button3: " + std::to_string(report->button3) + "\n").c_str());
+	//OutputDebugStringA(("Button4: " + std::to_string(report->button4) + "\n").c_str());
+	//OutputDebugStringA(("Button5: " + std::to_string(report->button5) + "\n").c_str());
+	//OutputDebugStringA(("Button6: " + std::to_string(report->button6) + "\n").c_str());
+	//OutputDebugStringA(("Button7: " + std::to_string(report->button7) + "\n").c_str());
+	//OutputDebugStringA(("Button8: " + std::to_string(report->button8) + "\n").c_str());
+	//OutputDebugStringA(("Button9: " + std::to_string(report->button9) + "\n").c_str());
+	//OutputDebugStringA(("Button10: " + std::to_string(report->button10) + "\n").c_str());
+	//OutputDebugStringA(("Left stick: " + std::to_string(report->leftStick) + "\n").c_str());
+	//OutputDebugStringA(("Right stick: " + std::to_string(report->rightStick) + "\n").c_str());
+
+	controller.onInput(CONTROLLER_INPUT::BUTTON_1, report->button1);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_2, report->button2);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_3, report->button3);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_4, report->button4);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_5, report->button5);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_6, report->button6);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_7, report->button7);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_8, report->button8);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_9, report->button9);
+	controller.onInput(CONTROLLER_INPUT::BUTTON_10, report->button10);
+
+	controller.onInput(CONTROLLER_INPUT::AXIS_LEFT_X, (report->leftX - 127.5f) / 127.5f);
+	controller.onInput(CONTROLLER_INPUT::AXIS_LEFT_Y, (report->leftY - 127.5f) / 127.5f);
+	controller.onInput(CONTROLLER_INPUT::AXIS_RIGHT_X, (report->rightX - 127.5f) / 127.5f);
+	controller.onInput(CONTROLLER_INPUT::AXIS_RIGHT_Y, (report->rightY - 127.5f) / 127.5f);
+
+	//TODO: handle dpad
 }
 
 void Input::handleGameInput()

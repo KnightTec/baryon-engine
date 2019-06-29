@@ -18,28 +18,10 @@
     <ClInclude Include="source\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\VirtualScreen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\GraphicsDeviceInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\DXErr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\WindowsApplication.h">
@@ -60,18 +42,30 @@
     <ClInclude Include="source\core\PassKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\rendering\GraphicsDeviceInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\rendering\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\rendering\RenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\rendering\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\rendering\VirtualScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\rendering\DXErr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\rendering\RenderTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\VirtualScreen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\GraphicsDeviceInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Mesh.cpp">
@@ -80,18 +74,34 @@
     <ClCompile Include="source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\WindowsApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\input\Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\rendering\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\rendering\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\rendering\VirtualScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\rendering\RenderTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\PixelShader.hlsl" />
     <None Include="shaders\VertexShader.hlsl" />
+    <None Include="shaders\PixelShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\LightPS.hlsl" />
+    <FxCompile Include="shaders\FullscreenVS.hlsl" />
   </ItemGroup>
 </Project>

@@ -9,6 +9,9 @@ class WindowsEventHandler
 {
 public:
 	virtual ~WindowsEventHandler() = default;
+	/*
+	 * The return value indicates whether the message has been handled
+	 */
 	virtual bool handleEvent(HWND, UINT, WPARAM, LPARAM) = 0;
 };
 

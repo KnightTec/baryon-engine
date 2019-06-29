@@ -1,5 +1,5 @@
 #include "VirtualScreen.h"
-#include "Window.h"
+#include "../Window.h"
 #include "DXErr.h"
 
 #include "dxgi.h"
@@ -30,17 +30,16 @@ static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 	output->GetDisplayModeList(format, 0, &numModes, displayModes);
 
 	std::vector<DirectX::XMUINT2> resolutions;
-	resolutions.emplace_back(DirectX::XMUINT2{ displayModes[0].Width, displayModes[0].Height });
+	resolutions.emplace_back(DirectX::XMUINT2{displayModes[0].Width, displayModes[0].Height});
 	for (UINT i = 1; i < numModes; i++)
 	{
-		if (displayModes[i].Width != displayModes[i-1].Width && displayModes[i].Height != displayModes[i - 1].Height)
+		if (displayModes[i].Width != displayModes[i - 1].Width && displayModes[i].Height != displayModes[i - 1].Height)
 		{
-			resolutions.emplace_back(DirectX::XMUINT2{ displayModes[i].Width, displayModes[i].Height });
+			resolutions.emplace_back(DirectX::XMUINT2{displayModes[i].Width, displayModes[i].Height});
 		}
 	}
 	delete[] displayModes;
 	return resolutions;
-
 }
 
 const std::vector<DirectX::XMUINT2>& VirtualScreen::getSupportedResolutions()
@@ -49,7 +48,7 @@ const std::vector<DirectX::XMUINT2>& VirtualScreen::getSupportedResolutions()
 	return supportedResolutions;
 }
 
-VirtualScreen::VirtualScreen() : initialized{ false }, fullscreen{ false }, activeCamera{ nullptr }, resolution{ 0, 0 }
+VirtualScreen::VirtualScreen() : initialized{false}, fullscreen{false}, activeCamera{nullptr}, resolution{0, 0}
 {
 }
 
@@ -118,17 +117,29 @@ bool VirtualScreen::configureBuffers()
 	depthStencilDesc.Height = swapChainDesc.Height;
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.Format = DXGI_FORMAT_R32G8X24_TYPELESS;
 	depthStencilDesc.SampleDesc.Count = 1;
 	depthStencilDesc.SampleDesc.Quality = 0;
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthStencilDesc.CPUAccessFlags = 0;
 	depthStencilDesc.MiscFlags = 0;
 	depthStencilDesc.TextureLayout = D3D11_TEXTURE_LAYOUT_UNDEFINED;
-
 	HR(getDevice()->CreateTexture2D1(&depthStencilDesc, nullptr, &depthStencilBuffer));
-	HR(getDevice()->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &depthStencilView));
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	dsvDesc.Flags = 0;
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+	HR(getDevice()->CreateDepthStencilView(depthStencilBuffer.Get(), &dsvDesc, &depthStencilView));
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC depthSrvDesc;
+	depthSrvDesc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+	depthSrvDesc.ViewDimension = D3D10_1_SRV_DIMENSION_TEXTURE2D;
+	depthSrvDesc.Texture2D.MipLevels = depthStencilDesc.MipLevels;
+	depthSrvDesc.Texture2D.MostDetailedMip = 0;
+	HR(getDevice()->CreateShaderResourceView(depthStencilBuffer.Get(), &depthSrvDesc, &depthBufferSRV));
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;
@@ -138,6 +149,9 @@ bool VirtualScreen::configureBuffers()
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	getContext()->RSSetViewports(1, &vp);
+
+	worldNormals.create({swapChainDesc.Width, swapChainDesc.Height});
+	litScene.create({swapChainDesc.Width, swapChainDesc.Height});
 
 	return true;
 }
@@ -149,6 +163,10 @@ void VirtualScreen::releaseBuffers()
 	backBuffer.Reset();
 	depthStencilView.Reset();
 	depthStencilBuffer.Reset();
+
+	worldNormals.release();
+	litScene.release();
+
 	getContext()->Flush();
 }
 
@@ -190,3 +208,15 @@ bool VirtualScreen::setFullscreen(bool fullscreen)
 	this->fullscreen = fullscreen;
 	return true;
 }
+
+void VirtualScreen::setupGeometryPass()
+{
+	ID3D11RenderTargetView* rtvs[] = {worldNormals.getRenderTargetView()};  
+	getContext()->OMSetRenderTargets(1, rtvs, depthStencilView.Get());
+}
+
+void VirtualScreen::setupLightPass()
+{
+	getContext()->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), nullptr);
+}
+

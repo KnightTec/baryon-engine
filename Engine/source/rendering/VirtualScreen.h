@@ -1,11 +1,12 @@
 #pragma once
-#include "Camera.h"
+#include "../Camera.h"
 #include "GraphicsDeviceInterface.h"
 
 #include "wrl/client.h"
 #include "d3d11_4.h"
 #include "DirectXMath.h"
 #include <vector>
+#include "RenderTexture.h"
 
 namespace Baryon
 {
@@ -28,13 +29,19 @@ public:
 	bool setFullscreen(bool fullscreen);
 	void setActiveCamera(Camera* camera);
 
+	void setupGeometryPass();
+	void setupLightPass();
+
 	DirectX::XMUINT2 getResolution() const;
 	float getAspectRatio() const;
 	Camera* getActiveCamera() const;
-	ID3D11RenderTargetView* getRenderTargetView() const;
-	ID3D11DepthStencilView* getDepthStencilView() const;
 
 	static const std::vector<DirectX::XMUINT2>& getSupportedResolutions();
+
+
+	RenderTexture worldNormals{DXGI_FORMAT_R32G32B32A32_FLOAT};
+	RenderTexture litScene{DXGI_FORMAT_R8G8B8A8_UNORM};
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthBufferSRV;
 private:
 	bool configureBuffers();
 	void releaseBuffers();
@@ -43,11 +50,14 @@ private:
 	bool fullscreen;
 	Camera* activeCamera;
 	DirectX::XMUINT2 resolution;
+
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> d3dSwapChain;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D1> backBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D1> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D1> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
+	
 };
 
 
@@ -86,16 +96,8 @@ inline void VirtualScreen::clear()
 {
 	static const float clearColor[] = {0.01, 0.01, 0.01, 1.000f};
 	getContext()->ClearRenderTargetView(renderTargetView.Get(), clearColor);
+	float clearColor2[] = {0, 0, 0, 1};
+	getContext()->ClearRenderTargetView(worldNormals.getRenderTargetView(), clearColor2);
 	getContext()->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-}
-
-inline ID3D11RenderTargetView* VirtualScreen::getRenderTargetView() const
-{
-	return renderTargetView.Get();
-}
-
-inline ID3D11DepthStencilView* VirtualScreen::getDepthStencilView() const
-{
-	return depthStencilView.Get();
 }
 }

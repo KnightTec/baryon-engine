@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <string>
 
 namespace Baryon
 {
@@ -61,7 +62,12 @@ public:
 	void tick() override;
 };
 
-typedef HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPUT::ENUM_SIZE)> Controller;
+class Controller : public HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPUT::ENUM_SIZE)>
+{
+	typedef HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPUT::ENUM_SIZE)> super;
+public:
+	void onInput(CONTROLLER_INPUT inputId, float value) override;
+};
 
 
 template <typename INPUT, int NUM_INPUTS>
@@ -111,4 +117,27 @@ inline void Mouse::tick()
 	inputs[static_cast<int>(MOUSE_INPUT::AXIS_X)] = 0;
 	inputs[static_cast<int>(MOUSE_INPUT::AXIS_Y)] = 0;
 }
+
+inline void Controller::onInput(CONTROLLER_INPUT inputId, float value)
+{
+	float deadZone = 0.07;
+	float sensitivity = 1;
+	switch (inputId)
+	{
+	case CONTROLLER_INPUT::AXIS_RIGHT_X:
+	case CONTROLLER_INPUT::AXIS_RIGHT_Y:
+		sensitivity = 5;
+	case CONTROLLER_INPUT::AXIS_LEFT_X:
+	case CONTROLLER_INPUT::AXIS_LEFT_Y:
+		if (abs(value) < deadZone)
+		{
+		value = 0;
+		}
+		break;
+	default:
+		break;
+	}
+	super::onInput(inputId, sensitivity * value);
+}
+
 }

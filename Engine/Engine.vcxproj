@@ -12,30 +12,32 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Camera.h" />
-    <ClInclude Include="source\DXErr.h" />
-    <ClInclude Include="source\GraphicsDeviceInterface.h" />
+    <ClInclude Include="source\rendering\DXErr.h" />
+    <ClInclude Include="source\rendering\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
     <ClInclude Include="source\input\HID.h" />
     <ClInclude Include="source\input\Input.h" />
     <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\core\Observer.h" />
     <ClInclude Include="source\core\PassKey.h" />
-    <ClInclude Include="source\Renderer.h" />
-    <ClInclude Include="source\RenderPass.h" />
-    <ClInclude Include="source\Shader.h" />
-    <ClInclude Include="source\VirtualScreen.h" />
+    <ClInclude Include="source\rendering\Renderer.h" />
+    <ClInclude Include="source\rendering\RenderPass.h" />
+    <ClInclude Include="source\rendering\RenderTexture.h" />
+    <ClInclude Include="source\rendering\Shader.h" />
+    <ClInclude Include="source\rendering\VirtualScreen.h" />
     <ClInclude Include="source\Window.h" />
     <ClInclude Include="source\WindowsApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Camera.cpp" />
-    <ClCompile Include="source\GraphicsDeviceInterface.cpp" />
+    <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
     <ClCompile Include="source\input\Input.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
-    <ClCompile Include="source\Renderer.cpp" />
-    <ClCompile Include="source\Shader.cpp" />
-    <ClCompile Include="source\VirtualScreen.cpp" />
+    <ClCompile Include="source\rendering\Renderer.cpp" />
+    <ClCompile Include="source\rendering\RenderTexture.cpp" />
+    <ClCompile Include="source\rendering\Shader.cpp" />
+    <ClCompile Include="source\rendering\VirtualScreen.cpp" />
     <ClCompile Include="source\WindowsApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -53,6 +55,20 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\FullscreenVS.hlsl">
+      <FileType>Document</FileType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\LightPS.hlsl">
+      <FileType>Document</FileType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -102,14 +118,14 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;D3DCompiler.lib;DXGI.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;D3DCompiler.lib;DXGI.lib;Hid.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,7 +139,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +148,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;D3DCompiler.lib;DXGI.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;D3DCompiler.lib;DXGI.lib;Hid.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

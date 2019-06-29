@@ -99,7 +99,7 @@ inline bool Shader::reload()
 
 inline void VertexShader::apply()
 {
-	getContext()->VSSetConstantBuffers(0, 1, cBuffers.data());
+	getContext()->VSSetConstantBuffers(0, cBuffers.size(), cBuffers.data());
 	getContext()->IASetInputLayout(d3dinputLayout.Get());
 	getContext()->VSSetShader(d3dvertexShader.Get(), nullptr, 0);
 }
