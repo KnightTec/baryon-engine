@@ -2,6 +2,7 @@
 #include "DirectXMath.h"
 #include <fstream>
 #include <minwinbase.h>
+#include <vector>
 
 using namespace Baryon;
 using namespace DirectX;

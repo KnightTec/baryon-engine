@@ -6,16 +6,13 @@ using namespace DirectX;
 
 void Camera::translate(DirectX::XMFLOAT3 vector, SPACE space)
 {
-	XMVECTOR pos = XMLoadFloat3(&position);
-	XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(XMLoadFloat4(&orientationQuaternion));
-
 	XMVECTOR translationVec = XMLoadFloat3(&vector);
 
 	if (space == SPACE::LOCAL)
 	{
-		translationVec = XMVector3Transform(translationVec, rotation);
+		translationVec = XMVector3Rotate(translationVec, XMLoadFloat4(&orientationQuaternion));
 	}
-	XMStoreFloat3(&position, XMVectorAdd(pos, translationVec));
+	XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&position), translationVec));
 }
 
 void Camera::rotate(float pitch, float yaw, float roll, SPACE space)

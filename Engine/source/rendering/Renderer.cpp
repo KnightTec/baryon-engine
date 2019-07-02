@@ -16,6 +16,12 @@ struct VS_CONSTANT_BUFFER
 	XMFLOAT4X4 mWorldNormals;
 };
 
+struct PS_CONSTANT_BUFFER
+{
+	XMFLOAT4X4 invViewProj;
+	XMFLOAT4 cameraPosition;
+};
+
 ComPtr<ID3D11RasterizerState1> rasterState;
 ComPtr<ID3D11SamplerState> samplerState;
 
@@ -23,7 +29,7 @@ static VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl", 1};
 static PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
 
 static VertexShader postVS{L"../../Engine/shaders/FullscreenVS.hlsl"};
-static PixelShader lightPS{L"../../Engine/shaders/LightPS.hlsl"};
+static PixelShader lightPS{L"../../Engine/shaders/LightPS.hlsl", 1};
 
 bool Renderer::initialize()
 {
@@ -103,13 +109,13 @@ void Renderer::render()
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const Mesh* mesh : meshes)
 	{
+		XMMATRIX worldMatrix = mesh->transform.getMatrix();
+
 		uint32_t strides = sizeof(Vertex);
 		uint32_t offsets = 0;
 		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
 		getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
 		getContext()->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-		XMMATRIX worldMatrix = XMMatrixIdentity();
 
 		for (VirtualScreen& screen : virtualScreens)
 		{
@@ -138,7 +144,15 @@ void Renderer::render()
 
 	for (VirtualScreen& screen : virtualScreens)
 	{
+		Camera* cam = screen.getActiveCamera();
+
+		PS_CONSTANT_BUFFER data = {};
+		XMStoreFloat4x4(&data.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, cam->getViewProjMatrix())));
+		XMStoreFloat4(&data.cameraPosition, cam->getPostion());
+		lightPS.updateConstantBufferByIndex(&data, sizeof(data), 0);
+
 		screen.setupLightPass();
+
 		ID3D11ShaderResourceView* srvs[] = {screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView()};
 		getContext()->PSSetShaderResources(0, 2, srvs);
 		

@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Camera.h" />
+    <ClInclude Include="source\Entity.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
     <ClInclude Include="source\rendering\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
@@ -25,6 +26,7 @@
     <ClInclude Include="source\rendering\RenderTexture.h" />
     <ClInclude Include="source\rendering\Shader.h" />
     <ClInclude Include="source\rendering\VirtualScreen.h" />
+    <ClInclude Include="source\Transform.h" />
     <ClInclude Include="source\Window.h" />
     <ClInclude Include="source\WindowsApplication.h" />
   </ItemGroup>

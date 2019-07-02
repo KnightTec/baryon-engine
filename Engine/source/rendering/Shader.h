@@ -106,7 +106,7 @@ inline void VertexShader::apply()
 
 inline void PixelShader::apply()
 {
-	getContext()->PSGetConstantBuffers(0, cBuffers.size(), cBuffers.data());
+	getContext()->PSSetConstantBuffers(0, cBuffers.size(), cBuffers.data());
 	getContext()->PSSetShader(d3dpixelShader.Get(), nullptr, 0);
 }
 } // namespace Baryon

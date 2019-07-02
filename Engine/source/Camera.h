@@ -1,13 +1,11 @@
 #pragma once
+#include "Transform.h"
+
 #include "DirectXMath.h"
+
 
 namespace Baryon
 {
-	enum class SPACE
-	{
-		LOCAL,
-		GLOBAL	
-	};
 
 class Camera
 {
@@ -20,6 +18,10 @@ public:
 	DirectX::XMMATRIX getViewMatrix();
 	DirectX::XMMATRIX getProjectionMatrix() const;
 	DirectX::XMMATRIX getViewProjMatrix();
+	DirectX::XMVECTOR getPostion()
+	{
+		return DirectX::XMLoadFloat3(&position);
+	}
 
 	void setFov(float fov);
 	void setAspectRatio(float aspectRatio);

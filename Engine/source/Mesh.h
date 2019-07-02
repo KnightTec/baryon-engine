@@ -1,10 +1,11 @@
 #pragma once
 #include "GraphicsDeviceInterface.h"
 
+#include "Transform.h"
+
 #include <DirectXMath.h>
 
 #include <cstdint>
-#include <vector>
 
 namespace Baryon
 {
@@ -17,6 +18,9 @@ struct Vertex
 class Mesh : GraphicsDeviceInterface
 {
 public:
+	// TODO: remove this member
+	Transform transform;
+
 	Mesh();
 	bool initialize(const char* filename);
 

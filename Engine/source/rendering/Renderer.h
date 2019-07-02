@@ -19,7 +19,7 @@ public:
 
 	//TODO: use factory for window
 	bool createVirtualScreen(Window& targetWindow);
-	void submitMesh(const Mesh& mesh);
+	void submitMesh(Mesh* mesh);
 	void render();
 private:
 	std::vector<const Mesh*> meshes;
@@ -29,9 +29,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Inline function implementations 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-inline void Renderer::submitMesh(const Mesh& mesh)
+inline void Renderer::submitMesh(Mesh* mesh)
 {
-	meshes.push_back(&mesh);
+	meshes.push_back(mesh);
 }
 
 }
