@@ -109,5 +109,6 @@
   <ItemGroup>
     <FxCompile Include="shaders\LightPS.hlsl" />
     <FxCompile Include="shaders\FullscreenVS.hlsl" />
+    <FxCompile Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
 </Project>

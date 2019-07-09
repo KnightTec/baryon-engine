@@ -151,7 +151,7 @@ bool VirtualScreen::configureBuffers()
 	getContext()->RSSetViewports(1, &vp);
 
 	worldNormals.create({swapChainDesc.Width, swapChainDesc.Height});
-	litScene.create({swapChainDesc.Width, swapChainDesc.Height});
+	litScene.create({ swapChainDesc.Width, swapChainDesc.Height });
 
 	return true;
 }
@@ -164,8 +164,8 @@ void VirtualScreen::releaseBuffers()
 	depthStencilView.Reset();
 	depthStencilBuffer.Reset();
 
-	worldNormals.release();
 	litScene.release();
+	worldNormals.release();
 
 	getContext()->Flush();
 }
@@ -216,6 +216,11 @@ void VirtualScreen::setupGeometryPass()
 }
 
 void VirtualScreen::setupLightPass()
+{
+	ID3D11RenderTargetView* rtvs[] = { litScene.getRenderTargetView() };
+	getContext()->OMSetRenderTargets(1, rtvs, nullptr);
+}
+void VirtualScreen::setupPostProcessPass()
 {
 	getContext()->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), nullptr);
 }

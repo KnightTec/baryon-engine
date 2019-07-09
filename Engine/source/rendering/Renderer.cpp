@@ -22,6 +22,13 @@ struct PS_CONSTANT_BUFFER
 	XMFLOAT4 cameraPosition;
 };
 
+struct POST_PROCESS_CBUFFER
+{
+	XMFLOAT4X4 invViewProj;
+	XMFLOAT4X4 prevFrameViewProj;
+};
+static POST_PROCESS_CBUFFER postProcessData = {};
+
 ComPtr<ID3D11RasterizerState1> rasterState;
 ComPtr<ID3D11SamplerState> samplerState;
 
@@ -30,6 +37,7 @@ static PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
 
 static VertexShader postVS{L"../../Engine/shaders/FullscreenVS.hlsl"};
 static PixelShader lightPS{L"../../Engine/shaders/LightPS.hlsl", 1};
+static PixelShader postPS{ L"../../Engine/shaders/PostProcessPS.hlsl", 1};
 
 bool Renderer::initialize()
 {
@@ -38,7 +46,7 @@ bool Renderer::initialize()
 
 	postVS.compile();
 	lightPS.compile();
-
+	postPS.compile();
 
 	// Create rasterizer state
 	D3D11_RASTERIZER_DESC1 rasterizerState;
@@ -67,6 +75,9 @@ bool Renderer::initialize()
 	HR(getDevice()->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf()));
 
 	getContext()->PSSetSamplers(0, 1, samplerState.GetAddressOf());
+
+
+	//TODO: invert depth buffer
 	/*
 	 * TODO: Blend State
 	  Depth Stencil State
@@ -157,8 +168,27 @@ void Renderer::render()
 		getContext()->PSSetShaderResources(0, 2, srvs);
 		
 		getContext()->Draw(3, 0);
-		screen.present();
+		//screen.present();
 	}
+
+	// render post processing
+	postPS.apply();
+	for (VirtualScreen& screen : virtualScreens)
+	{
+		
+		XMStoreFloat4x4(&postProcessData.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, screen.getActiveCamera()->getViewProjMatrix())));
+		postPS.updateConstantBufferByIndex(&postProcessData, sizeof postProcessData, 0);
+
+		screen.setupPostProcessPass();
+		ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.litScene.getShaderResourceView() };
+		getContext()->PSSetShaderResources(0, 2, srvs);
+
+		getContext()->Draw(3, 0);
+		screen.present();
+
+		XMStoreFloat4x4(&postProcessData.prevFrameViewProj, XMMatrixTranspose(screen.getActiveCamera()->getViewProjMatrix()));
+	}
+
 	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr};
 	getContext()->PSSetShaderResources(0, 2, nulls);
 }

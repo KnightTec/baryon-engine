@@ -47,18 +47,14 @@ float4 main(in VSOutput input) : SV_Target0
     float3 viewDir = worldPos - cameraPosition;
     float distance = length(viewDir);
     viewDir = normalize(viewDir);
-    float falloff = 0.4;
+    float falloff = 0.3;
 
     float fogFactorDepth = 1 - exp(-distance * falloff);
-
-
     
-    //float fogFactorHeight = exp(-cameraPosition.y * falloff) * (1.0 - exp(-distance * viewDir.y * falloff)) / (viewDir.y * falloff);
+    float fogFactorHeight = exp(-cameraPosition.y * falloff) * (1.0 - exp(-distance * viewDir.y * falloff)) / (viewDir.y * falloff);
+    fogFactorHeight = saturate(fogFactorHeight);
 
-    //fogFactorHeight = saturate(fogFactorHeight);
-
-    //float fogFactor = fogFactorDepth * fogFactorHeight;
-    float fogFactor = 0;
+    float fogFactor = fogFactorDepth * fogFactorHeight;
 
     float3 outColor = fogFactor * float3(0.8, 0.8, 0.8) + (1 - fogFactor) * litColor;
     return float4(outColor, 1);

@@ -31,6 +31,7 @@ public:
 
 	void setupGeometryPass();
 	void setupLightPass();
+	void setupPostProcessPass();
 
 	DirectX::XMUINT2 getResolution() const;
 	float getAspectRatio() const;
@@ -40,7 +41,8 @@ public:
 
 
 	RenderTexture worldNormals{DXGI_FORMAT_R32G32B32A32_FLOAT};
-	RenderTexture litScene{DXGI_FORMAT_R8G8B8A8_UNORM};
+	RenderTexture litScene{ DXGI_FORMAT_R16G16B16A16_UNORM };
+
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthBufferSRV;
 private:
 	bool configureBuffers();
