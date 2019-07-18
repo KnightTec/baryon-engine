@@ -100,6 +100,6 @@ inline void VirtualScreen::clear()
 	getContext()->ClearRenderTargetView(renderTargetView.Get(), clearColor);
 	float clearColor2[] = {0, 0, 0, 1};
 	getContext()->ClearRenderTargetView(worldNormals.getRenderTargetView(), clearColor2);
-	getContext()->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	getContext()->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 0.0f, 0);
 }
 }

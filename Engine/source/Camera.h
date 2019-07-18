@@ -66,8 +66,9 @@ inline DirectX::XMMATRIX Camera::getViewProjMatrix()
 }
 inline void Camera::setFrustrum(float fov, float aspectRatio, float nearZ, float farZ)
 {
+	// swap near and far z for inverted floating point depth
 	XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(
-		DirectX::XMConvertToRadians(fov), aspectRatio, nearZ, farZ));
+		DirectX::XMConvertToRadians(fov), aspectRatio, farZ, nearZ));
 }
 inline void Camera::setFov(float fov)
 {

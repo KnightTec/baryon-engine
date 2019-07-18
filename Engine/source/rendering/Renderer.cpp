@@ -31,6 +31,7 @@ static POST_PROCESS_CBUFFER postProcessData = {};
 
 ComPtr<ID3D11RasterizerState1> rasterState;
 ComPtr<ID3D11SamplerState> samplerState;
+ComPtr<ID3D11DepthStencilState> depthStencilState;
 
 static VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl", 1};
 static PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
@@ -76,6 +77,26 @@ bool Renderer::initialize()
 
 	getContext()->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 
+	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+	dsDesc.DepthEnable = true;
+	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dsDesc.DepthFunc = D3D11_COMPARISON_GREATER;
+	dsDesc.StencilEnable = false;
+	dsDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	dsDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+	const D3D11_DEPTH_STENCILOP_DESC defaultStencilOp =
+	{ D3D11_STENCIL_OP_KEEP,
+	  D3D11_STENCIL_OP_KEEP,
+	  D3D11_STENCIL_OP_KEEP,
+	  D3D11_COMPARISON_ALWAYS };
+
+	dsDesc.FrontFace = defaultStencilOp;
+	dsDesc.BackFace = defaultStencilOp;
+
+	HR(getDevice()->CreateDepthStencilState(&dsDesc, depthStencilState.GetAddressOf()));
+
+	getContext()->OMSetDepthStencilState(depthStencilState.Get(), 0);
 
 	//TODO: invert depth buffer
 	/*
