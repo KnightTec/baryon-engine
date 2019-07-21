@@ -55,7 +55,6 @@ public:
 	static void processOSInput(WPARAM wParam, LPARAM lParam);
 	static void handleGameInput();
 
-	
 private:
 	static void handleKeyboard(RAWKEYBOARD* data);
 	static void handleMouse(RAWMOUSE* data);

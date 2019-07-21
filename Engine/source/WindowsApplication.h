@@ -26,7 +26,7 @@ public:
 	/*
 	 * Create a unspecified window
 	 */
-	static HWND createEmptyWindow();
+	static HWND getWindowHandle();
 	static DirectX::XMUINT2 getDisplayResolution();
 private:
 	static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

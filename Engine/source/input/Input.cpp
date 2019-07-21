@@ -188,6 +188,7 @@ void Input::processOSInput(WPARAM wParam, LPARAM lParam)
 		handleKeyboard(&raw.data.keyboard);
 		break;
 	case RIM_TYPEHID:
+		//TODO: XInput
 		//HidP_GetButtonCaps
 		/*{
 			HidP_GetButtonCaps()

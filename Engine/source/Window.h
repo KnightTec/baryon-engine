@@ -24,7 +24,7 @@ protected:
 };
 
 
-inline Window::Window() : hwnd{WindowsApplication::createEmptyWindow()}, screen{nullptr}
+inline Window::Window() : hwnd{WindowsApplication::getWindowHandle()}, screen{nullptr}
 {
 }
 

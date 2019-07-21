@@ -1,4 +1,4 @@
-Texture2D depthTex : register(t0);
+Texture2D<float> depthTex : register(t0);
 Texture2D sceneTex : register(t1);
 
 SamplerState texSampler : register(s0);
@@ -58,17 +58,21 @@ float4 main(in VSOutput input) : SV_Target0
 
     float3 ndc = getNDC(input.tex);
 
-    float2 velocity = (ndc.xy - previousNdc.xy)/10.0f;
+    float2 velocity = (ndc.xy - previousNdc.xy);
 
-    int numSamples = 5;
+    velocity /= 16.f;
+
+    int numSamples = 6;
+    float2 texPos = input.tex + velocity;
+    float2 texNeg = input.tex - velocity;
     
-    input.tex += velocity;
-
-    for (int i = 1; i < numSamples; ++i, input.tex += velocity) {
-        color += sceneTex.Sample(texSampler, input.tex).xyz;
+    for (int i = 1; i < numSamples; ++i, texPos += velocity, texNeg -= velocity)
+    {
+        color += sceneTex.Sample(texSampler, texPos).xyz;
+        color += sceneTex.Sample(texSampler, texNeg).xyz;
     }
 
-    float3 finalColor = color / numSamples;
+    float3 finalColor = color / (2 * numSamples);
     
     return float4(finalColor, 1);
 }
