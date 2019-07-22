@@ -48,7 +48,7 @@ void applyFog(in float2 texCoords, inout float3 color)
     float3 lightDir = normalize(float3(1, 3, -4));
     float sunFactor = saturate(dot(lightDir, viewDir));
 
-    fogColor = lerp(float3(0.65, 0.7, 0.85), float3(1, 0.8, 0.75), sunFactor);
+    fogColor = lerp(float3(0.55, 0.6, 0.75), float3(1, 0.8, 0.75), sunFactor);
 
 
     color = fogFactor * fogColor + (1 - fogFactor) * color;
@@ -59,9 +59,25 @@ float4 main(in VSOutput input) : SV_Target0
     float3 nor = normalTex.Sample(texSampler, input.tex).xyz;    
     
     float3 lightDir = normalize(float3(1, 3, -4));
-	float3 light = float3(1, 0.8, 0.75) * saturate(dot(lightDir, nor)) + 0.1f * float3(0.8, 0.85, 1);
+
+    float3 surfaceColor = float3(0.4, 0.4, 0.4);
+
+    float3 worldPos = getWorldPos(input.tex);
+    float3 viewDir = normalize(cameraPosition - worldPos);
+    float3 halfVec = normalize(lightDir + viewDir);
+    float specularExponent = 50;
+    float specularIntensity = 0.8;
+    specularIntensity *= pow(saturate(dot(nor, halfVec)), specularExponent);
+    float3 specularColor = float3(1, 1, 1);
+    float diffuseIntensity = saturate(dot(lightDir, nor));
+
+    // prevent specular reflection in areas not facing the light
+    specularIntensity *= ceil(diffuseIntensity);
+
+    float3 diffuseLight = float3(1, 0.8, 0.75) * diffuseIntensity;
+    float3 ambientLight = 0.2f * float3(0.55, 0.6, 0.75);
+    float3 color = (diffuseLight + ambientLight) * surfaceColor + specularIntensity * specularColor;
   
-    float3 color = float3(0.4, 0.4, 0.4) * light;
     if (length(nor) == 0)
     {
         color = float3(0.01, 0.01, 0.01);

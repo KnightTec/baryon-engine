@@ -1,8 +1,9 @@
 #pragma once
-#include "windows.h"
-#include "WindowsApplication.h"
 #include "VirtualScreen.h"
+#include "WindowsApplication.h"
 
+
+#include "windows.h"
 
 namespace Baryon
 {

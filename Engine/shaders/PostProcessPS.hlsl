@@ -44,35 +44,37 @@ float4 main(in VSOutput input) : SV_Target0
 {
     float3 color = sceneTex.Sample(texSampler, input.tex).xyz;
 
-    // apply dithering (http://enbseries.enbdev.com/forum/viewtopic.php?f=7&t=5220)
-    float dither_amp = 2.0;
-    float noise = lerp(-0.5, 0.5, InterleavedGradientNoise(input.pos.xy)) * dither_amp; //or other noise method
-    color.xyz = pow(color.xyz, 1.0 / 2.2);
-    color.xyz = color.xyz + noise * min(color.xyz + 0.5 * pow(1.0 / 255.0, 2.2), 0.75 * (pow(256.0 / 255.0, 2.2) - 1.0));
-    color.xyz = pow(color.xyz, 2.2);
-
     // perform camera motion blur
     float3 worldPos = getWorldPos(input.tex);
     float4 previousNdc = mul(float4(worldPos, 1), prevViewProj);
     previousNdc /= previousNdc.w;
-
     float3 ndc = getNDC(input.tex);
-
     float2 velocity = (ndc.xy - previousNdc.xy);
-
-    velocity /= 16.f;
-
-    int numSamples = 6;
+    int numSamples = 36;
+    float intensity = 0.5f;
+    velocity /= numSamples;
+    velocity *= intensity;
     float2 texPos = input.tex + velocity;
     float2 texNeg = input.tex - velocity;
-    
     for (int i = 1; i < numSamples; ++i, texPos += velocity, texNeg -= velocity)
     {
         color += sceneTex.Sample(texSampler, texPos).xyz;
         color += sceneTex.Sample(texSampler, texNeg).xyz;
     }
+    color = color / (2 * numSamples - 1);
 
-    float3 finalColor = color / (2 * numSamples);
+    // add vignette
+    float distanceFromCenter = length(input.tex - float2(0.5, 0.5));
+    float x = saturate(distanceFromCenter - 0.2);
+    float vignette = x * x * 3;
+    color = color * (1 - vignette);
+
+    // apply dithering (http://enbseries.enbdev.com/forum/viewtopic.php?f=7&t=5220)
+    float dither_amp = 2.0;
+    float noise = lerp(-0.5, 0.5, InterleavedGradientNoise(input.pos.xy)) * dither_amp;
+    color.xyz = pow(color.xyz, 1.0 / 2.2);
+    color.xyz = color.xyz + noise * min(color.xyz + 0.5 * pow(1.0 / 255.0, 2.2), 0.75 * (pow(256.0 / 255.0, 2.2) - 1.0));
+    color.xyz = pow(color.xyz, 2.2);
     
-    return float4(finalColor, 1);
+    return float4(color, 1);
 }

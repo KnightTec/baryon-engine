@@ -102,9 +102,10 @@ void HID<INPUT, NUM_INPUTS>::tick()
 
 inline void Mouse::onInput(MOUSE_INPUT inputId, float value)
 {
+	float sensitity = 0.5;
 	if (inputId == MOUSE_INPUT::AXIS_X || inputId == MOUSE_INPUT::AXIS_Y)
 	{
-		inputs[static_cast<int>(inputId)] += value;
+		inputs[static_cast<int>(inputId)] += value * sensitity;
 	} 
 	else
 	{

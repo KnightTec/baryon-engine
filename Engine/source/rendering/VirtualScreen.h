@@ -1,12 +1,13 @@
 #pragma once
 #include "../Camera.h"
 #include "GraphicsDeviceInterface.h"
+#include "RenderTexture.h"
 
 #include "wrl/client.h"
 #include "d3d11_4.h"
 #include "DirectXMath.h"
 #include <vector>
-#include "RenderTexture.h"
+
 
 namespace Baryon
 {
