@@ -65,7 +65,7 @@ float4 main(in VSOutput input) : SV_Target0
     float3 worldPos = getWorldPos(input.tex);
     float3 viewDir = normalize(cameraPosition - worldPos);
     float3 halfVec = normalize(lightDir + viewDir);
-    float specularExponent = 50;
+    float specularExponent = 30;
     float specularIntensity = 0.8;
     specularIntensity *= pow(saturate(dot(nor, halfVec)), specularExponent);
     float3 specularColor = float3(1, 1, 1);

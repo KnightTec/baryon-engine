@@ -3,11 +3,14 @@ Texture2D sceneTex : register(t1);
 
 SamplerState texSampler : register(s0);
 
+
 cbuffer CONSTANT_DATA : register(b0)
 {
     matrix invViewProj;
     matrix prevViewProj;
 };
+
+
 
 struct VSOutput
 {
@@ -49,24 +52,28 @@ float4 main(in VSOutput input) : SV_Target0
     float4 previousNdc = mul(float4(worldPos, 1), prevViewProj);
     previousNdc /= previousNdc.w;
     float3 ndc = getNDC(input.tex);
-    float2 velocity = (ndc.xy - previousNdc.xy);
-    int numSamples = 36;
-    float intensity = 0.5f;
+    float2 velocity = (ndc.xy - previousNdc.xy) / 2;
+    int numSamples = 32;
+    float intensity = 1;
     velocity /= numSamples;
     velocity *= intensity;
     float2 texPos = input.tex + velocity;
     float2 texNeg = input.tex - velocity;
+    float sum = 1;
+    float factor = (numSamples - 1) / (float) numSamples;
     for (int i = 1; i < numSamples; ++i, texPos += velocity, texNeg -= velocity)
     {
-        color += sceneTex.Sample(texSampler, texPos).xyz;
-        color += sceneTex.Sample(texSampler, texNeg).xyz;
+        color += sceneTex.Sample(texSampler, texPos).xyz * factor;
+        color += sceneTex.Sample(texSampler, texNeg).xyz * factor;
+        sum += 2 * factor;
+        factor -= 1 / numSamples;
     }
-    color = color / (2 * numSamples - 1);
+    color = color / sum;
 
     // add vignette
     float distanceFromCenter = length(input.tex - float2(0.5, 0.5));
     float x = saturate(distanceFromCenter - 0.2);
-    float vignette = x * x * 3;
+    float vignette = pow(x, 6) * 32;
     color = color * (1 - vignette);
 
     // apply dithering (http://enbseries.enbdev.com/forum/viewtopic.php?f=7&t=5220)
@@ -77,4 +84,5 @@ float4 main(in VSOutput input) : SV_Target0
     color.xyz = pow(color.xyz, 2.2);
     
     return float4(color, 1);
+    //return float4(float3(1, 1, 1) * vignette, 1);
 }

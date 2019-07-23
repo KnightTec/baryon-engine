@@ -105,10 +105,10 @@
   <ItemGroup>
     <None Include="shaders\VertexShader.hlsl" />
     <None Include="shaders\PixelShader.hlsl" />
+    <None Include="shaders\LightPS.hlsl" />
+    <None Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\LightPS.hlsl" />
     <FxCompile Include="shaders\FullscreenVS.hlsl" />
-    <FxCompile Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
 </Project>
