@@ -101,14 +101,17 @@
     <ClCompile Include="source\rendering\VirtualScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\input\HID.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\VertexShader.hlsl" />
     <None Include="shaders\PixelShader.hlsl" />
     <None Include="shaders\LightPS.hlsl" />
-    <None Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\FullscreenVS.hlsl" />
+    <FxCompile Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
 </Project>

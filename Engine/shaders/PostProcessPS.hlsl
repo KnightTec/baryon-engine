@@ -3,7 +3,6 @@ Texture2D sceneTex : register(t1);
 
 SamplerState texSampler : register(s0);
 
-
 cbuffer CONSTANT_DATA : register(b0)
 {
     matrix invViewProj;
@@ -53,6 +52,7 @@ float4 main(in VSOutput input) : SV_Target0
     previousNdc /= previousNdc.w;
     float3 ndc = getNDC(input.tex);
     float2 velocity = (ndc.xy - previousNdc.xy) / 2;
+    
     int numSamples = 32;
     float intensity = 1;
     velocity /= numSamples;
@@ -68,6 +68,7 @@ float4 main(in VSOutput input) : SV_Target0
         sum += 2 * factor;
         factor -= 1 / numSamples;
     }
+
     color = color / sum;
 
     // add vignette

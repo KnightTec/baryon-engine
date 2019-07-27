@@ -1,5 +1,5 @@
 #pragma once
-#include <utility>
+#include "windows.h"
 #include <string>
 
 namespace Baryon
@@ -25,7 +25,19 @@ enum class CONTROLLER_INPUT : int
 	BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5, BUTTON_6, BUTTON_7, BUTTON_8, BUTTON_9, BUTTON_10,
 	DPAD_LEFT, DPAD_RIGHT, DPAD_UP, DPAD_DOWN,
 	AXIS_LEFT_X, AXIS_LEFT_Y, AXIS_RIGHT_X, AXIS_RIGHT_Y,
-	ENUM_SIZE
+	ENUM_SIZE,
+
+	// XBOX controller aliases
+	BUTTON_X = BUTTON_1,
+	BUTTON_A = BUTTON_2,
+	BUTTON_B = BUTTON_3,
+	BUTTON_Y = BUTTON_4,
+	LEFT_SHOULDER = BUTTON_5,
+	RIGHT_SHOULDER = BUTTON_6,
+	LEFT_TRIGGER = BUTTON_7,
+	RIGHT_TRIGGER = BUTTON_8,
+	BUTTON_BACK = BUTTON_9,
+	BUTTON_START = BUTTON_10
 };
 
 template <typename INPUT, int NUM_INPUTS>
@@ -66,7 +78,12 @@ class Controller : public HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPU
 {
 	typedef HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPUT::ENUM_SIZE)> super;
 public:
+	enum class STICK
+	{
+		LEFT, RIGHT
+	};
 	void onInput(CONTROLLER_INPUT inputId, float value) override;
+	void onInputStick(STICK stick, float x, float y);
 };
 
 
@@ -98,47 +115,6 @@ template <typename INPUT, int NUM_INPUTS>
 void HID<INPUT, NUM_INPUTS>::tick()
 {
 	memcpy_s(lastInputs, sizeof(lastInputs), inputs, sizeof(inputs));
-}
-
-inline void Mouse::onInput(MOUSE_INPUT inputId, float value)
-{
-	float sensitity = 0.5;
-	if (inputId == MOUSE_INPUT::AXIS_X || inputId == MOUSE_INPUT::AXIS_Y)
-	{
-		inputs[static_cast<int>(inputId)] += value * sensitity;
-	} 
-	else
-	{
-		super::onInput(inputId, value);
-	}
-}
-inline void Mouse::tick()
-{
-	super::tick();
-	inputs[static_cast<int>(MOUSE_INPUT::AXIS_X)] = 0;
-	inputs[static_cast<int>(MOUSE_INPUT::AXIS_Y)] = 0;
-}
-
-inline void Controller::onInput(CONTROLLER_INPUT inputId, float value)
-{
-	float deadZone = 0.07;
-	float sensitivity = 1;
-	switch (inputId)
-	{
-	case CONTROLLER_INPUT::AXIS_RIGHT_X:
-	case CONTROLLER_INPUT::AXIS_RIGHT_Y:
-		sensitivity = 5;
-	case CONTROLLER_INPUT::AXIS_LEFT_X:
-	case CONTROLLER_INPUT::AXIS_LEFT_Y:
-		if (abs(value) < deadZone)
-		{
-		value = 0;
-		}
-		break;
-	default:
-		break;
-	}
-	super::onInput(inputId, sensitivity * value);
 }
 
 }

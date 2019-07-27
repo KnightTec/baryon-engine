@@ -1,7 +1,9 @@
 #pragma once
-#include "windows.h"
-
 #include "HID.h"
+
+#include "windows.h"
+#include "Xinput.h"
+
 
 #include <unordered_map>
 #include <vector>
@@ -58,7 +60,9 @@ public:
 private:
 	static void handleKeyboard(RAWKEYBOARD* data);
 	static void handleMouse(RAWMOUSE* data);
-	static void handleController(RAWHID* data);
+	static void handleXInput(const XINPUT_STATE& state);
+	static void handleRumblepad2(RAWHID* data);
+	static void handleDualShock4(RAWHID* data);
 	
 	static std::pair<float, std::vector<void(*)(float)>> inputCallbacks[10];
 

@@ -66,9 +66,9 @@ float4 main(in VSOutput input) : SV_Target0
     float3 viewDir = normalize(cameraPosition - worldPos);
     float3 halfVec = normalize(lightDir + viewDir);
     float specularExponent = 30;
-    float specularIntensity = 0.8;
+    float specularIntensity = 1;
     specularIntensity *= pow(saturate(dot(nor, halfVec)), specularExponent);
-    float3 specularColor = float3(1, 1, 1);
+    float3 specularColor = float3(1, 0.8, 0.75);
     float diffuseIntensity = saturate(dot(lightDir, nor));
 
     // prevent specular reflection in areas not facing the light
