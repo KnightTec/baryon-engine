@@ -3,7 +3,8 @@
 
 using namespace Baryon;
 
-GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0], STYLE style = WINDOWED) 
+GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0],
+                       STYLE style = WINDOWED)
 	: style{WINDOWED}, resolution{resolution}
 {
 	WindowsApplication::registerEventHandler(this);
@@ -13,11 +14,11 @@ GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = Virtua
 bool GameWindow::initialize()
 {
 	// TODO: remove init function
-	
+
 	setStyle(style);
 	setResolution(resolution);
 	show();
-	
+
 	return true;
 }
 
@@ -86,29 +87,56 @@ void GameWindow::resize(DirectX::XMUINT2 clientSize)
 		position.y = 0;
 	}
 	SetWindowPos(hwnd, nullptr, position.x, position.y, rect.right - rect.left, rect.bottom - rect.top, SWP_SHOWWINDOW | SWP_NOZORDER);
+
+	trapCursor();
+}
+
+void GameWindow::trapCursor()
+{
+	RECT rect;
+	GetClientRect(hwnd, &rect);
+
+	POINT ul;
+	ul.x = rect.left;
+	ul.y = rect.top;
+
+	POINT lr;
+	lr.x = rect.right;
+	lr.y = rect.bottom;
+
+	MapWindowPoints(hwnd, nullptr, &ul, 1);
+	MapWindowPoints(hwnd, nullptr, &lr, 1);
+
+	rect.left = ul.x;
+	rect.top = ul.y;
+	rect.right = lr.x;
+	rect.bottom = lr.y;
+
+	ClipCursor(&rect);
 }
 
 bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMSg)
 	{
-		case WM_ACTIVATE:
-			if (style != FULLSCREEN)
-			{
-				return false;
-			}
-			if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE)
-			{
-				screen->setFullscreen(true);
-				return true;
-			}
-			if (LOWORD(wParam) == WA_INACTIVE)
-			{
-				screen->setFullscreen(false);
-				return true;
-			}
-		default:
-			// message not handled here
+	case WM_ACTIVATE:
+		trapCursor();
+		if (style != FULLSCREEN)
+		{
 			return false;
+		}
+		if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE)
+		{
+			screen->setFullscreen(true);
+			return true;
+		}
+		if (LOWORD(wParam) == WA_INACTIVE)
+		{
+			screen->setFullscreen(false);
+			return true;
+		}
+	default:
+		// message not handled here
+		return false;
 	}
 }

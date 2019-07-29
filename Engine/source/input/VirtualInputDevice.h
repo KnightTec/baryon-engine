@@ -1,5 +1,4 @@
 #pragma once
-#include "windows.h"
 #include <string>
 
 namespace Baryon
@@ -20,9 +19,10 @@ enum class MOUSE_INPUT : int
 	ENUM_SIZE
 };
 
-enum class CONTROLLER_INPUT : int
+enum class GAMEPAD_INPUT : int
 {
 	BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5, BUTTON_6, BUTTON_7, BUTTON_8, BUTTON_9, BUTTON_10,
+	STICK_LEFT, STICK_RIGHT,
 	DPAD_LEFT, DPAD_RIGHT, DPAD_UP, DPAD_DOWN,
 	AXIS_LEFT_X, AXIS_LEFT_Y, AXIS_RIGHT_X, AXIS_RIGHT_Y,
 	ENUM_SIZE,
@@ -40,13 +40,14 @@ enum class CONTROLLER_INPUT : int
 	BUTTON_START = BUTTON_10
 };
 
+
 template <typename INPUT, int NUM_INPUTS>
-class HID
+class VirtualInputDevice
 {
 	static_assert(std::is_enum<INPUT>::value, "INPUT must be an enum type!");
 public:
-	HID();
-	virtual ~HID() = default;
+	VirtualInputDevice();
+	virtual ~VirtualInputDevice() = default;
 
 	virtual void onInput(INPUT inputId, float value);
 
@@ -64,55 +65,57 @@ protected:
 };
 
 
-typedef HID<KEYBOARD_INPUT, static_cast<int>(KEYBOARD_INPUT::ENUM_SIZE)> Keyboard;
+typedef VirtualInputDevice<KEYBOARD_INPUT, static_cast<int>(KEYBOARD_INPUT::ENUM_SIZE)> Keyboard;
 
-class Mouse : public HID<MOUSE_INPUT, static_cast<int>(MOUSE_INPUT::ENUM_SIZE)>
+class Mouse : public VirtualInputDevice<MOUSE_INPUT, static_cast<int>(MOUSE_INPUT::ENUM_SIZE)>
 {
-	typedef HID<MOUSE_INPUT, static_cast<int>(MOUSE_INPUT::ENUM_SIZE)> super;
+	typedef VirtualInputDevice<MOUSE_INPUT, static_cast<int>(MOUSE_INPUT::ENUM_SIZE)> super;
 public:
 	void onInput(MOUSE_INPUT inputId, float value) override;
 	void tick() override;
 };
 
-class Controller : public HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPUT::ENUM_SIZE)>
+class Gamepad : public VirtualInputDevice<GAMEPAD_INPUT, static_cast<int>(GAMEPAD_INPUT::ENUM_SIZE)>
 {
-	typedef HID<CONTROLLER_INPUT, static_cast<int>(CONTROLLER_INPUT::ENUM_SIZE)> super;
+	typedef VirtualInputDevice<GAMEPAD_INPUT, static_cast<int>(GAMEPAD_INPUT::ENUM_SIZE)> super;
 public:
+	static constexpr int numberOfButtons = 12;
 	enum class STICK
 	{
 		LEFT, RIGHT
 	};
-	void onInput(CONTROLLER_INPUT inputId, float value) override;
+	void clearButtons();
+	void onInput(GAMEPAD_INPUT inputId, float value) override;
 	void onInputStick(STICK stick, float x, float y);
 };
 
 
 template <typename INPUT, int NUM_INPUTS>
-HID<INPUT, NUM_INPUTS>::HID()
+VirtualInputDevice<INPUT, NUM_INPUTS>::VirtualInputDevice()
 {
 }
 template <typename INPUT, int NUM_INPUTS>
-void HID<INPUT, NUM_INPUTS>::onInput(INPUT inputId, float value)
+void VirtualInputDevice<INPUT, NUM_INPUTS>::onInput(INPUT inputId, float value)
 {
 	inputs[static_cast<int>(inputId)] = value;
 }
 template <typename INPUT, int NUM_INPUTS>
-bool HID<INPUT, NUM_INPUTS>::isInputStart(INPUT inputId)
+bool VirtualInputDevice<INPUT, NUM_INPUTS>::isInputStart(INPUT inputId)
 {
 	return inputs[static_cast<int>(inputId)] && !lastInputs[static_cast<int>(inputId)];
 }
 template <typename INPUT, int NUM_INPUTS>
-bool HID<INPUT, NUM_INPUTS>::isInputEnd(INPUT inputId)
+bool VirtualInputDevice<INPUT, NUM_INPUTS>::isInputEnd(INPUT inputId)
 {
 	return !inputs[static_cast<int>(inputId)] && lastInputs[static_cast<int>(inputId)];
 }
 template <typename INPUT, int NUM_INPUTS>
-float HID<INPUT, NUM_INPUTS>::getInputValue(INPUT inputId)
+float VirtualInputDevice<INPUT, NUM_INPUTS>::getInputValue(INPUT inputId)
 {
 	return inputs[static_cast<int>(inputId)];
 }
 template <typename INPUT, int NUM_INPUTS>
-void HID<INPUT, NUM_INPUTS>::tick()
+void VirtualInputDevice<INPUT, NUM_INPUTS>::tick()
 {
 	memcpy_s(lastInputs, sizeof(lastInputs), inputs, sizeof(inputs));
 }

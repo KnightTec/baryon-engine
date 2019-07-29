@@ -32,9 +32,10 @@ public:
 private:
 	bool initialize() override;
 	/*
-	 * Resize the windows client area
+	 * Resize the client area of the window
 	 */
 	void resize(DirectX::XMUINT2 clientSize);
+	void trapCursor();
 
 	STYLE style;
 

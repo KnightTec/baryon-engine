@@ -1,9 +1,7 @@
 #pragma once
-#include "HID.h"
+#include "VirtualInputDevice.h"
 
 #include "windows.h"
-#include "Xinput.h"
-
 
 #include <unordered_map>
 #include <vector>
@@ -25,55 +23,72 @@ public:
 	public:
 		void setInputBinding(KEYBOARD_INPUT inputId, float scale);
 		void setInputBinding(MOUSE_INPUT inputId, float scale);
-		void setInputBinding(CONTROLLER_INPUT inputId, float scale);
+		void setInputBinding(GAMEPAD_INPUT inputId, float scale);
 		void removeInputBinding(KEYBOARD_INPUT inputId);
 		void removeInputBinding(MOUSE_INPUT inputId);
-		void removeInputBinding(CONTROLLER_INPUT inputId);
+		void removeInputBinding(GAMEPAD_INPUT inputId);
 	private:
 		void handleInput();
 
-		float axisValue = 0;
 		std::vector<void(*)(float)> callbacks;
 		std::vector<std::pair<KEYBOARD_INPUT, float>> keyboardBindings;
 		std::vector<std::pair<MOUSE_INPUT, float>> mouseBindings;
-		std::vector<std::pair<CONTROLLER_INPUT, float>> controllerBindings;
+		std::vector<std::pair<GAMEPAD_INPUT, float>> gamepadBindings;
 	};
 
-	enum TYPE
+	class Action
 	{
-		KEYBOARD_SPACE,
-		KEYBOARD_ENTER,
+		friend class Input;
+	public:
+		enum TYPE
+		{
+			PRESSED,
+			RELEASED
+		};
+		void setInputBinding(KEYBOARD_INPUT inputId);
+		void setInputBinding(MOUSE_INPUT inputId);
+		void setInputBinding(GAMEPAD_INPUT inputId);
+	private:
+		void handleInput();
+
+		std::vector<std::pair<void(*)(), TYPE>> callbacks;
+		std::vector<KEYBOARD_INPUT> keyboardBindings;
+		std::vector<MOUSE_INPUT> mouseBindings;
+		std::vector<GAMEPAD_INPUT> gamepadBindings;
 	};
 
 	static void initialize();
-	static void bindFunctionToInput(void (*function)(float), TYPE type);
-
 	static Axis& addAxis(const std::string& axisName);
+	static Action& addAction(const std::string& actionName);
 
 	/*
-	 * returns false if axis does not exist
+	 * returns false if axis/action does not exist
 	 */
 	static bool bindAxis(const std::string& axisName, void (*function)(float));
-	static void processOSInput(WPARAM wParam, LPARAM lParam);
-	static void handleGameInput();
+	static bool bindAction(const std::string& actionName, Action::TYPE type, void (*function)());
 
+	static void passOSData(WPARAM wParam, LPARAM lParam);
+	static void handleGameInput();
 private:
-	static void handleKeyboard(RAWKEYBOARD* data);
-	static void handleMouse(RAWMOUSE* data);
-	static void handleXInput(const XINPUT_STATE& state);
-	static void handleRumblepad2(RAWHID* data);
-	static void handleDualShock4(RAWHID* data);
-	
-	static std::pair<float, std::vector<void(*)(float)>> inputCallbacks[10];
+	static void processKeyboard(RAWKEYBOARD* data);
+	static void processMouse(RAWMOUSE* data);
+	static void processXInput();
+	static void processGenericGamepad(RAWINPUT* raw);
 
 	static Keyboard keyboard;
 	static Mouse mouse;
-	static Controller controller;
+	static Gamepad gamepad;
 	static std::unordered_map<std::string, Axis> inputAxes;
+	static std::unordered_map<std::string, Action> inputActions;
 };
+
 
 inline Input::Axis& Input::addAxis(const std::string& axisName)
 {
 	return inputAxes[axisName];
+}
+inline Input::Action& Input::addAction(const std::string& actionName)
+{
+	return inputActions[actionName];
 }
 }

@@ -1,5 +1,6 @@
 #include "Input.h"
 
+#include "Xinput.h"
 #include "hidsdi.h"
 
 #include <string>
@@ -35,9 +36,9 @@ void Input::Axis::setInputBinding(MOUSE_INPUT inputId, float scale)
 	mouseBindings.emplace_back(inputId, scale);
 }
 
-void Input::Axis::setInputBinding(CONTROLLER_INPUT inputId, float scale)
+void Input::Axis::setInputBinding(GAMEPAD_INPUT inputId, float scale)
 {
-	for (auto& input : controllerBindings)
+	for (auto& input : gamepadBindings)
 	{
 		if (inputId == input.first)
 		{
@@ -45,11 +46,12 @@ void Input::Axis::setInputBinding(CONTROLLER_INPUT inputId, float scale)
 			return;
 		}
 	}
-	controllerBindings.emplace_back(inputId, scale);
+	gamepadBindings.emplace_back(inputId, scale);
 }
 
 void Input::Axis::handleInput()
 {
+	float axisValue = 0;
 	for (const auto& input : keyboardBindings)
 	{
 		axisValue += keyboard.getInputValue(input.first) * input.second;
@@ -58,15 +60,94 @@ void Input::Axis::handleInput()
 	{
 		axisValue += mouse.getInputValue(input.first) * input.second;
 	}
-	for (const auto& input : controllerBindings)
+	for (const auto& input : gamepadBindings)
 	{
-		axisValue += controller.getInputValue(input.first) * input.second;
+		axisValue += gamepad.getInputValue(input.first) * input.second;
 	}
 	for (auto function : callbacks)
 	{
 		function(axisValue);
 	}
-	axisValue = 0;
+}
+void Input::Action::setInputBinding(KEYBOARD_INPUT inputId)
+{
+	for (auto& input : keyboardBindings)
+	{
+		if (inputId == input)
+		{
+			return;
+		}
+	}
+	keyboardBindings.emplace_back(inputId);
+}
+void Input::Action::setInputBinding(MOUSE_INPUT inputId)
+{
+	for (auto& input : mouseBindings)
+	{
+		if (inputId == input)
+		{
+			return;
+		}
+	}
+	mouseBindings.emplace_back(inputId);
+}
+void Input::Action::setInputBinding(GAMEPAD_INPUT inputId)
+{
+	for (auto& input : gamepadBindings)
+	{
+		if (inputId == input)
+		{
+			return;
+		}
+	}
+	gamepadBindings.emplace_back(inputId);
+}
+void Input::Action::handleInput()
+{
+	std::vector<TYPE> actionBuffer;
+	for (const auto& inputId : keyboardBindings)
+	{
+		if (keyboard.isInputStart(inputId))
+		{
+			actionBuffer.push_back(PRESSED);
+		}
+		else if (keyboard.isInputEnd(inputId))
+		{
+			actionBuffer.push_back(RELEASED);
+		}
+	}
+	for (const auto& inputId : mouseBindings)
+	{
+		if (mouse.isInputStart(inputId))
+		{
+			actionBuffer.push_back(PRESSED);
+		}
+		else if (mouse.isInputEnd(inputId))
+		{
+			actionBuffer.push_back(RELEASED);
+		}
+	}
+	for (const auto& inputId : gamepadBindings)
+	{
+		if (gamepad.isInputStart(inputId))
+		{
+			actionBuffer.push_back(PRESSED);
+		}
+		else if (gamepad.isInputEnd(inputId))
+		{
+			actionBuffer.push_back(RELEASED);
+		}
+	}
+	for (const auto& callback : callbacks)
+	{
+		for (TYPE type : actionBuffer)
+		{
+			if (type == callback.second)
+			{
+				callback.first();
+			}
+		}
+	}
 }
 
 
@@ -87,39 +168,14 @@ struct STRUCT_HID_USAGE_PAGE_GENERIC
 		KEYBOARD = 0x06
 	};
 };
-
-struct GamepadInputReport
-{
-	unsigned int : 8;
-	unsigned int leftX : 8;
-	unsigned int leftY : 8;
-	unsigned int rightX : 8;
-	unsigned int rightY: 8;
-
-	unsigned int dPad : 4;
-	unsigned int button1 : 1;
-	unsigned int button2 : 1;
-	unsigned int button3 : 1;
-	unsigned int button4 : 1;
-
-	unsigned int button5 : 1;
-	unsigned int button6 : 1;
-	unsigned int button7 : 1;
-	unsigned int button8 : 1;
-	unsigned int button9 : 1;
-	unsigned int button10 : 1;
-	unsigned int leftStick : 1;
-	unsigned int rightStick: 1;
-	unsigned int : 8;
-};
 }
 
 
-std::pair<float, std::vector<void(*)(float)>> Input::inputCallbacks[10];
 Keyboard Input::keyboard;
 Mouse Input::mouse;
-Controller Input::controller;
+Gamepad Input::gamepad;
 std::unordered_map<std::string, Input::Axis> Input::inputAxes;
+std::unordered_map<std::string, Input::Action> Input::inputActions;
 
 void Input::initialize()
 {
@@ -148,13 +204,8 @@ void Input::initialize()
 
 	if (!RegisterRawInputDevices(rid, numDevices, sizeof(RAWINPUTDEVICE)))
 	{
-		OutputDebugStringA("[Warning] Input device registration failed!\n");
+		OutputDebugStringW(L"[Warning] Input device registration failed!\n");
 	}
-}
-
-void Input::bindFunctionToInput(void (* function)(float), TYPE type)
-{
-	inputCallbacks[type].second.push_back(function);
 }
 
 bool Input::bindAxis(const std::string& axisName, void (* function)(float))
@@ -168,89 +219,80 @@ bool Input::bindAxis(const std::string& axisName, void (* function)(float))
 	return true;
 }
 
-void Input::processOSInput(WPARAM wParam, LPARAM lParam)
+bool Input::bindAction(const std::string& actionName, Action::TYPE type, void (* function)())
+{
+	auto action = inputActions.find(actionName);
+	if (action == inputActions.end())
+	{
+		return false;
+	}
+	action->second.callbacks.emplace_back(std::pair(function, type));
+	return true;
+}
+
+void Input::passOSData(WPARAM wParam, LPARAM lParam)
 {
 	unsigned sizeHeader = sizeof(RAWINPUTHEADER);
 	unsigned size = sizeof(RAWINPUT);
-	RAWINPUTHEADER rawHeader;
 	RAWINPUT raw;
-	GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_HEADER, &rawHeader, &sizeHeader, sizeof(RAWINPUTHEADER));
-	GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER));
 
-	switch (rawHeader.dwType)
+	// get input device information
+	GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_HEADER, &raw.header, &sizeHeader, sizeof(RAWINPUTHEADER));
+	wchar_t deviceName[256];
+	UINT nameSize = 256;
+	GetRawInputDeviceInfoW(raw.header.hDevice, RIDI_DEVICENAME, deviceName, &nameSize);
+	RID_DEVICE_INFO deviceInfo;
+	UINT deviceInfoSize = sizeof(deviceInfo);
+	GetRawInputDeviceInfoW(raw.header.hDevice, RIDI_DEVICEINFO, &deviceInfo, &deviceInfoSize);
+
+	if (raw.header.dwType == RIM_TYPEHID && wcsstr(deviceName, L"IG_"))
+	{
+		processXInput();
+		return;
+	}
+
+	// check if the device is a Dualshock 4 gamepad
+	if (deviceInfo.hid.dwVendorId == 0x54c && (deviceInfo.hid.dwProductId == 0x5c4 || deviceInfo.hid.dwProductId == 0x9cc))
+	{
+		// with a Dualshock 4 GetRawInputData only returns garbage, but GetRawInputBuffer works
+		UINT cbSize;
+		GetRawInputBuffer(nullptr, &cbSize, sizeof(RAWINPUTHEADER));
+		if (cbSize == 0)
+		{
+			return;
+		}
+		auto pRawInput = static_cast<PRAWINPUT>(malloc(cbSize));
+		GetRawInputBuffer(pRawInput, &cbSize, sizeof(RAWINPUTHEADER));
+		raw = *pRawInput;
+		free(pRawInput);
+	}
+	else
+	{
+		GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER));
+	}
+
+	switch (raw.header.dwType)
 	{
 	case RIM_TYPEMOUSE:
-		handleMouse(&raw.data.mouse);
+		processMouse(&raw.data.mouse);
 		break;
 	case RIM_TYPEKEYBOARD:
-		handleKeyboard(&raw.data.keyboard);
+		processKeyboard(&raw.data.keyboard);
 		break;
 	case RIM_TYPEHID:
-		//TODO: XInput
-		XINPUT_STATE xinputState;
-		if (XInputGetState(0, &xinputState) == ERROR_SUCCESS || XInputGetState(1, &xinputState) == ERROR_SUCCESS)
 		{
-			OutputDebugStringA("XInput device detected");
-			handleXInput(xinputState);
+			processGenericGamepad(&raw);
 			break;
 		}
-		//HidP_GetButtonCaps
-		/*{
-			HidP_GetButtonCaps()
-			//TODO: dualshock 4
-
-			BYTE* buffer = new BYTE[128];
-
-			unsigned s = 256;
-			char str[256];
-			GetRawInputDeviceInfoA(rawHeader.hDevice, RIDI_DEVICENAME, &str, &s);
-
-
-			OutputDebugStringA(str);
-			HANDLE hid_device = CreateFileA(str, GENERIC_READ | GENERIC_WRITE,
-			                                FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-			                                OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
-
-			unsigned long sn;
-			//OVERLAPPED o = {};
-			//bool b = ReadFile(hid_device, buffer, 64, &sn, &o);
-			OVERLAPPED ov =  {};
-			std::stringstream ss;
-			for (int i = 0; i < 64; i++)
-			{
-				ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
-			}
-			OutputDebugStringA((ss.str() + "\n").c_str());
-
-			uint8_t buf[32];
-			memset(buf, 0, sizeof(buf));
-			buf[0] = 0x05;
-			buf[1] = 0xFF;
-			buf[4] = 0; // 0-255
-			buf[5] = 0; // 0-255
-			buf[6] = 0; // 0-255
-			buf[7] = 255; // 0-255
-			buf[8] = 255; // 0-255
-			DWORD bytes_written;
-			WriteFile(hid_device, buf, sizeof(buf), &bytes_written, &ov);
-			//	
-		}*/
-
-		//OutputDebugStringA(("Hid input " + std::to_string(c++) + "\n").c_str());
-		handleRumblepad2(&raw.data.hid);
-		break;
-
 	default:
-		//OutputDebugStringA((std::to_string(rawHeader.dwType) + "\n").c_str());
 		break;
 	}
 }
 
 
-
-void Input::handleKeyboard(RAWKEYBOARD* data)
+void Input::processKeyboard(RAWKEYBOARD* data)
 {
-	float value = 1 - data->Flags & RI_KEY_BREAK;
+	float value = float(1 - data->Flags & RI_KEY_BREAK);
 
 	// handle character keys
 	if (data->VKey >= 0x41 && data->VKey <= 0x5A)
@@ -270,29 +312,20 @@ void Input::handleKeyboard(RAWKEYBOARD* data)
 		keyboard.onInput(KEYBOARD_INPUT::ARROW_UP, value);
 		break;
 	case VK_DOWN:
-		keyboard.onInput(KEYBOARD_INPUT::ARROW_DOWN, value);;
+		keyboard.onInput(KEYBOARD_INPUT::ARROW_DOWN, value);
 		break;
 	case VK_SPACE:
-		//TODO: uncomment this line
-		//inputCallbacks[KEYBOARD_SPACE].first = value;
-		if (value == 1)
-		{
-			inputCallbacks[KEYBOARD_SPACE].second.at(0)(0);
-		}
+		keyboard.onInput(KEYBOARD_INPUT::SPACE, value);
 		break;
 	case VK_RETURN:
-		//inputCallbacks[KEYBOARD_ENTER].first = value;
-		if (value == 1)
-		{
-			inputCallbacks[KEYBOARD_ENTER].second.at(0)(0);
-		}
+		keyboard.onInput(KEYBOARD_INPUT::ENTER, value);
 		break;
 	default:
 		break;
 	}
 }
 
-void Input::handleMouse(RAWMOUSE* data)
+void Input::processMouse(RAWMOUSE* data)
 {
 	if (data->usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
 	{
@@ -315,86 +348,169 @@ void Input::handleMouse(RAWMOUSE* data)
 		// handle relative mouse movement
 		mouse.onInput(MOUSE_INPUT::AXIS_X, data->lLastX);
 		mouse.onInput(MOUSE_INPUT::AXIS_Y, data->lLastY);
-		OutputDebugStringA((std::to_string(data->lLastX) + "\n").c_str());
 	}
 }
 
-void Input::handleRumblepad2(RAWHID* data)
+void Input::processXInput()
 {
-	// TODO: get device info
-	UINT bufSize = data->dwCount * data->dwSizeHid;
-	BYTE* buffer = data->bRawData;
-
-	auto* report = reinterpret_cast<GamepadInputReport*>(buffer);
-
-	std::stringstream ss;
-	for (int i = 0; i < bufSize; i++)
+	XINPUT_STATE state;
+	if (XInputGetState(0, &state) != ERROR_SUCCESS)
 	{
-		ss << std::setfill('0') << std::setw(2) << std::hex << int(buffer[i]) << ' ';
+		return;
 	}
-	OutputDebugStringA((ss.str() + "\n").c_str());
+	static DWORD packetNumber = 0;
+	// check if the state of the gamepad has changed
+	if (state.dwPacketNumber == packetNumber)
+	{
+		return;
+	}
+	packetNumber = state.dwPacketNumber;
 
-	controller.onInput(CONTROLLER_INPUT::BUTTON_1, report->button1);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_2, report->button2);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_3, report->button3);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_4, report->button4);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_5, report->button5);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_6, report->button6);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_7, report->button7);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_8, report->button8);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_9, report->button9);
-	controller.onInput(CONTROLLER_INPUT::BUTTON_10, report->button10);
+	gamepad.onInputStick(Gamepad::STICK::LEFT, float(state.Gamepad.sThumbLX) / 32767, -float(state.Gamepad.sThumbLY) / 32767);
+	gamepad.onInputStick(Gamepad::STICK::RIGHT, float(state.Gamepad.sThumbRX) / 32767, -float(state.Gamepad.sThumbRY) / 32767);
 
-	controller.onInputStick(Controller::STICK::LEFT, (report->leftX - 127.5f) / 127.5f, (report->leftY - 127.5f) / 127.5f);
-	controller.onInputStick(Controller::STICK::RIGHT, (report->rightX - 127.5f) / 127.5f, (report->rightY - 127.5f) / 127.5f);
+	gamepad.onInput(GAMEPAD_INPUT::LEFT_SHOULDER, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::RIGHT_SHOULDER, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0));
 
-	//TODO: handle dpad
+	gamepad.onInput(GAMEPAD_INPUT::LEFT_TRIGGER, float(state.Gamepad.bLeftTrigger) / 255);
+	gamepad.onInput(GAMEPAD_INPUT::LEFT_TRIGGER, float(state.Gamepad.bRightTrigger) / 255);
+
+	gamepad.onInput(GAMEPAD_INPUT::BUTTON_A, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::BUTTON_B, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::BUTTON_X, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::BUTTON_Y, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
+
+	gamepad.onInput(GAMEPAD_INPUT::BUTTON_BACK, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::BUTTON_START, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0));
+
+	gamepad.onInput(GAMEPAD_INPUT::DPAD_LEFT, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::DPAD_RIGHT, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::DPAD_UP, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::DPAD_DOWN, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0));
+
+	gamepad.onInput(GAMEPAD_INPUT::STICK_LEFT, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0));
+	gamepad.onInput(GAMEPAD_INPUT::STICK_RIGHT, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0));
 }
 
-void Input::handleXInput(const XINPUT_STATE& state)
+void Input::processGenericGamepad(RAWINPUT* raw)
 {
-	controller.onInputStick(Controller::STICK::LEFT, float(state.Gamepad.sThumbLX) / 32767, -float(state.Gamepad.sThumbLY) / 32767);
-	controller.onInputStick(Controller::STICK::RIGHT, float(state.Gamepad.sThumbRX) / 32767, -float(state.Gamepad.sThumbRY) / 32767);
+	UINT bufferSize;
+	GetRawInputDeviceInfoW(raw->header.hDevice, RIDI_PREPARSEDDATA, nullptr, &bufferSize);
+	auto pPreparsedData = static_cast<PHIDP_PREPARSED_DATA>(malloc(bufferSize));
+	GetRawInputDeviceInfoW(raw->header.hDevice, RIDI_PREPARSEDDATA, pPreparsedData, &bufferSize);
+	HIDP_CAPS caps;
+	if (HidP_GetCaps(pPreparsedData, &caps) != HIDP_STATUS_SUCCESS)
+	{
+		free(pPreparsedData);
+		return;
+	}
+	auto buttonCaps = new HIDP_BUTTON_CAPS[caps.NumberInputButtonCaps];
+	if (HidP_GetButtonCaps(HidP_Input, buttonCaps, &caps.NumberInputButtonCaps, pPreparsedData) != HIDP_STATUS_SUCCESS)
+	{
+		delete[] buttonCaps;
+		free(pPreparsedData);
+		return;
+	}
+	auto valueCaps = new HIDP_VALUE_CAPS[caps.NumberInputValueCaps];
+	if (HidP_GetValueCaps(HidP_Input, valueCaps, &caps.NumberInputValueCaps, pPreparsedData) != HIDP_STATUS_SUCCESS)
+	{
+		delete[] valueCaps;
+		delete[] buttonCaps;
+		free(pPreparsedData);
+		return;
+	}
+	ULONG usageLength = HidP_MaxUsageListLength(HidP_Input, buttonCaps->UsagePage, pPreparsedData);
+	auto usage = new USAGE[usageLength];
 
-	controller.onInput(CONTROLLER_INPUT::LEFT_SHOULDER, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0));
-	controller.onInput(CONTROLLER_INPUT::RIGHT_SHOULDER, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0));
 
-	controller.onInput(CONTROLLER_INPUT::LEFT_TRIGGER, float(state.Gamepad.bLeftTrigger) / 255);
-	controller.onInput(CONTROLLER_INPUT::LEFT_TRIGGER, float(state.Gamepad.bRightTrigger) / 255);
+	if (HidP_GetUsages(HidP_Input, buttonCaps->UsagePage, 0, usage, &usageLength, pPreparsedData,
+	                   reinterpret_cast<PCHAR>(raw->data.hid.bRawData), raw->data.hid.dwSizeHid) != HIDP_STATUS_SUCCESS)
+	{
+		delete[] usage;
+		delete[] valueCaps;
+		delete[] buttonCaps;
+		free(pPreparsedData);
+		return;
+	}
+	if (usageLength > 0 && usage[0] != 0)
+	{
+		int x = 0;
+	}
 
-	controller.onInput(CONTROLLER_INPUT::BUTTON_A, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0));
-	controller.onInput(CONTROLLER_INPUT::BUTTON_B, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0));
-	controller.onInput(CONTROLLER_INPUT::BUTTON_X, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
-	controller.onInput(CONTROLLER_INPUT::BUTTON_Y, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
+	gamepad.clearButtons();
+	for (ULONG i = 0; i < usageLength; i++)
+	{
+		int buttonId = usage[i] - buttonCaps->Range.UsageMin;
+		if (buttonId < Gamepad::numberOfButtons)
+		{
+			gamepad.onInput(static_cast<GAMEPAD_INPUT>(buttonId), 1);
+		}
+	}
+	float axisLeftX = 0;
+	float axisLeftY = 0;
+	float axisRightX = 0;
+	float axisRightY = 0;
+	for (int i = 0; i < caps.NumberInputValueCaps; i++)
+	{
+		ULONG tmp;
+		HidP_GetUsageValue(HidP_Input, valueCaps[i].UsagePage, 0,
+		                   valueCaps[i].Range.UsageMin, &tmp, pPreparsedData,
+		                   reinterpret_cast<PCHAR>(raw->data.hid.bRawData), raw->data.hid.dwSizeHid);
+		float value = tmp << 1;
+		value /= float(valueCaps[i].LogicalMax - valueCaps[i].LogicalMin);
+		value -= 1;
+		switch (valueCaps[i].Range.UsageMin)
+		{
+		case 0x30:
+			axisLeftX = value;
+			break;
+		case 0x31:
+			axisLeftY = value;
+			break;
+		case 0x32:
+			axisRightX = value;
+			break;
+		case 0x35:
+			axisRightY = value;
+			break;
+		case 0x39:
+			// TODO: D-Pad
+			break;
+		case 0x33:
+			// DS4 left trigger
+			break;
+		case 0x34:
+			{
+				// DS4 right trigger in range [-1, 1]
+				std::string s = std::to_string(value) + "\n";
+				OutputDebugStringA(s.c_str());
+				break;
+			}
+		default:
+			break;
+		}
+	}
+	gamepad.onInputStick(Gamepad::STICK::LEFT, axisLeftX, axisLeftY);
+	gamepad.onInputStick(Gamepad::STICK::RIGHT, axisRightX, axisRightY);
 
-	controller.onInput(CONTROLLER_INPUT::BUTTON_BACK, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0));
-	controller.onInput(CONTROLLER_INPUT::BUTTON_START, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0));
-
-	controller.onInput(CONTROLLER_INPUT::DPAD_LEFT, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0));
-	controller.onInput(CONTROLLER_INPUT::DPAD_RIGHT, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0));
-	controller.onInput(CONTROLLER_INPUT::DPAD_UP, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0));
-	controller.onInput(CONTROLLER_INPUT::DPAD_DOWN, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0));
+	// free all memory
+	delete[] usage;
+	delete[] valueCaps;
+	delete[] buttonCaps;
+	free(pPreparsedData);
 }
 
 void Input::handleGameInput()
 {
-	//TODO: remove this loop
-	for (auto& inputCallback : inputCallbacks)
+	for (auto& action : inputActions)
 	{
-		if (inputCallback.first)
-		{
-			for (void (*callback)(float) : inputCallback.second)
-			{
-				callback(inputCallback.first);
-			}
-		}
+		action.second.handleInput();
 	}
-
 	for (auto& axis : inputAxes)
 	{
 		axis.second.handleInput();
 	}
 	keyboard.tick();
 	mouse.tick();
-	controller.tick();
+	gamepad.tick();
 }

@@ -1,4 +1,5 @@
-#include <HID.h>
+#include <VirtualInputDevice.h>
+
 
 using namespace Baryon;
 
@@ -21,11 +22,15 @@ void Mouse::tick()
 	inputs[static_cast<int>(MOUSE_INPUT::AXIS_Y)] = 0;
 }
 
-void Controller::onInput(CONTROLLER_INPUT inputId, float value)
+void Gamepad::clearButtons()
+{
+	memset(inputs, 0, sizeof(GAMEPAD_INPUT) * numberOfButtons);
+}
+void Gamepad::onInput(GAMEPAD_INPUT inputId, float value)
 {
 	super::onInput(inputId, value);
 }
-void Controller::onInputStick(STICK stick, float x, float y)
+void Gamepad::onInputStick(STICK stick, float x, float y)
 {
 	float deadZone = 0.2;
 	float sensitivity = 1;
@@ -37,7 +42,7 @@ void Controller::onInputStick(STICK stick, float x, float y)
 	if (magnitude < deadZone)
 	{
 		x = y = 0;
-	} 
+	}
 	else
 	{
 		if (magnitude > 1)
@@ -51,13 +56,13 @@ void Controller::onInputStick(STICK stick, float x, float y)
 	switch (stick)
 	{
 	case STICK::LEFT:
-		super::onInput(CONTROLLER_INPUT::AXIS_LEFT_X, x);
-		super::onInput(CONTROLLER_INPUT::AXIS_LEFT_Y, y);
+		super::onInput(GAMEPAD_INPUT::AXIS_LEFT_X, x);
+		super::onInput(GAMEPAD_INPUT::AXIS_LEFT_Y, y);
 		break;
 	case STICK::RIGHT:
-		sensitivity = 5;
-		super::onInput(CONTROLLER_INPUT::AXIS_RIGHT_X, sensitivity * x);
-		super::onInput(CONTROLLER_INPUT::AXIS_RIGHT_Y, sensitivity * y);
+		sensitivity = 10;
+		super::onInput(GAMEPAD_INPUT::AXIS_RIGHT_X, sensitivity * x);
+		super::onInput(GAMEPAD_INPUT::AXIS_RIGHT_Y, sensitivity * y);
 		break;
 	}
 }

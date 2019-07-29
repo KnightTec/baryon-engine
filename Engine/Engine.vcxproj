@@ -16,7 +16,7 @@
     <ClInclude Include="source\rendering\DXErr.h" />
     <ClInclude Include="source\rendering\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
-    <ClInclude Include="source\input\HID.h" />
+    <ClInclude Include="source\input\VirtualInputDevice.h" />
     <ClInclude Include="source\input\Input.h" />
     <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\core\Observer.h" />
@@ -32,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Camera.cpp" />
-    <ClCompile Include="source\input\HID.cpp" />
+    <ClCompile Include="source\input\VirtualInputDevice.cpp" />
     <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
     <ClCompile Include="source\input\Input.cpp" />
@@ -73,11 +73,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </None>
-    <FxCompile Include="shaders\PostProcessPS.hlsl">
+    <None Include="shaders\PostProcessPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <FileType>Document</FileType>
-    </FxCompile>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
