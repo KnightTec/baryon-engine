@@ -73,8 +73,8 @@ float4 main(in VSOutput input) : SV_Target0
 
     // add vignette
     float distanceFromCenter = length(input.tex - float2(0.5, 0.5));
-    float x = saturate(distanceFromCenter - 0.2);
-    float vignette = pow(x, 6) * 32;
+    float x = saturate(distanceFromCenter - 0.15);
+    float vignette = pow(x, 6) * 24;
     color = color * (1 - vignette);
 
     // apply dithering (http://enbseries.enbdev.com/forum/viewtopic.php?f=7&t=5220)

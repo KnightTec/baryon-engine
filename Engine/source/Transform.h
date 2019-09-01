@@ -16,8 +16,7 @@ public:
 	void translate(float x, float y, float z, SPACE space = SPACE::LOCAL);
 	void rotate(float pitch, float yaw, float roll, SPACE space = SPACE::LOCAL);
 	void scale(float x, float y, float z, SPACE space = SPACE::LOCAL);
-	DirectX::XMMATRIX getMatrix() const;
-
+	DirectX::XMMATRIX getWorldMatrix() const;
 private:
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT4 rotationQuaternion;
@@ -50,14 +49,14 @@ inline void Transform::rotate(float pitch, float yaw, float roll, SPACE space)
 }
 inline void Transform::scale(float x, float y, float z, SPACE space)
 {
-	//TODO: local scale
+	//TODO: global scale
 	using namespace DirectX;
 	size.x *= x;
 	size.y *= y;
 	size.z *= z;
 }
 
-inline DirectX::XMMATRIX Transform::getMatrix() const
+inline DirectX::XMMATRIX Transform::getWorldMatrix() const
 {
 	using namespace DirectX;
 	return XMMatrixScalingFromVector(XMLoadFloat3(&size)) * XMMatrixRotationQuaternion(XMLoadFloat4(&rotationQuaternion)) * XMMatrixTranslationFromVector(XMLoadFloat3(&position));

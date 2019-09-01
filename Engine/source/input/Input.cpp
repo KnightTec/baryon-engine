@@ -280,19 +280,25 @@ void Input::passOSData(WPARAM wParam, LPARAM lParam)
 		processKeyboard(&raw.data.keyboard);
 		break;
 	case RIM_TYPEHID:
-		{
-			processGenericGamepad(&raw);
-			break;
-		}
+		processGenericGamepad(&raw);
+		break;
 	default:
 		break;
 	}
 }
 
+static std::unordered_map<int, KEYBOARD_INPUT> keyboardMap{
+	{VK_LEFT, KEYBOARD_INPUT::ARROW_LEFT},
+	{VK_RIGHT, KEYBOARD_INPUT::ARROW_RIGHT},
+	{VK_UP, KEYBOARD_INPUT::ARROW_UP},
+	{VK_DOWN, KEYBOARD_INPUT::ARROW_DOWN},
+	{VK_SPACE, KEYBOARD_INPUT::SPACE},
+	{VK_RETURN, KEYBOARD_INPUT::RETURN}
+};
 
 void Input::processKeyboard(RAWKEYBOARD* data)
 {
-	float value = float(1 - data->Flags & RI_KEY_BREAK);
+	auto value = float(1 - data->Flags & RI_KEY_BREAK);
 
 	// handle character keys
 	if (data->VKey >= 0x41 && data->VKey <= 0x5A)
@@ -300,28 +306,10 @@ void Input::processKeyboard(RAWKEYBOARD* data)
 		keyboard.onInput(static_cast<KEYBOARD_INPUT>(data->VKey - 0x41), value);
 		return;
 	}
-	switch (data->VKey)
+	const auto& it = keyboardMap.find(data->VKey);
+	if (it != keyboardMap.end())
 	{
-	case VK_LEFT:
-		keyboard.onInput(KEYBOARD_INPUT::ARROW_LEFT, value);
-		break;
-	case VK_RIGHT:
-		keyboard.onInput(KEYBOARD_INPUT::ARROW_RIGHT, value);
-		break;
-	case VK_UP:
-		keyboard.onInput(KEYBOARD_INPUT::ARROW_UP, value);
-		break;
-	case VK_DOWN:
-		keyboard.onInput(KEYBOARD_INPUT::ARROW_DOWN, value);
-		break;
-	case VK_SPACE:
-		keyboard.onInput(KEYBOARD_INPUT::SPACE, value);
-		break;
-	case VK_RETURN:
-		keyboard.onInput(KEYBOARD_INPUT::ENTER, value);
-		break;
-	default:
-		break;
+		keyboard.onInput(it->second, value);
 	}
 }
 
@@ -373,7 +361,7 @@ void Input::processXInput()
 	gamepad.onInput(GAMEPAD_INPUT::RIGHT_SHOULDER, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0));
 
 	gamepad.onInput(GAMEPAD_INPUT::LEFT_TRIGGER, float(state.Gamepad.bLeftTrigger) / 255);
-	gamepad.onInput(GAMEPAD_INPUT::LEFT_TRIGGER, float(state.Gamepad.bRightTrigger) / 255);
+	gamepad.onInput(GAMEPAD_INPUT::RIGHT_TRIGGER, float(state.Gamepad.bRightTrigger) / 255);
 
 	gamepad.onInput(GAMEPAD_INPUT::BUTTON_A, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0));
 	gamepad.onInput(GAMEPAD_INPUT::BUTTON_B, static_cast<float>((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0));
@@ -456,9 +444,26 @@ void Input::processGenericGamepad(RAWINPUT* raw)
 		HidP_GetUsageValue(HidP_Input, valueCaps[i].UsagePage, 0,
 		                   valueCaps[i].Range.UsageMin, &tmp, pPreparsedData,
 		                   reinterpret_cast<PCHAR>(raw->data.hid.bRawData), raw->data.hid.dwSizeHid);
-		float value = tmp << 1;
-		value /= float(valueCaps[i].LogicalMax - valueCaps[i].LogicalMin);
-		value -= 1;
+		float value;
+		switch (valueCaps[i].Range.UsageMin)
+		{
+		case 0x39:
+			// D-Pad
+			value = tmp;
+			break;
+		case 0x33:
+		case 0x34:
+			// triggers
+			value = tmp;
+			value /= float(valueCaps[i].LogicalMax - valueCaps[i].LogicalMin);
+			break;
+		default:
+			// thumbsticks
+			value = tmp << 1;
+			value /= float(valueCaps[i].LogicalMax - valueCaps[i].LogicalMin);
+			value -= 1;
+			break;
+		}
 		switch (valueCaps[i].Range.UsageMin)
 		{
 		case 0x30:
@@ -477,15 +482,10 @@ void Input::processGenericGamepad(RAWINPUT* raw)
 			// TODO: D-Pad
 			break;
 		case 0x33:
-			// DS4 left trigger
+			gamepad.onInput(GAMEPAD_INPUT::LEFT_TRIGGER, value);
 			break;
 		case 0x34:
-			{
-				// DS4 right trigger in range [-1, 1]
-				std::string s = std::to_string(value) + "\n";
-				OutputDebugStringA(s.c_str());
-				break;
-			}
+			gamepad.onInput(GAMEPAD_INPUT::RIGHT_TRIGGER, value);
 		default:
 			break;
 		}

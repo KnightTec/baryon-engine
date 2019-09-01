@@ -141,7 +141,7 @@ void Renderer::render()
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const Mesh* mesh : meshes)
 	{
-		XMMATRIX worldMatrix = mesh->transform.getMatrix();
+		XMMATRIX worldMatrix = mesh->transform.getWorldMatrix();
 
 		uint32_t strides = sizeof(Vertex);
 		uint32_t offsets = 0;

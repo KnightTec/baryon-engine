@@ -51,8 +51,8 @@ void GameWindow::setStyle(STYLE newStyle)
 void GameWindow::setResolution(DirectX::XMUINT2 resolution)
 {
 	this->resolution = resolution;
-	resize(resolution);
 	screen->resize(resolution);
+	resize(resolution);
 }
 
 void GameWindow::resize(DirectX::XMUINT2 clientSize)

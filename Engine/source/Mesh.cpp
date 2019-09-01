@@ -73,7 +73,7 @@ Mesh::Mesh()
 
 	getDevice()->CreateBuffer(&bufferDesc, &initData, indexBuffer.GetAddressOf());
 }
-bool Mesh::initialize(const char* filename)
+bool Mesh::load(const char* filename)
 {
 	////TODO: parse imported file
 

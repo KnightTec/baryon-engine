@@ -6,7 +6,7 @@ namespace Baryon
 class Entity
 {
 public:
-
+	virtual void update() = 0;
 protected:
 	Transform transform;
 private:

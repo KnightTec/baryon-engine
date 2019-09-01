@@ -6,6 +6,7 @@
 #include <DirectXMath.h>
 
 #include <cstdint>
+#include <string>
 
 namespace Baryon
 {
@@ -22,14 +23,16 @@ public:
 	Transform transform;
 
 	Mesh();
-	bool initialize(const char* filename);
+	bool load(const char* filename);
+
+	// returns the path of the converted mesh
+	static std::string import(const char* source);
 
 	ID3D11Buffer* getVertexBuffer() const;
 	ID3D11Buffer* getIndexBuffer() const;
 	uint32_t getIndexCount() const;
 private:
 	uint32_t indexCount;
-
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 };
