@@ -1,15 +1,22 @@
 #pragma once
 #include "Transform.h"
+#include "Mesh.h"
 
 namespace Baryon
 {
 class Entity
 {
 public:
-	virtual void update() = 0;
-protected:
+	Entity(Mesh& mesh);
+	//virtual void update() = 0;
+
 	Transform transform;
+	Mesh& mesh;
 private:
-	uint64_t id;
+	uint32_t id;
 };
+
+inline Entity::Entity(Mesh& mesh) : mesh{mesh}
+{
+}
 }

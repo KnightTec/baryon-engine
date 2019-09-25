@@ -78,11 +78,11 @@ float4 main(in VSOutput input) : SV_Target0
     color = color * (1 - vignette);
 
     // apply dithering (http://enbseries.enbdev.com/forum/viewtopic.php?f=7&t=5220)
-    float dither_amp = 2.0;
+    float dither_amp = 0.1;
     float noise = lerp(-0.5, 0.5, InterleavedGradientNoise(input.pos.xy)) * dither_amp;
-    color.xyz = pow(color.xyz, 1.0 / 2.2);
+    //color.xyz = pow(color.xyz, 1.0 / 2.2);
     color.xyz = color.xyz + noise * min(color.xyz + 0.5 * pow(1.0 / 255.0, 2.2), 0.75 * (pow(256.0 / 255.0, 2.2) - 1.0));
-    color.xyz = pow(color.xyz, 2.2);
+    //color.xyz = pow(color.xyz, 2.2);
     
     return float4(color, 1);
     //return float4(float3(1, 1, 1) * vignette, 1);

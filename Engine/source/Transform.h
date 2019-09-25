@@ -16,15 +16,16 @@ public:
 	void translate(float x, float y, float z, SPACE space = SPACE::LOCAL);
 	void rotate(float pitch, float yaw, float roll, SPACE space = SPACE::LOCAL);
 	void scale(float x, float y, float z, SPACE space = SPACE::LOCAL);
+
 	DirectX::XMMATRIX getWorldMatrix() const;
 private:
-	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT4 rotationQuaternion;
+	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 size;
 };
 
 
-inline Transform::Transform() : position(0, 0, 0), rotationQuaternion(0, 0, 0, 1), size(1, 1, 1)
+inline Transform::Transform() : rotationQuaternion(0, 0, 0, 1), position(0, 0, 0), size(1, 1, 1)
 {
 }
 inline void Transform::translate(float x, float y, float z, SPACE space)

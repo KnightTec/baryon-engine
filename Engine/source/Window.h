@@ -2,6 +2,7 @@
 #include "VirtualScreen.h"
 #include "WindowsApplication.h"
 
+#include <DirectXMath.h>
 
 #include "windows.h"
 
@@ -11,36 +12,45 @@ class Window
 {
 	friend class Renderer;
 public:
-	Window();
+	Window(DirectX::XMUINT2 resolution);
 	HWND getHwnd() const;
 	void setActiveCamera(Camera* camera);
 	void show();
-
-	void setVirtualScreen(VirtualScreen* vs);
+	virtual void setResolution(DirectX::XMUINT2 resolution);
+	DirectX::XMUINT2 getResolution() const;
 protected:
-	virtual bool initialize() = 0;
+	virtual void resize(DirectX::XMUINT2 clientSize) = 0;
 
 	HWND hwnd;
 	VirtualScreen* screen;
+	DirectX::XMUINT2 resolution;
 };
 
 
-inline Window::Window() : hwnd{WindowsApplication::getWindowHandle()}, screen{nullptr}
+inline Window::Window(DirectX::XMUINT2 resolution) 
+	: hwnd{WindowsApplication::getWindowHandle()}, screen{nullptr}, resolution{resolution}
 {
 }
-
 inline HWND Window::getHwnd() const
 {
 	return hwnd;
 }
-
 inline void Window::setActiveCamera(Camera* camera)
 {
 	screen->setActiveCamera(camera);
 }
-
 inline void Window::show()
 {
 	ShowWindow(hwnd, SW_SHOW);
 }
+inline void Window::setResolution(DirectX::XMUINT2 resolution)
+{
+	this->resolution = resolution;
+	screen->resize(resolution);
+}
+inline DirectX::XMUINT2 Window::getResolution() const
+{
+	return resolution;
+}
+
 }

@@ -226,7 +226,7 @@ bool Input::bindAction(const std::string& actionName, Action::TYPE type, void (*
 	{
 		return false;
 	}
-	action->second.callbacks.emplace_back(std::pair(function, type));
+	action->second.callbacks.emplace_back(std::pair<void(*)(), Action::TYPE>(function, type));
 	return true;
 }
 

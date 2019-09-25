@@ -3,6 +3,7 @@
 #include "VirtualScreen.h"
 
 #include <vector>
+#include "../Entity.h"
 
 namespace Baryon
 {
@@ -20,9 +21,11 @@ public:
 	//TODO: use factory for window
 	bool createVirtualScreen(Window& targetWindow);
 	void submitMesh(Mesh* mesh);
+	void submitEntity(Entity* entity);
 	void render();
 private:
 	std::vector<const Mesh*> meshes;
+	std::vector<Entity*> entities;
 	std::vector<VirtualScreen> virtualScreens;
 };
 
@@ -33,5 +36,10 @@ inline void Renderer::submitMesh(Mesh* mesh)
 {
 	meshes.push_back(mesh);
 }
+inline void Renderer::submitEntity(Entity* entity)
+{
+	entities.push_back(entity);
+}
+
 
 }

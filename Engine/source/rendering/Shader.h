@@ -7,9 +7,6 @@
 
 namespace Baryon
 {
-struct Empty
-{
-};
 
 class Shader : protected GraphicsDeviceInterface
 {

@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "VirtualScreen.h"
-#include "../Mesh.h"
+#include "Mesh.h"
 #include "RenderPass.h"
 #include "DXErr.h"
 #include "../Window.h"
@@ -98,12 +98,12 @@ bool Renderer::initialize()
 
 	getContext()->OMSetDepthStencilState(depthStencilState.Get(), 0);
 
-	//TODO: invert depth buffer
 	/*
 	 * TODO: Blend State
 	  Depth Stencil State
 	  Sampler State
 	 */
+
 	return true;
 }
 
@@ -124,7 +124,7 @@ bool Renderer::createVirtualScreen(Window& targetWindow)
 		return false;
 	}
 	targetWindow.screen = &virtualScreens.back();
-	targetWindow.initialize();
+	targetWindow.setResolution(targetWindow.getResolution());
 	return true;
 }
 
@@ -139,15 +139,15 @@ void Renderer::render()
 
 	// render geometry pass
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	for (const Mesh* mesh : meshes)
+	for (const Entity* entity : entities)
 	{
-		XMMATRIX worldMatrix = mesh->transform.getWorldMatrix();
+		XMMATRIX worldMatrix = entity->transform.getWorldMatrix();
 
 		uint32_t strides = sizeof(Vertex);
 		uint32_t offsets = 0;
-		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
+		ID3D11Buffer* vertexBuffer = entity->mesh.getVertexBuffer();
 		getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
-		getContext()->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+		getContext()->IASetIndexBuffer(entity->mesh.getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 		for (VirtualScreen& screen : virtualScreens)
 		{
@@ -162,7 +162,7 @@ void Renderer::render()
 				XMStoreFloat4x4(&data.mWorldNormals, XMMatrixInverse(nullptr, worldMatrix));
 				vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
-				getContext()->DrawIndexed(mesh->getIndexCount(), 0, 0);
+				getContext()->DrawIndexed(entity->mesh.getIndexCount(), 0, 0);
 			}
 		}
 	}

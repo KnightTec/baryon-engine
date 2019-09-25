@@ -20,27 +20,26 @@ public:
 		FULLSCREEN = 2,
 	};
 
-	GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution, STYLE style);
+	GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution);
 	
 	void setStyle(STYLE newStyle);
 	/*
 	 * Set the resolution of the back buffer
 	 */
-	void setResolution(DirectX::XMUINT2 resolution);
+	void setResolution(DirectX::XMUINT2 resolution) override;
 
 	bool handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam) override;
 private:
-	bool initialize() override;
 	/*
 	 * Resize the client area of the window
 	 */
-	void resize(DirectX::XMUINT2 clientSize);
+	void resize(DirectX::XMUINT2 clientSize) override;
+	/*
+	 * Trap the cursor inside the client area
+	 */
 	void trapCursor();
 
 	STYLE style;
-
-	//TODO: move this member to Window.h
-	DirectX::XMUINT2 resolution;
 };
 
 }

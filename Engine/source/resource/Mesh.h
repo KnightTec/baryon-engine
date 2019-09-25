@@ -1,8 +1,6 @@
 #pragma once
 #include "GraphicsDeviceInterface.h"
 
-#include "Transform.h"
-
 #include <DirectXMath.h>
 
 #include <cstdint>
@@ -19,9 +17,6 @@ struct Vertex
 class Mesh : GraphicsDeviceInterface
 {
 public:
-	// TODO: remove this member
-	Transform transform;
-
 	Mesh();
 	bool load(const char* filename);
 

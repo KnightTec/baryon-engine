@@ -9,8 +9,6 @@ namespace Baryon
 class RenderTexture : GraphicsDeviceInterface
 {
 public:
-
-
 	RenderTexture(DXGI_FORMAT format);
 	bool create(DirectX::XMUINT2 resolution);
 	void release();

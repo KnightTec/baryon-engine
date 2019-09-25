@@ -3,23 +3,11 @@
 
 using namespace Baryon;
 
-GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0],
-                       STYLE style = WINDOWED)
-	: style{WINDOWED}, resolution{resolution}
+GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0])
+	: Window(resolution), style{WINDOWED}
 {
 	WindowsApplication::registerEventHandler(this);
 	SetWindowTextW(hwnd, name);
-}
-
-bool GameWindow::initialize()
-{
-	// TODO: remove init function
-
-	setStyle(style);
-	setResolution(resolution);
-	show();
-
-	return true;
 }
 
 void GameWindow::setStyle(STYLE newStyle)
@@ -50,8 +38,7 @@ void GameWindow::setStyle(STYLE newStyle)
 
 void GameWindow::setResolution(DirectX::XMUINT2 resolution)
 {
-	this->resolution = resolution;
-	screen->resize(resolution);
+	Window::setResolution(resolution);
 	resize(resolution);
 }
 

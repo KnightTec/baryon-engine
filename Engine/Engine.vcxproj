@@ -13,12 +13,13 @@
   <ItemGroup>
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Entity.h" />
+    <ClInclude Include="source\EntityManager.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
     <ClInclude Include="source\rendering\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
     <ClInclude Include="source\input\VirtualInputDevice.h" />
     <ClInclude Include="source\input\Input.h" />
-    <ClInclude Include="source\Mesh.h" />
+    <ClInclude Include="source\resource\Mesh.h" />
     <ClInclude Include="source\core\Observer.h" />
     <ClInclude Include="source\core\PassKey.h" />
     <ClInclude Include="source\rendering\Renderer.h" />
@@ -26,6 +27,7 @@
     <ClInclude Include="source\rendering\RenderTexture.h" />
     <ClInclude Include="source\rendering\Shader.h" />
     <ClInclude Include="source\rendering\VirtualScreen.h" />
+    <ClInclude Include="source\resource\ResourceManager.h" />
     <ClInclude Include="source\Transform.h" />
     <ClInclude Include="source\Window.h" />
     <ClInclude Include="source\WindowsApplication.h" />
@@ -36,7 +38,7 @@
     <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
     <ClCompile Include="source\input\Input.cpp" />
-    <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\resource\Mesh.cpp" />
     <ClCompile Include="source\rendering\Renderer.cpp" />
     <ClCompile Include="source\rendering\RenderTexture.cpp" />
     <ClCompile Include="source\rendering\Shader.cpp" />
@@ -126,8 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\resource;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,8 +148,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\resource;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -20,7 +20,7 @@ public:
 	DirectX::XMMATRIX getViewProjMatrix();
 	DirectX::XMVECTOR getPostion()
 	{
-		return DirectX::XMLoadFloat3(&position);
+		return XMLoadFloat3(&position);
 	}
 
 	void setFov(float fov);
@@ -30,10 +30,10 @@ public:
 private:
 	void updateViewMatrix();
 
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT4 orientationQuaternion;
 	DirectX::XMFLOAT4X4 projectionMatrix;
 	DirectX::XMFLOAT4X4 viewMatrix;
+	DirectX::XMFLOAT4 orientationQuaternion;
+	DirectX::XMFLOAT3 position;
 
 	float fov;
 	float aspectRatio;

@@ -56,7 +56,7 @@ bool VirtualScreen::initialize(const Window& window)
 {
 	assert(!initialized);
 	initialized = true;
-
+	
 	// Create the swap chain
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));

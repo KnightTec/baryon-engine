@@ -40,7 +40,6 @@ void Engine::run()
 
 		Input::handleGameInput();
 		renderer.render();
-
 	}
 	terminate();
 }

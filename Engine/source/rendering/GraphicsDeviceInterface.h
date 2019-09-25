@@ -11,7 +11,7 @@ class Engine;
 
 /*
  * A service locator that provides a interface to the graphics API
- * All classes that wish to use the graphics API must inherit from this class
+ * All classes that use the graphics API must inherit from this class
  */
 class GraphicsDeviceInterface
 {
