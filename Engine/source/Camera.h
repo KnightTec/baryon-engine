@@ -31,7 +31,7 @@ private:
 	void updateViewMatrix();
 
 	DirectX::XMFLOAT4X4 projectionMatrix;
-	DirectX::XMFLOAT4X4 viewMatrix;
+	DirectX::XMFLOAT4X3 viewMatrix;
 	DirectX::XMFLOAT4 orientationQuaternion;
 	DirectX::XMFLOAT3 position;
 
@@ -54,7 +54,7 @@ inline Camera::Camera(float fov, float aspectRatio, float nearZ, float farZ, Dir
 inline DirectX::XMMATRIX Camera::getViewMatrix()
 {
 	updateViewMatrix();
-	return XMLoadFloat4x4(&viewMatrix);
+	return XMLoadFloat4x3(&viewMatrix);
 }
 inline DirectX::XMMATRIX Camera::getProjectionMatrix() const
 {

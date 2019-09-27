@@ -1,5 +1,6 @@
 #include "GameWindow.h"
 #include "VirtualScreen.h"
+#include <minwinbase.h>
 
 using namespace Baryon;
 
@@ -114,11 +115,13 @@ bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 		}
 		if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE)
 		{
+			resize(WindowsApplication::getDisplayResolution());
 			screen->setFullscreen(true);
 			return true;
 		}
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
+			ShowWindow(hWnd, SW_SHOWMINIMIZED);
 			screen->setFullscreen(false);
 			return true;
 		}

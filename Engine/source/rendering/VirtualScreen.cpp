@@ -4,11 +4,15 @@
 
 #include "dxgi.h"
 #include <string>
+#include <minwinbase.h>
+#include <minwinbase.h>
+#include <minwinbase.h>
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
 
 static const DXGI_FORMAT swapChainFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+static DXGI_RATIONAL refreshRate = {0, 1};
 
 static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 {
@@ -33,9 +37,16 @@ static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 	resolutions.emplace_back(DirectX::XMUINT2{displayModes[0].Width, displayModes[0].Height});
 	for (UINT i = 1; i < numModes; i++)
 	{
+		// skip duplicates
 		if (displayModes[i].Width != displayModes[i - 1].Width && displayModes[i].Height != displayModes[i - 1].Height)
 		{
 			resolutions.emplace_back(DirectX::XMUINT2{displayModes[i].Width, displayModes[i].Height});
+		}
+		// get the maximal refresh rate
+		DXGI_RATIONAL refreshRateTmp = displayModes[i].RefreshRate;
+		if (refreshRateTmp.Numerator / refreshRateTmp.Denominator > refreshRate.Numerator / refreshRate.Denominator)
+		{
+			refreshRate = refreshRateTmp;
 		}
 	}
 	delete[] displayModes;
@@ -50,6 +61,8 @@ const std::vector<DirectX::XMUINT2>& VirtualScreen::getSupportedResolutions()
 
 VirtualScreen::VirtualScreen() : initialized{false}, fullscreen{false}, activeCamera{nullptr}, resolution{0, 0}
 {
+	// call to initialize the refresh rate
+	getSupportedResolutions();
 }
 
 bool VirtualScreen::initialize(const Window& window)
@@ -178,6 +191,7 @@ bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
 	mode.Width = resolution.x;
 	mode.Height = resolution.y;
 	mode.Format = swapChainFormat;
+	mode.RefreshRate = refreshRate;
 	if (fullscreen)
 	{
 		HR(d3dSwapChain->ResizeTarget(&mode));
@@ -194,11 +208,15 @@ bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
 
 bool VirtualScreen::setFullscreen(bool fullscreen)
 {
-	if (fullscreen == this->fullscreen)
-	{
-		return true;
-	}
 	HR(d3dSwapChain->SetFullscreenState(fullscreen, nullptr));
+	if (fullscreen)
+	{
+		DXGI_MODE_DESC mode = {};
+		mode.Width = resolution.x;
+		mode.Height = resolution.y;
+		mode.Format = swapChainFormat;
+		HR(d3dSwapChain->ResizeTarget(&mode));
+	}
 	releaseBuffers();
 	if (d3dSwapChain)
 	{

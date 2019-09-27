@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Camera.h" />
+    <ClInclude Include="source\core\Array.h" />
     <ClInclude Include="source\Entity.h" />
     <ClInclude Include="source\EntityManager.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
@@ -23,7 +24,6 @@
     <ClInclude Include="source\core\Observer.h" />
     <ClInclude Include="source\core\PassKey.h" />
     <ClInclude Include="source\rendering\Renderer.h" />
-    <ClInclude Include="source\rendering\RenderPass.h" />
     <ClInclude Include="source\rendering\RenderTexture.h" />
     <ClInclude Include="source\rendering\Shader.h" />
     <ClInclude Include="source\rendering\VirtualScreen.h" />

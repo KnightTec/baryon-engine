@@ -29,5 +29,5 @@ void Camera::updateViewMatrix()
 {
 	XMMATRIX viewMat = XMMatrixTranslationFromVector(-XMLoadFloat3(&position));
 	viewMat *= XMMatrixTranspose(XMMatrixRotationQuaternion(XMLoadFloat4(&orientationQuaternion)));
-	XMStoreFloat4x4(&viewMatrix, viewMat);
+	XMStoreFloat4x3(&viewMatrix, viewMat);
 }

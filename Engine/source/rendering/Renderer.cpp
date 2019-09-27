@@ -1,8 +1,8 @@
 #include "Renderer.h"
 #include "VirtualScreen.h"
 #include "Mesh.h"
-#include "RenderPass.h"
 #include "DXErr.h"
+#include "Shader.h"
 #include "../Window.h"
 
 using namespace Baryon;
