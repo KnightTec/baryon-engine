@@ -3,7 +3,7 @@
 #include "Mesh.h"
 #include "DXErr.h"
 #include "Shader.h"
-#include "../Window.h"
+#include "Window.h"
 
 using namespace Baryon;
 using namespace DirectX;

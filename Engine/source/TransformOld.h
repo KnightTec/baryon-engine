@@ -9,10 +9,10 @@ enum class SPACE
 	GLOBAL
 };
 
-class Transform
+class TransformOld
 {
 public:
-	Transform();
+	TransformOld();
 	void translate(float x, float y, float z, SPACE space = SPACE::LOCAL);
 	void rotate(float pitch, float yaw, float roll, SPACE space = SPACE::LOCAL);
 	void scale(float x, float y, float z, SPACE space = SPACE::LOCAL);
@@ -25,10 +25,10 @@ private:
 };
 
 
-inline Transform::Transform() : rotationQuaternion(0, 0, 0, 1), position(0, 0, 0), size(1, 1, 1)
+inline TransformOld::TransformOld() : rotationQuaternion(0, 0, 0, 1), position(0, 0, 0), size(1, 1, 1)
 {
 }
-inline void Transform::translate(float x, float y, float z, SPACE space)
+inline void TransformOld::translate(float x, float y, float z, SPACE space)
 {
 	using namespace DirectX;
 	XMVECTOR translationVec = XMVectorSet(x, y, z, 1);
@@ -38,7 +38,7 @@ inline void Transform::translate(float x, float y, float z, SPACE space)
 	}
 	XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&position), translationVec));
 }
-inline void Transform::rotate(float pitch, float yaw, float roll, SPACE space)
+inline void TransformOld::rotate(float pitch, float yaw, float roll, SPACE space)
 {
 	using namespace DirectX;
 	XMVECTOR newRotation = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
@@ -48,7 +48,7 @@ inline void Transform::rotate(float pitch, float yaw, float roll, SPACE space)
 
 	XMStoreFloat4(&rotationQuaternion, XMQuaternionNormalize(rotation));
 }
-inline void Transform::scale(float x, float y, float z, SPACE space)
+inline void TransformOld::scale(float x, float y, float z, SPACE space)
 {
 	//TODO: global scale
 	using namespace DirectX;
@@ -57,7 +57,7 @@ inline void Transform::scale(float x, float y, float z, SPACE space)
 	size.z *= z;
 }
 
-inline DirectX::XMMATRIX Transform::getWorldMatrix() const
+inline DirectX::XMMATRIX TransformOld::getWorldMatrix() const
 {
 	using namespace DirectX;
 	return XMMatrixScalingFromVector(XMLoadFloat3(&size)) * XMMatrixRotationQuaternion(XMLoadFloat4(&rotationQuaternion)) * XMMatrixTranslationFromVector(XMLoadFloat3(&position));

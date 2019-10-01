@@ -1,6 +1,6 @@
 #pragma once
 #include "VirtualScreen.h"
-#include "WindowsApplication.h"
+#include "../WindowsApplication.h"
 
 #include <DirectXMath.h>
 

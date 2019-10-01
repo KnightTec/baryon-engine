@@ -1,56 +1,53 @@
 #pragma once
-#include "Mesh.h"
-#include "Array.h"
-#include "Entity.h"
+#include "Archetype.h"
+#include "Components.h"
+#include "Memory.h"
+
+#include <unordered_map>
+
 
 namespace Baryon
 {
-
-struct TransformComponent
-{
-	DirectX::XMFLOAT4 rotationQuaternion;
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT3 size;
-};
-
-struct RenderComponent
-{
-	DirectX::XMFLOAT4X3 worldMatrix;
-	//TODO: replace with path
-	Mesh* mesh;
-};
-
 class EntityManager
 {
 public:
-	EntityManager(size_t maxEntities);
-	const Entity& createEntity();
-	const void destroyEntity(uint64_t id);
+	EntityManager();
+	EntityId createEntity();
+	void destroyEntity(EntityId entityId);
+	template <typename T>
+	void addComponent(EntityId entityId);
+	void addComponent(EntityId entityId, TypeId componentType);
+	template <typename T>
+	void removeComponent(EntityId entityId);
+	void removeComponent(EntityId entityId, TypeId componentType);
+	template <typename T>
+	T* getComponent(EntityId entityId);
 private:
-	Array<TransformComponent> transformComponents;
-	Array<RenderComponent> renderComponents;
+	void changeArchetype(EntityId entityId, TypeFlag newFlag);
 
-	//TODO: index array
-
-
-	size_t transformCount;
-	size_t renderComponentCount;
+	StackAllocator archetypeAllocator;
+	std::unordered_map<TypeFlag, Archetype*> archetypes;
+	std::unordered_map<EntityId, TypeFlag> entityToComponentsMap;
+	EntityId nextFreeId;
 };
 
-inline EntityManager::EntityManager(size_t maxEntities) 
-	: transformComponents(maxEntities), renderComponents(maxEntities)
-{
-}
-inline const Entity& EntityManager::createEntity()
-{
-	//TODO:
 
-}
-inline const void EntityManager::destroyEntity(uint64_t id)
+template <typename T>
+void EntityManager::addComponent(EntityId entityId)
 {
-	//TODO:
+	changeArchetype(entityId, entityToComponentsMap[entityId] | ComponentRegistry::getTypeInfo<T>().flag);
+}
+template <typename T>
+void EntityManager::removeComponent(EntityId entityId)
+{
+	changeArchetype(entityId, entityToComponentsMap[entityId] & ~ComponentRegistry::getTypeInfo<T>().flag);
 }
 
 
 
+template <typename... HandledComponents>
+class System
+{
+	// getComponentArray
+};
 }

@@ -1,6 +1,5 @@
 #include "GameWindow.h"
 #include "VirtualScreen.h"
-#include <minwinbase.h>
 
 using namespace Baryon;
 

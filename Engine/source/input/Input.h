@@ -15,8 +15,6 @@ namespace Baryon
 class Input
 {
 public:
-	//TODO: Input Action
-
 	class Axis
 	{
 		friend class Input;

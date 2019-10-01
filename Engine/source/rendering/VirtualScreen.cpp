@@ -1,12 +1,11 @@
 #include "VirtualScreen.h"
-#include "../Window.h"
+#include "Window.h"
 #include "DXErr.h"
 
 #include "dxgi.h"
 #include <string>
 #include <minwinbase.h>
-#include <minwinbase.h>
-#include <minwinbase.h>
+
 
 using namespace Baryon;
 using namespace Microsoft::WRL;

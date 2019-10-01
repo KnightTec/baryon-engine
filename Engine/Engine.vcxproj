@@ -11,8 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Archetype.h" />
     <ClInclude Include="source\Camera.h" />
-    <ClInclude Include="source\core\Array.h" />
+    <ClInclude Include="source\Components.h" />
+    <ClInclude Include="source\core\Memory.h" />
     <ClInclude Include="source\Entity.h" />
     <ClInclude Include="source\EntityManager.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
@@ -28,12 +30,14 @@
     <ClInclude Include="source\rendering\Shader.h" />
     <ClInclude Include="source\rendering\VirtualScreen.h" />
     <ClInclude Include="source\resource\ResourceManager.h" />
-    <ClInclude Include="source\Transform.h" />
-    <ClInclude Include="source\Window.h" />
+    <ClInclude Include="source\TransformOld.h" />
+    <ClInclude Include="source\rendering\Window.h" />
     <ClInclude Include="source\WindowsApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Camera.cpp" />
+    <ClCompile Include="source\Components.cpp" />
+    <ClCompile Include="source\EntityManager.cpp" />
     <ClCompile Include="source\input\VirtualInputDevice.cpp" />
     <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />

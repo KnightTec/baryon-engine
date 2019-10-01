@@ -4,6 +4,8 @@
 
 #include "windows.h"
 #include "Input.h"
+#include "Components.h"
+#include "EntityManager.h"
 
 using namespace Baryon;
 
@@ -12,6 +14,7 @@ bool Engine::initialize()
 	SetProcessDPIAware();
 
 	Input::initialize();
+	ComponentRegistry::initialize();
 
 	if (!GraphicsDeviceInterface::initialize(Key<Engine>()))
 	{
@@ -24,6 +27,7 @@ bool Engine::initialize()
 		MessageBoxW(nullptr, L"Error: Failed to initialize Renderer.", L"Baryon Engine", MB_OK | MB_ICONERROR);
 		return false;
 	}
+
 	return true;
 }
 

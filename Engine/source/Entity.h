@@ -1,5 +1,5 @@
 #pragma once
-#include "Transform.h"
+#include "TransformOld.h"
 #include "Mesh.h"
 
 namespace Baryon
@@ -11,7 +11,7 @@ public:
 	//virtual void update() = 0;
 	uint64_t getId() const;
 
-	Transform transform;
+	TransformOld transform;
 	Mesh& mesh;
 private:
 	uint64_t id;
