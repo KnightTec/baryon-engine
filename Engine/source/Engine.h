@@ -1,5 +1,6 @@
 #pragma once
 #include "Renderer.h"
+#include "EntityManager.h"
 
 
 namespace Baryon
@@ -12,7 +13,7 @@ class Engine
 public:
 	/*
 	 * Must be called before any other function
-	*/
+	 */
 	bool initialize();
 	/*
 	 * Run the main loop of the game engine
@@ -22,6 +23,7 @@ public:
 	Renderer& getRenderer();
 private:
 	Renderer renderer;
+	EntityManager em;
 };
 
 inline Renderer& Engine::getRenderer()

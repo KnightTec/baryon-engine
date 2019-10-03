@@ -16,10 +16,10 @@ public:
 	void destroyEntity(EntityId entityId);
 	template <typename T>
 	void addComponent(EntityId entityId);
-	void addComponent(EntityId entityId, TypeId componentType);
+	void addComponent(EntityId entityId, TypeFlag componentTypesFlag);
 	template <typename T>
 	void removeComponent(EntityId entityId);
-	void removeComponent(EntityId entityId, TypeId componentType);
+	void removeComponent(EntityId entityId, TypeFlag componentTypesFlag);
 	template <typename T>
 	T* getComponent(EntityId entityId);
 private:
@@ -35,12 +35,20 @@ private:
 template <typename T>
 void EntityManager::addComponent(EntityId entityId)
 {
-	changeArchetype(entityId, entityToComponentsMap[entityId] | ComponentRegistry::getTypeInfo<T>().flag);
+	addComponent(entityId, ComponentRegistry::getTypeInfo<T>().flag);
+}
+inline void EntityManager::addComponent(EntityId entityId, TypeFlag componentTypesFlag)
+{
+	changeArchetype(entityId, entityToComponentsMap[entityId] | componentTypesFlag);
 }
 template <typename T>
 void EntityManager::removeComponent(EntityId entityId)
 {
-	changeArchetype(entityId, entityToComponentsMap[entityId] & ~ComponentRegistry::getTypeInfo<T>().flag);
+	removeComponent(entityId, ComponentRegistry::getTypeInfo<T>().flag);
+}
+inline void EntityManager::removeComponent(EntityId entityId, TypeFlag componentTypesFlag)
+{
+	changeArchetype(entityId, entityToComponentsMap[entityId] & ~componentTypesFlag);
 }
 
 

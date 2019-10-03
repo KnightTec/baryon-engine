@@ -15,6 +15,7 @@
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Components.h" />
     <ClInclude Include="source\core\Memory.h" />
+    <ClInclude Include="source\core\ConstantHashMap.h" />
     <ClInclude Include="source\Entity.h" />
     <ClInclude Include="source\EntityManager.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
@@ -35,6 +36,7 @@
     <ClInclude Include="source\WindowsApplication.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Archetype.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Components.cpp" />
     <ClCompile Include="source\EntityManager.cpp" />

@@ -15,22 +15,24 @@ typedef uint64_t EntityId;
 
 struct TypeInfo
 {
+	TypeId typeId;
 	const char* name;
 	TypeFlag flag;
 	size_t sizeInBytes;
 	size_t alignment;
+	int countPerChunk;
 };
 
 class ComponentRegistry
 {
 public:
+	static void initialize();
 	template <typename T>
-	static void registerComponentType(const char* typeName, size_t componentsPerChunk = 4096);
+	static void registerComponentType(const char* typeName, size_t countPerChunk = 4096);
 	template <typename T>
 	static const TypeInfo& getTypeInfo();
 	static const TypeInfo& getTypeInfo(TypeFlag flag);
 	static const TypeInfo& getTypeInfo(TypeId typeId);
-	static void initialize();
 private:
 	static std::unordered_map<TypeId, TypeInfo> idMap;
 	static std::unordered_map<TypeFlag, TypeInfo> flagMap;
@@ -45,16 +47,18 @@ TypeId typeId(T obj)
 }
 
 template <typename T>
-void ComponentRegistry::registerComponentType(const char* typeName, size_t componentsPerChunk)
+void ComponentRegistry::registerComponentType(const char* typeName, size_t countPerChunk)
 {
 	TypeId id = typeId<T>();
 	if (idMap.find(id) == idMap.end())
 	{
 		auto& typeInfo = idMap[typeId<T>()];
+		typeInfo.typeId = typeId<T>();
 		typeInfo.name = typeName;
 		typeInfo.flag = 1 << (idMap.size() - 1);
 		typeInfo.sizeInBytes = sizeof T;
 		typeInfo.alignment = alignof(T);
+		typeInfo.countPerChunk = countPerChunk;
 
 		flagMap[typeInfo.flag] = typeInfo;
 	}
@@ -62,17 +66,19 @@ void ComponentRegistry::registerComponentType(const char* typeName, size_t compo
 template <typename T>
 const TypeInfo& ComponentRegistry::getTypeInfo()
 {
-	assert(idMap.find(typeId<T>()) != idMap.end());
-	return idMap[typeId<T>()];
+	return getTypeInfo(typeId<T>());
 }
 inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeFlag flag)
 {
 	assert(flagMap.find(flag) != flagMap.end());
 	return flagMap[flag];
 }
+inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeId typeId)
+{
+	assert(idMap.find(typeId) != idMap.end());
+	return idMap[typeId];
+}
 
-
-//TODO: use static variables to autoregister types outside functions
 
 #define REGISTER_COMPONENT_TYPE_1_ARG(type)							ComponentRegistry::registerComponentType<type>(#type)
 #define REGISTER_COMPONENT_TYPE_2_ARGS(type, componentsPerChunk)	ComponentRegistry::registerComponentType<type>(#type, componentsPerChunk)
