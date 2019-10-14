@@ -9,10 +9,9 @@ Archetype::Archetype(TypeFlag componentTypes, StackAllocator* allocator)
 {
 	size_t bufferSize = 0;
 	size_t alignmentOverhead = 0;
-	TypeFlag currentType;
 	while (componentTypes)
 	{
-		currentType = componentTypes & -componentTypes;
+		TypeFlag currentType = componentTypes & -componentTypes;
 		componentTypes &= ~currentType;
 		auto& typeInfo = ComponentRegistry::getTypeInfo(currentType);
 		if (typeInfo.countPerChunk < maxEntitiesPerChunk)
@@ -23,7 +22,6 @@ Archetype::Archetype(TypeFlag componentTypes, StackAllocator* allocator)
 		alignmentOverhead += typeInfo.alignment;
 		typeOffsets[typeInfo.typeId] = 0;
 	}
-
 	bufferSize = bufferSize * maxEntitiesPerChunk + alignmentOverhead;
 	buffer = static_cast<uint8_t*>(allocator->allocate(bufferSize));
 	entityIds = static_cast<EntityId*>(allocator->allocate(maxEntitiesPerChunk * sizeof EntityId));
@@ -32,7 +30,6 @@ Archetype::Archetype(TypeFlag componentTypes, StackAllocator* allocator)
 	for (auto& it : typeOffsets)
 	{
 		it.second = nextOffset;
-
 		auto typeAddress = reinterpret_cast<size_t>(buffer) + it.second;
 		auto& typeInfo = ComponentRegistry::getTypeInfo(it.first);
 
@@ -56,10 +53,10 @@ void Archetype::removeEntity(EntityId entityId)
 {
 	Index lastIndex = --numEntities;
 	Index removedEntityIndex = entityToComponentIndexMap[entityId];
-	for (auto& component : typeOffsets)
+	for (auto& typeOffset : typeOffsets)
 	{
-		uint8_t* typeAddress = buffer + typeOffsets[component.first];
-		size_t typeSize = ComponentRegistry::getTypeInfo(component.first).sizeInBytes;
+		uint8_t* typeAddress = buffer + typeOffset.second;
+		size_t typeSize = ComponentRegistry::getTypeInfo(typeOffset.first).sizeInBytes;
 		memcpy(typeAddress + removedEntityIndex * typeSize, typeAddress + lastIndex * typeSize, typeSize);
 	}
 	EntityId movedEntityId = entityIds[lastIndex];
@@ -70,9 +67,19 @@ void Archetype::removeEntity(EntityId entityId)
 void Archetype::moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId)
 {
 	targetArchetype->addEntity(entityId);
-	for (auto& componentType : typeOffsets)
+	Index entityIndex = entityToComponentIndexMap[entityId];
+	Index targetEntityIndex = targetArchetype->numEntities - 1;
+	uint8_t* targetBuffer = targetArchetype->buffer;
+	for (auto& targetTypeOffset : targetArchetype->typeOffsets)
 	{
-		//TODO: copy data
+		auto typeOffset = typeOffsets.find(targetTypeOffset.first);
+		if (typeOffset != typeOffsets.end())
+		{
+			size_t typeSize = ComponentRegistry::getTypeInfo(targetTypeOffset.first).sizeInBytes;
+			void* src = buffer + typeOffset->second + typeSize * entityIndex;
+			void* dst = targetBuffer + targetTypeOffset.second + typeSize * targetEntityIndex;
+			memcpy(dst, src, typeSize);
+		}
 	}
 	removeEntity(entityId);
 }

@@ -16,11 +16,9 @@ public:
 	HWND getHwnd() const;
 	void setActiveCamera(Camera* camera);
 	void show();
-	virtual void setResolution(DirectX::XMUINT2 resolution);
+	virtual void setResolution(DirectX::XMUINT2 resolution) = 0;
 	DirectX::XMUINT2 getResolution() const;
 protected:
-	virtual void resize(DirectX::XMUINT2 clientSize) = 0;
-
 	HWND hwnd;
 	VirtualScreen* screen;
 	DirectX::XMUINT2 resolution;

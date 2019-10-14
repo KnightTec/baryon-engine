@@ -29,7 +29,7 @@ private:
 	/*
 	 * Resize the client area of the window
 	 */
-	void resize(DirectX::XMUINT2 clientSize) override;
+	void resize(DirectX::XMUINT2 clientSize);
 	/*
 	 * Trap the cursor inside the client area
 	 */

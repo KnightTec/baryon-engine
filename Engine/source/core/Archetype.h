@@ -14,11 +14,7 @@ public:
 	void addEntity(EntityId entityId);
 	void removeEntity(EntityId entityId);
 	void moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId);
-	template <typename T>
-	T* getComponentPtr()
-	{
-		return static_cast<T*>(typeOffsets[typeId<T>()]);
-	}
+	void* getComponent(EntityId entityId, TypeId componentType);
 private:
 	uint8_t* buffer;
 	EntityId* entityIds;
@@ -27,4 +23,13 @@ private:
 	int maxEntitiesPerChunk;
 	int numEntities;
 };
+
+
+inline void* Archetype::getComponent(EntityId entityId, TypeId componentType)
+{
+	auto entityIndex = entityToComponentIndexMap.find(entityId);
+	size_t entityOffset = ComponentRegistry::getTypeInfo(componentType).sizeInBytes * entityToComponentIndexMap[entityId];
+	return buffer + typeOffsets[componentType] + entityOffset;
+}
+
 }

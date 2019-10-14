@@ -60,13 +60,7 @@
     <ClInclude Include="source\resource\ResourceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\EntityManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\TransformOld.h">
@@ -78,10 +72,19 @@
     <ClInclude Include="source\rendering\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Archetype.h">
+    <ClInclude Include="source\core\ConstantHashMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\core\ConstantHashMap.h">
+    <ClInclude Include="source\core\Archetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\core\EntityManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\core\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\core\System.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -119,13 +122,13 @@
     <ClCompile Include="source\resource\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\EntityManager.cpp">
+    <ClCompile Include="source\core\Archetype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Components.cpp">
+    <ClCompile Include="source\core\EntityManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Archetype.cpp">
+    <ClCompile Include="source\core\Components.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

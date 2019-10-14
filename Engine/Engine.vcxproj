@@ -11,13 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Archetype.h" />
+    <ClInclude Include="source\core\Archetype.h" />
     <ClInclude Include="source\Camera.h" />
-    <ClInclude Include="source\Components.h" />
+    <ClInclude Include="source\core\Components.h" />
     <ClInclude Include="source\core\Memory.h" />
     <ClInclude Include="source\core\ConstantHashMap.h" />
+    <ClInclude Include="source\core\System.h" />
     <ClInclude Include="source\Entity.h" />
-    <ClInclude Include="source\EntityManager.h" />
+    <ClInclude Include="source\core\EntityManager.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
     <ClInclude Include="source\rendering\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
@@ -36,10 +37,10 @@
     <ClInclude Include="source\WindowsApplication.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Archetype.cpp" />
+    <ClCompile Include="source\core\Archetype.cpp" />
     <ClCompile Include="source\Camera.cpp" />
-    <ClCompile Include="source\Components.cpp" />
-    <ClCompile Include="source\EntityManager.cpp" />
+    <ClCompile Include="source\core\Components.cpp" />
+    <ClCompile Include="source\core\EntityManager.cpp" />
     <ClCompile Include="source\input\VirtualInputDevice.cpp" />
     <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />

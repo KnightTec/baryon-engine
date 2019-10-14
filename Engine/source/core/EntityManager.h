@@ -50,12 +50,13 @@ inline void EntityManager::removeComponent(EntityId entityId, TypeFlag component
 {
 	changeArchetype(entityId, entityToComponentsMap[entityId] & ~componentTypesFlag);
 }
-
-
-
-template <typename... HandledComponents>
-class System
+template <typename T>
+T* EntityManager::getComponent(EntityId entityId)
 {
-	// getComponentArray
-};
+	//TODO
+	return nullptr;
+	//archetypes[entityToComponentsMap[entityId]]->getComponentPtr<T>();
+}
+
+
 }

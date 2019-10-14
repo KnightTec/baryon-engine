@@ -10,7 +10,7 @@ typedef const void* TypeId;
 template <typename T>
 TypeId typeId(T obj = T());
 
-typedef unsigned long long TypeFlag;
+typedef long long TypeFlag;
 typedef uint64_t EntityId;
 
 struct TypeInfo
