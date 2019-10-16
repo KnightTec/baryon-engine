@@ -5,13 +5,35 @@
 
 #include "Window.h"
 
-class Editor : public QWidget
+struct BaryonEditorApp : QApplication
+{
+	using QApplication::QApplication;
+	static bool running;
+};
+
+class Editor : public QWidget, public Baryon::Window
 {
 	Q_OBJECT
 
 public:
-	Editor(QWidget *parent = Q_NULLPTR);
+	Editor(Baryon::Renderer* renderer, QWidget *parent = Q_NULLPTR);
+
+	bool event(QEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
+
 
 private:
+	void resizeAndRerender(const QSize& size);
+
 	Ui::EditorClass ui;
+
+	Baryon::Renderer* renderer;
+
+	bool resizing = false;
 };
+
+
+
+
+

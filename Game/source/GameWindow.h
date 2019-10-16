@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Engine/source/WindowsApplication.h"
-#include "../../Engine/source/rendering/Window.h"
+#include "WindowsApplication.h"
+#include "Window.h"
 
 #include <windows.h>
 #include "DirectXMath.h"
@@ -20,9 +20,11 @@ public:
 		FULLSCREEN = 2,
 	};
 
-	GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution);
+	GameWindow(const wchar_t* title, DirectX::XMUINT2 resolution);
 	
 	void setStyle(STYLE newStyle);
+	void show();
+
 	void setResolution(DirectX::XMUINT2 resolution) override;
 	bool handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam) override;
 private:
@@ -37,5 +39,11 @@ private:
 
 	STYLE style;
 };
+
+
+inline void GameWindow::show()
+{
+	ShowWindow(hwnd, SW_SHOW);
+}
 
 }

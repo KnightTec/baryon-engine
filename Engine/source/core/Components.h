@@ -79,6 +79,13 @@ inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeId typeId)
 	return idMap[typeId];
 }
 
+#define REGISTER_COMPONENT_TYPE_X(T)\
+	struct T##_registrator{\
+		T##_registrator() {\
+			ComponentRegistry::registerComponentType<T>(#T);\
+		}\
+	};\
+	static T##_registrator global_##T##_registrator;
 
 #define REGISTER_COMPONENT_TYPE_1_ARG(type)							ComponentRegistry::registerComponentType<type>(#type)
 #define REGISTER_COMPONENT_TYPE_2_ARGS(type, componentsPerChunk)	ComponentRegistry::registerComponentType<type>(#type, componentsPerChunk)

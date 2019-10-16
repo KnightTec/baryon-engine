@@ -22,6 +22,7 @@ public:
 	void removeComponent(EntityId entityId, TypeFlag componentTypesFlag);
 	template <typename T>
 	T* getComponent(EntityId entityId);
+	void getArchetypesWithComponents(TypeFlag componentTypesFlag, Archetype** archetypePtrBuffer, int& numArchetypes);
 private:
 	void changeArchetype(EntityId entityId, TypeFlag newFlag);
 
@@ -53,10 +54,18 @@ inline void EntityManager::removeComponent(EntityId entityId, TypeFlag component
 template <typename T>
 T* EntityManager::getComponent(EntityId entityId)
 {
-	//TODO
-	return nullptr;
-	//archetypes[entityToComponentsMap[entityId]]->getComponentPtr<T>();
+	auto typeFlagIt = entityToComponentsMap.find(entityId);
+	if (typeFlagIt == entityToComponentsMap.end())
+	{
+		return nullptr;
+	}
+	auto archetypeIt = archetypes.find(typeFlagIt->second);
+	if (archetypeIt == archetypes.end())
+	{
+		return nullptr;
+	}
+	Archetype* archetype = archetypeIt->second;
+	return reinterpret_cast<T*>(archetype->getComponent(entityId, typeId<T>()));
 }
-
 
 }

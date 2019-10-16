@@ -65,8 +65,6 @@ bool Renderer::initialize()
 	HR(getDevice()->CreateRasterizerState1(&rasterizerState, rasterState.GetAddressOf()));
 	getContext()->RSSetState(rasterState.Get());
 
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -177,37 +175,40 @@ void Renderer::render()
 	for (VirtualScreen& screen : virtualScreens)
 	{
 		Camera* cam = screen.getActiveCamera();
+		if (cam != nullptr) {
 
-		PS_CONSTANT_BUFFER data = {};
-		XMStoreFloat4x4(&data.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, cam->getViewProjMatrix())));
-		XMStoreFloat4(&data.cameraPosition, cam->getPostion());
-		lightPS.updateConstantBufferByIndex(&data, sizeof(data), 0);
+			PS_CONSTANT_BUFFER data = {};
+			XMStoreFloat4x4(&data.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, cam->getViewProjMatrix())));
+			XMStoreFloat4(&data.cameraPosition, cam->getPostion());
+			lightPS.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
-		screen.setupLightPass();
+			screen.setupLightPass();
 
-		ID3D11ShaderResourceView* srvs[] = {screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView()};
-		getContext()->PSSetShaderResources(0, 2, srvs);
-		
-		getContext()->Draw(3, 0);
-		//screen.present();
+			ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView() };
+			getContext()->PSSetShaderResources(0, 2, srvs);
+
+			getContext()->Draw(3, 0);
+		}
 	}
 
 	// render post processing
 	postPS.apply();
 	for (VirtualScreen& screen : virtualScreens)
 	{
-		
-		XMStoreFloat4x4(&postProcessData.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, screen.getActiveCamera()->getViewProjMatrix())));
-		postPS.updateConstantBufferByIndex(&postProcessData, sizeof postProcessData, 0);
+		Camera* cam = screen.getActiveCamera();
+		if (cam != nullptr) {
+			XMStoreFloat4x4(&postProcessData.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, cam->getViewProjMatrix())));
+			postPS.updateConstantBufferByIndex(&postProcessData, sizeof postProcessData, 0);
 
-		screen.setupPostProcessPass();
-		ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.litScene.getShaderResourceView() };
-		getContext()->PSSetShaderResources(0, 2, srvs);
+			screen.setupPostProcessPass();
+			ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.litScene.getShaderResourceView() };
+			getContext()->PSSetShaderResources(0, 2, srvs);
 
-		getContext()->Draw(3, 0);
-		screen.present();
+			getContext()->Draw(3, 0);
+			screen.present();
 
-		XMStoreFloat4x4(&postProcessData.prevFrameViewProj, XMMatrixTranspose(screen.getActiveCamera()->getViewProjMatrix()));
+			XMStoreFloat4x4(&postProcessData.prevFrameViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
+		}
 	}
 
 	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr};

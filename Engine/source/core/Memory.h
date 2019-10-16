@@ -59,8 +59,9 @@ inline void* StackAllocator::allocate(size_t size)
 	{
 		return nullptr;
 	}
+	void* outPtr = stackBase + allocatedSize;
 	allocatedSize = newAllocatedSize;
-	return stackBase + allocatedSize;
+	return outPtr;
 }
 inline void StackAllocator::clearStack()
 {

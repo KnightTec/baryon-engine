@@ -15,6 +15,9 @@ public:
 	void removeEntity(EntityId entityId);
 	void moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId);
 	void* getComponent(EntityId entityId, TypeId componentType);
+	int getEntityCount() const;
+	template <typename T>
+	T* getComponentArray();
 private:
 	uint8_t* buffer;
 	EntityId* entityIds;
@@ -25,11 +28,18 @@ private:
 };
 
 
-inline void* Archetype::getComponent(EntityId entityId, TypeId componentType)
+
+inline int Archetype::getEntityCount() const
 {
-	auto entityIndex = entityToComponentIndexMap.find(entityId);
-	size_t entityOffset = ComponentRegistry::getTypeInfo(componentType).sizeInBytes * entityToComponentIndexMap[entityId];
-	return buffer + typeOffsets[componentType] + entityOffset;
+	return numEntities;
 }
+template <typename T>
+T* Archetype::getComponentArray()
+{
+	return reinterpret_cast<T*>(buffer + typeOffsets[typeId<T>()]);
+}
+
+
+
 
 }

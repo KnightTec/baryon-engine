@@ -15,9 +15,9 @@ public:
 	Window(DirectX::XMUINT2 resolution);
 	HWND getHwnd() const;
 	void setActiveCamera(Camera* camera);
-	void show();
-	virtual void setResolution(DirectX::XMUINT2 resolution) = 0;
 	DirectX::XMUINT2 getResolution() const;
+
+	virtual void setResolution(DirectX::XMUINT2 resolution);
 protected:
 	HWND hwnd;
 	VirtualScreen* screen;
@@ -26,7 +26,7 @@ protected:
 
 
 inline Window::Window(DirectX::XMUINT2 resolution) 
-	: hwnd{WindowsApplication::getWindowHandle()}, screen{nullptr}, resolution{resolution}
+	: hwnd{nullptr}, screen{nullptr}, resolution{resolution}
 {
 }
 inline HWND Window::getHwnd() const
@@ -36,10 +36,6 @@ inline HWND Window::getHwnd() const
 inline void Window::setActiveCamera(Camera* camera)
 {
 	screen->setActiveCamera(camera);
-}
-inline void Window::show()
-{
-	ShowWindow(hwnd, SW_SHOW);
 }
 inline void Window::setResolution(DirectX::XMUINT2 resolution)
 {

@@ -97,7 +97,7 @@ inline Camera* VirtualScreen::getActiveCamera() const
 
 inline void VirtualScreen::clear()
 {
-	static const float clearColor[] = {0.01, 0.01, 0.01, 1.000f};
+	static const float clearColor[] = {0.01f, 0.01f, 0.01f, 1.000f};
 	getContext()->ClearRenderTargetView(renderTargetView.Get(), clearColor);
 	float clearColor2[] = {0, 0, 0, 1};
 	getContext()->ClearRenderTargetView(worldNormals.getRenderTargetView(), clearColor2);

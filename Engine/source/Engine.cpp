@@ -5,9 +5,11 @@
 #include "windows.h"
 #include "Input.h"
 #include "Components.h"
-#include "EntityManager.h"
+
 
 using namespace Baryon;
+
+
 
 bool Engine::initialize()
 {
@@ -28,25 +30,25 @@ bool Engine::initialize()
 		return false;
 	}
 
+	EntityId id = em.createEntity();
+	em.addComponent<StaticMesh>(id);
+	auto* t = em.getComponent<Transform>(id);
+	t->position.x = 1;
+	t = em.getComponent<Transform>(id);
+	id = em.createEntity();
+	em.addComponent<StaticMesh>(id);
+
+
 	return true;
 }
 
-void Engine::run()
+void Engine::mainLoopIteration()
 {
-	MSG msg = {};
-	while (msg.message != WM_QUIT)
-	{
-		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		Input::handleGameInput();
-		renderer.render();
-	}
-	terminate();
+	Input::handleGameInput();
+	tst.tick();
+	renderer.render();
 }
+
 
 void Engine::terminate()
 {

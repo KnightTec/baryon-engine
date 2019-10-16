@@ -3,11 +3,12 @@
 
 using namespace Baryon;
 
-GameWindow::GameWindow(const wchar_t* name, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0])
+GameWindow::GameWindow(const wchar_t* title, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0])
 	: Window(resolution), style{WINDOWED}
 {
+	hwnd = WindowsApplication::getWindowHandle();
 	WindowsApplication::registerEventHandler(this);
-	SetWindowTextW(hwnd, name);
+	SetWindowTextW(hwnd, title);
 }
 
 void GameWindow::setStyle(STYLE newStyle)
@@ -35,13 +36,11 @@ void GameWindow::setStyle(STYLE newStyle)
 	}
 	style = newStyle;
 }
-
 void GameWindow::setResolution(DirectX::XMUINT2 resolution)
 {
 	Window::setResolution(resolution);
 	resize(resolution);
 }
-
 void GameWindow::resize(DirectX::XMUINT2 clientSize)
 {
 	assert(hwnd);
@@ -77,7 +76,6 @@ void GameWindow::resize(DirectX::XMUINT2 clientSize)
 
 	trapCursor();
 }
-
 void GameWindow::trapCursor()
 {
 	RECT rect;
@@ -101,7 +99,6 @@ void GameWindow::trapCursor()
 
 	ClipCursor(&rect);
 }
-
 bool GameWindow::handleEvent(HWND hWnd, UINT uMSg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMSg)

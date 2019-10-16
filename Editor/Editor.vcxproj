@@ -67,12 +67,15 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\resource;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\rendering;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\input;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\core;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Engine\source\resource;$(SolutionDir)\Engine\source\rendering;$(SolutionDir)\Engine\source\input;$(SolutionDir)\Engine\source\core;$(SolutionDir)\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>$(Qt_DEFINES_);%(PreprocessorDefinitions);BARYON_EDITOR;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(OutDir);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;$(Qt_LIBS_);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -81,12 +84,15 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\resource;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\rendering;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\input;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source\core;C:\Users\Svenny\source\repos\BaryonEngine\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Engine\source\resource;$(SolutionDir)\Engine\source\rendering;$(SolutionDir)\Engine\source\input;$(SolutionDir)\Engine\source\core;$(SolutionDir)\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>$(Qt_DEFINES_);%(PreprocessorDefinitions);BARYON_EDITOR;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(OutDir);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;$(Qt_LIBS_);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

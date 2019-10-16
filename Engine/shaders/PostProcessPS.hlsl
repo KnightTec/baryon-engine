@@ -53,7 +53,7 @@ float4 main(in VSOutput input) : SV_Target0
     float3 ndc = getNDC(input.tex);
     float2 velocity = (ndc.xy - previousNdc.xy) / 2;
     
-    int numSamples = 32;
+    int numSamples = 64;
     float intensity = 1;
     velocity /= numSamples;
     velocity *= intensity;

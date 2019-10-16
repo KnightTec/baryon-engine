@@ -83,3 +83,15 @@ void Archetype::moveEntity(Archetype* targetArchetype, TypeFlag targetComponentT
 	}
 	removeEntity(entityId);
 }
+void* Archetype::getComponent(EntityId entityId, TypeId componentType)
+{
+	//TODO: seems to return the wrong memory address
+
+	auto entityIndexIt = entityToComponentIndexMap.find(entityId);
+	if (entityIndexIt == entityToComponentIndexMap.end())
+	{
+		return nullptr;
+	}
+	size_t entityOffset = ComponentRegistry::getTypeInfo(componentType).sizeInBytes * entityIndexIt->second;
+	return buffer + typeOffsets[componentType] + entityOffset;
+}
