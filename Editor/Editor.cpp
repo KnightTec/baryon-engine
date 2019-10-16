@@ -20,6 +20,8 @@ bool Editor::event(QEvent* event)
 	{
 	case QEvent::WinIdChange:
 		hwnd = reinterpret_cast<HWND>(ui.frame->winId());
+		screen->terminate();
+		screen->initialize(*this);
 		return true;
 	default:
 		return QWidget::event(event);

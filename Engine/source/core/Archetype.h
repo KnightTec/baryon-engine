@@ -28,7 +28,6 @@ private:
 };
 
 
-
 inline int Archetype::getEntityCount() const
 {
 	return numEntities;
@@ -38,8 +37,5 @@ T* Archetype::getComponentArray()
 {
 	return reinterpret_cast<T*>(buffer + typeOffsets[typeId<T>()]);
 }
-
-
-
 
 }
