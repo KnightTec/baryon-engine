@@ -20,8 +20,9 @@ bool Editor::event(QEvent* event)
 	{
 	case QEvent::WinIdChange:
 		hwnd = reinterpret_cast<HWND>(ui.frame->winId());
-		screen->terminate();
-		screen->initialize(*this);
+		//TODO: fix exeption 
+		//screen->terminate();
+		//screen->initialize(*this);
 		return true;
 	default:
 		return QWidget::event(event);
@@ -48,7 +49,11 @@ void Editor::closeEvent(QCloseEvent* event)
 
 void Editor::resizeAndRerender(const QSize& size)
 {
-	setResolution({ (uint32_t)size.width(), (uint32_t)size.height() });
+	setResolution({ (uint32_t)size.width() + 100, (uint32_t)size.height() + 100 });
+	//setResolution({ 1000,  1000 });
+	//int x = size.width();
+	//int y = size.height();
+	//screen->getActiveCamera()->setAspectRatio(float(y)/x);
 	renderer->render();
 	resizing = false;
 }
