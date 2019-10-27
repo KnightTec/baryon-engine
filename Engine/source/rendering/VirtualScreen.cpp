@@ -80,7 +80,7 @@ bool VirtualScreen::initialize(const Window& window)
 	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 2;
-	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+	swapChainDesc.Scaling = DXGI_SCALING_NONE;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
@@ -106,6 +106,7 @@ void VirtualScreen::terminate()
 {
 	d3dSwapChain->SetFullscreenState(false, nullptr);
 	releaseBuffers();
+	initialized = false;
 }
 
 bool VirtualScreen::configureBuffers()
@@ -153,14 +154,12 @@ bool VirtualScreen::configureBuffers()
 	depthSrvDesc.Texture2D.MostDetailedMip = 0;
 	HR(getDevice()->CreateShaderResourceView(depthStencilBuffer.Get(), &depthSrvDesc, &depthBufferSRV));
 
-	D3D11_VIEWPORT vp;
-	vp.TopLeftX = 0.0f;
-	vp.TopLeftY = 0.0f;
-	vp.Width = static_cast<float>(resolution.x);
-	vp.Height = static_cast<float>(resolution.y);
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	getContext()->RSSetViewports(1, &vp);
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	viewport.Width = static_cast<float>(resolution.x);
+	viewport.Height = static_cast<float>(resolution.y);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 
 	worldNormals.create({swapChainDesc.Width, swapChainDesc.Height});
 	litScene.create({ swapChainDesc.Width, swapChainDesc.Height });
@@ -240,5 +239,10 @@ void VirtualScreen::setupLightPass()
 void VirtualScreen::setupPostProcessPass()
 {
 	getContext()->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), nullptr);
+}
+void VirtualScreen::setViewportSize(int width, int height)
+{
+	viewport.Width = width;
+	viewport.Height = height;
 }
 

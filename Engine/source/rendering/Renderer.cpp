@@ -152,6 +152,7 @@ void Renderer::render()
 			Camera* cam = screen.getActiveCamera();
 			if (cam)
 			{
+				screen.setupIntermediateViewport();
 				screen.setupGeometryPass();
 
 				// update constant buffer (matrices)
@@ -182,6 +183,7 @@ void Renderer::render()
 			XMStoreFloat4(&data.cameraPosition, cam->getPostion());
 			lightPS.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
+			screen.setupIntermediateViewport();
 			screen.setupLightPass();
 
 			ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView() };
@@ -200,6 +202,7 @@ void Renderer::render()
 			XMStoreFloat4x4(&postProcessData.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, cam->getViewProjMatrix())));
 			postPS.updateConstantBufferByIndex(&postProcessData, sizeof postProcessData, 0);
 
+			screen.setupFinalViewport();
 			screen.setupPostProcessPass();
 			ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.litScene.getShaderResourceView() };
 			getContext()->PSSetShaderResources(0, 2, srvs);

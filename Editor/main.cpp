@@ -65,7 +65,6 @@ int main(int argc, char *argv[])
 	while (BaryonEditorApp::running)
 	{
 		QApplication::processEvents();
-
 		engine.mainLoopIteration();
 	}
 	engine.terminate();
