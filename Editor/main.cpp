@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 
 
 	Editor w(&engine.getRenderer());
+	w.resize(800, 600);
 	Baryon::Camera camera(80, 1, 0.01, 1000, { 0, 20, 0 });
 
 	if (!engine.getRenderer().createVirtualScreen(w))

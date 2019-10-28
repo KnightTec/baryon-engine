@@ -20,16 +20,15 @@ public:
 
 	bool event(QEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
-	bool eventFilter(QObject* watched, QEvent* event) override;
-	void paintEvent(QPaintEvent* event) override;
-	void closeEvent(QCloseEvent* event) override;
 	void showEvent(QShowEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
 private:
-	void resizeAndRerender(const QSize& size);
+	void onResize(const QSize& size);
 
 	Ui::EditorClass ui;
 
 	Baryon::Renderer* renderer;
+	
 };
 
 
