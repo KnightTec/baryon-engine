@@ -35,7 +35,9 @@ inline HWND Window::getHwnd() const
 }
 inline void Window::setActiveCamera(Camera* camera)
 {
-	screen->setActiveCamera(camera);
+	if (screen) {
+		screen->setActiveCamera(camera);
+	}
 }
 inline void Window::setResolution(DirectX::XMUINT2 resolution)
 {

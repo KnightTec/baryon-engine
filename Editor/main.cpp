@@ -38,7 +38,6 @@ int main(int argc, char *argv[])
 
 
 	Editor w(&engine.getRenderer());
-	w.resize(800, 600);
 	Baryon::Camera camera(80, 1, 0.01, 1000, { 0, 20, 0 });
 
 	if (!engine.getRenderer().createVirtualScreen(w))
@@ -46,8 +45,10 @@ int main(int argc, char *argv[])
 		MessageBoxW(nullptr, L"Error: Failed to create VirtualScreen.", L"Baryon Engine", MB_OK | MB_ICONERROR);
 		return EXIT_FAILURE;
 	}
+
 	w.setActiveCamera(&camera);
-	w.show();
+//	w.getEd2()->setActiveCamera(&camera);
+	w.showMaximized();
 
 	Baryon::Mesh mesh;
 	int i = 30;
@@ -66,6 +67,7 @@ int main(int argc, char *argv[])
 	while (BaryonEditorApp::running)
 	{
 		QApplication::processEvents();
+		w.onResize(w.size());
 		engine.mainLoopIteration();
 	}
 	engine.terminate();

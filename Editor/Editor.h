@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
+
 #include "ui_Editor.h"
 
 #include "Window.h"
@@ -11,6 +12,8 @@ struct BaryonEditorApp : QApplication
 	static bool running;
 };
 
+
+
 class Editor : public QWidget, public Baryon::Window
 {
 	Q_OBJECT
@@ -18,18 +21,20 @@ class Editor : public QWidget, public Baryon::Window
 public:
 	Editor(Baryon::Renderer* renderer, QWidget *parent = Q_NULLPTR);
 
-	bool event(QEvent* event) override;
+	bool eventFilter(QObject* watched, QEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
+	void timerEvent(QTimerEvent* event) override;
 	void showEvent(QShowEvent* event) override;
 	void closeEvent(QCloseEvent* event) override;
-private:
+
 	void onResize(const QSize& size);
-
+private:
 	Ui::EditorClass ui;
-
 	Baryon::Renderer* renderer;
-	
+	int resizeTimerId;
 };
+
+
 
 
 

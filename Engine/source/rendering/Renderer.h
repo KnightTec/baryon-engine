@@ -18,7 +18,6 @@ public:
 	bool initialize();
 	void terminate();
 
-	//TODO: use factory for window
 	bool createVirtualScreen(Window& targetWindow);
 	void submitMesh(Mesh* mesh);
 	void submitEntity(Entity* entity);

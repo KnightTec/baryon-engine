@@ -1,6 +1,8 @@
 #include "Editor.h"
 #include <QResizeEvent>
-#include <QtConcurrent/QtConcurrent>
+#include <QTimer>
+#include <QScreen>
+#include <QBoxLayout>
 #include "Renderer.h"
 
 
@@ -8,30 +10,27 @@ bool BaryonEditorApp::running = true;
 
 
 Editor::Editor(Baryon::Renderer* renderer, QWidget* parent)
-	: QWidget(parent), Window({ 2000, 2000 }), renderer(renderer)
+	: QWidget(parent), Window({(uint32_t)size().width(), (uint32_t)size().height()}), renderer(renderer), resizeTimerId(0)
 {
-	ui.setupUi(this);	
+	ui.setupUi(this);
+	ui.frame->installEventFilter(this);
 	hwnd = reinterpret_cast<HWND>(ui.frame->winId());
 	setMinimumHeight(50);
 	setAttribute(Qt::WA_NativeWindow);
-	setAttribute(Qt::WA_PaintOnScreen);
-	setAttribute(Qt::WA_NoSystemBackground);
-	setAttribute(Qt::WA_MSWindowsUseDirect3D);
+	//setAttribute(Qt::WA_NoSystemBackground);
 	setAutoFillBackground(false);
-	ui.frame->setGeometry(0, 0, 1920, 1080);
 	ui.frame->setAttribute(Qt::WA_NativeWindow);
-	ui.frame->setAttribute(Qt::WA_PaintOnScreen);
-	ui.frame->setAttribute(Qt::WA_NoSystemBackground);
-	ui.frame->setAttribute(Qt::WA_MSWindowsUseDirect3D);
-	ui.frame->setAttribute(Qt::WA_ForceUpdatesDisabled);
+	//ui.frame->setAttribute(Qt::WA_NoSystemBackground);
 	ui.frame->setAutoFillBackground(false);
+	ui.frame->setUpdatesEnabled(false);
 }
 
-bool Editor::event(QEvent* event)
+bool Editor::eventFilter(QObject* watched, QEvent* event)
 {
-	switch (event->type())
+	if (watched == ui.frame)
 	{
-		case QEvent::WinIdChange:
+		if (event->type() == QEvent::WinIdChange)
+		{
 			hwnd = reinterpret_cast<HWND>(ui.frame->winId());
 			if (screen)
 			{
@@ -39,15 +38,48 @@ bool Editor::event(QEvent* event)
 				screen->initialize(*this);
 			}
 			return true;
-		default:
-			return QWidget::event(event);
+		}
 	}
+	return false;
 }
 void Editor::resizeEvent(QResizeEvent* event)
 {
+	if (resizeTimerId)
+	{
+		killTimer(resizeTimerId);
+		resizeTimerId = 0;
+	}
+	else
+	{
+		QScreen* screen = BaryonEditorApp::primaryScreen();
+		QSize screenSize = screen->size();
+		if (screenSize.width() >= screenSize.height())
+		{
+			setResolution({(uint32_t)screenSize.width(), (uint32_t)screenSize.width()});
+		}
+		else
+		{
+			setResolution({ (uint32_t)screenSize.height(), (uint32_t)screenSize.height() });
+		}
+
+		renderer->render();
+	}
+	resizeTimerId = startTimer(20000);
 	const QSize& size = event->size();
 	onResize(size);
 }
+void Editor::timerEvent(QTimerEvent* event)
+{
+	if (event->timerId() == resizeTimerId)
+	{
+		const QSize& s = ui.frame->size();
+		setResolution({(uint32_t)s.width(), (uint32_t)s.height()});
+		ui.frame->setGeometry(0, 0, s.width(), s.height());
+		killTimer(resizeTimerId);
+		resizeTimerId = 0;
+	}
+}
+
 void Editor::showEvent(QShowEvent* event)
 {
 	onResize(size());

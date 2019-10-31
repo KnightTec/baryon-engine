@@ -7,6 +7,7 @@
 #include "d3d11_4.h"
 #include "DirectXMath.h"
 #include <vector>
+#include "DXErr.h"
 
 
 namespace Baryon
@@ -42,7 +43,7 @@ public:
 
 
 	RenderTexture worldNormals{DXGI_FORMAT_R32G32B32A32_FLOAT};
-	RenderTexture litScene{ DXGI_FORMAT_R16G16B16A16_UNORM };
+	RenderTexture litScene{DXGI_FORMAT_R16G16B16A16_UNORM};
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthBufferSRV;
 private:
@@ -71,7 +72,11 @@ inline bool VirtualScreen::present()
 {
 	// TODO: disable vsync
 	//return !(FAILED(d3dSwapChain->Present(0, 0)));
-	return !(FAILED(d3dSwapChain->Present(0, 0)));
+	if (FAILED(d3dSwapChain->Present(0, 0)))
+	{
+		return false;
+	}
+	return true;
 }
 inline void VirtualScreen::setActiveCamera(Camera* camera)
 {
@@ -109,6 +114,4 @@ inline void VirtualScreen::setupFinalViewport()
 {
 	getContext()->RSSetViewports(1, &viewport);
 }
-
-
 }
