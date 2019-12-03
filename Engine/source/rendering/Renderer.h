@@ -19,11 +19,9 @@ public:
 	void terminate();
 
 	bool createVirtualScreen(Window& targetWindow);
-	void submitMesh(Mesh* mesh);
 	void submitEntity(Entity* entity);
 	void render();
 private:
-	std::vector<const Mesh*> meshes;
 	std::vector<Entity*> entities;
 	std::vector<VirtualScreen> virtualScreens;
 };
@@ -31,10 +29,6 @@ private:
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Inline function implementations 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-inline void Renderer::submitMesh(Mesh* mesh)
-{
-	meshes.push_back(mesh);
-}
 inline void Renderer::submitEntity(Entity* entity)
 {
 	entities.push_back(entity);

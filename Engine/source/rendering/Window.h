@@ -42,7 +42,9 @@ inline void Window::setActiveCamera(Camera* camera)
 inline void Window::setResolution(DirectX::XMUINT2 resolution)
 {
 	this->resolution = resolution;
-	screen->resize(resolution);
+	if (screen) {
+		screen->resize(resolution);
+	}
 }
 inline DirectX::XMUINT2 Window::getResolution() const
 {

@@ -60,6 +60,8 @@ inline void TransformOld::scale(float x, float y, float z, SPACE space)
 inline DirectX::XMMATRIX TransformOld::getWorldMatrix() const
 {
 	using namespace DirectX;
-	return XMMatrixScalingFromVector(XMLoadFloat3(&size)) * XMMatrixRotationQuaternion(XMLoadFloat4(&rotationQuaternion)) * XMMatrixTranslationFromVector(XMLoadFloat3(&position));
+	return XMMatrixScalingFromVector(XMLoadFloat3(&size)) * 
+		XMMatrixRotationQuaternion(XMLoadFloat4(&rotationQuaternion)) * 
+		XMMatrixTranslationFromVector(XMLoadFloat3(&position));
 }
 }

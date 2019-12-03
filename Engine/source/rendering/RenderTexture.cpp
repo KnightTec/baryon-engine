@@ -7,7 +7,7 @@ RenderTexture::RenderTexture(DXGI_FORMAT format) : format{format}
 {
 }
 
-bool RenderTexture::create(DirectX::XMUINT2 resolution)
+bool RenderTexture::create(Size2D resolution)
 {
 	D3D11_TEXTURE2D_DESC texDesc;
 	texDesc.Width = resolution.x;

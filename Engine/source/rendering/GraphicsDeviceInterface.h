@@ -1,5 +1,4 @@
 #pragma once
-#include "PassKey.h"
 
 #include "wrl/client.h"
 #include "d3d11_4.h"
@@ -16,8 +15,8 @@ class Engine;
 class GraphicsDeviceInterface
 {
 public:
-	static bool initialize(Key<Engine>);
-	static void terminate(Key<Engine>);
+	static bool initialize();
+	static void terminate();
 protected:
 	static ID3D11Device4* getDevice();
 	static ID3D11DeviceContext4* getContext();

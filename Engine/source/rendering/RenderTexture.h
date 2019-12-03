@@ -1,5 +1,7 @@
 #pragma once
 #include "GraphicsDeviceInterface.h"
+#include "Size.h"
+
 #include <DirectXMath.h>
 #include <dxgi.h>
 
@@ -10,7 +12,7 @@ class RenderTexture : GraphicsDeviceInterface
 {
 public:
 	RenderTexture(DXGI_FORMAT format);
-	bool create(DirectX::XMUINT2 resolution);
+	bool create(Size2D resolution);
 	void release();
 
 	ID3D11ShaderResourceView* getShaderResourceView();

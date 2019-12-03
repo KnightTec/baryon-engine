@@ -11,7 +11,7 @@ bool GraphicsDeviceInterface::initialized = false;
 ID3D11Device4* GraphicsDeviceInterface::d3dDevice;
 ID3D11DeviceContext4* GraphicsDeviceInterface::d3dContext;
 
-bool GraphicsDeviceInterface::initialize(Key<Engine>)
+bool GraphicsDeviceInterface::initialize()
 {
 	assert(!initialized);
 	UINT flags = 0;
@@ -49,8 +49,14 @@ bool GraphicsDeviceInterface::initialize(Key<Engine>)
 	initialized = true;
 	return true;
 }
-void GraphicsDeviceInterface::terminate(Key<Engine>)
+void GraphicsDeviceInterface::terminate()
 {
+	ID3D11Debug* debug;
+	d3dDevice->QueryInterface(IID_PPV_ARGS(&debug));
+
 	d3dContext->Release();
 	d3dDevice->Release();
+
+	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	debug->Release();
 }

@@ -1,6 +1,5 @@
 #include "Engine.h"
 #include "GraphicsDeviceInterface.h"
-#include "PassKey.h"
 
 #include "windows.h"
 #include "Input.h"
@@ -18,7 +17,7 @@ bool Engine::initialize()
 	Input::initialize();
 	ComponentRegistry::initialize();
 
-	if (!GraphicsDeviceInterface::initialize(Key<Engine>()))
+	if (!GraphicsDeviceInterface::initialize())
 	{
 		MessageBoxW(nullptr, L"Error: Failed to initialize GraphicsDeviceInterface.", L"Baryon Engine",
 		            MB_OK | MB_ICONERROR);
@@ -53,6 +52,6 @@ void Engine::mainLoopIteration()
 void Engine::terminate()
 {
 	renderer.terminate();
-	GraphicsDeviceInterface::terminate(Key<Engine>());
+	GraphicsDeviceInterface::terminate();
 }
 
