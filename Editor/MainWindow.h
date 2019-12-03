@@ -1,31 +1,31 @@
 #pragma once
 #include <QMainWindow>
 #include <QDockWidget>
-#include "Editor.h"
 
-class Engine;
+#include "Editor.h"
+#include "Engine.h"
+#include "Camera.h"
+
+
+struct BaryonEditorApp : QApplication
+{
+	using QApplication::QApplication;
+	static bool running;
+	void initialize();
+};
 
 class MainWindow : public QMainWindow
 {
 public:
-	MainWindow(Engine* engine);
-	void tick();
-	~MainWindow()
-	{
-		delete editor;
-	}
+	MainWindow(Baryon::Engine* engine);
+	~MainWindow();
 
+	void tick();
+	void closeEvent(QCloseEvent* event) override;
 private:
-	Engine* engine;
+	Baryon::Engine* engine;
+	Baryon::Camera camera;
 
 	Editor* editor;
+	QDockWidget* dockEditor;
 };
-
-//MainWindow()
-//{
-//	QDockWidget *dock = new QDockWidget(tr("World ViewX"), this);
-//	dock->setAttribute(Qt::WA_PaintOnScreen);
-//	//editor = new Editor(this);
-//	//dock->setWidget(editor);
-//	addDockWidget(Qt::RightDockWidgetArea, dock, Qt::Horizontal);
-//}

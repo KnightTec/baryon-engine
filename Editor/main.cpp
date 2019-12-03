@@ -1,9 +1,12 @@
 #include "Editor.h"
 #include <QtWidgets/QApplication>
 #include <QThread>
-#include <QPalette>
-#include <QStyleFactory>
+#include <QOpenGLPaintDevice>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QPixmap>
 
+#include "MainWindow.h"
 #include "Engine.h"
 
 int main(int argc, char *argv[])
@@ -15,40 +18,10 @@ int main(int argc, char *argv[])
 	}
 
 	BaryonEditorApp app(argc, argv);
+	app.initialize();
 
-	BaryonEditorApp::setStyle(QStyleFactory::create("Fusion"));
-
-	QPalette darkPalette;
-	darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
-	darkPalette.setColor(QPalette::WindowText, Qt::white);
-	darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
-	darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-	darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-	darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-	darkPalette.setColor(QPalette::Text, Qt::white);
-	darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
-	darkPalette.setColor(QPalette::ButtonText, Qt::white);
-	darkPalette.setColor(QPalette::BrightText, Qt::red);
-	darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-	darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-	darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-
-	BaryonEditorApp::setPalette(darkPalette);
-	app.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-
-
-	Editor w(&engine.getRenderer());
-	Baryon::Camera camera(80, 1, 0.01, 1000, { 0, 20, 0 });
-
-	if (!engine.getRenderer().createVirtualScreen(w))
-	{
-		MessageBoxW(nullptr, L"Error: Failed to create VirtualScreen.", L"Baryon Engine", MB_OK | MB_ICONERROR);
-		return EXIT_FAILURE;
-	}
-
-	w.setActiveCamera(&camera);
-//	w.getEd2()->setActiveCamera(&camera);
-	w.showMaximized();
+	MainWindow mainWindow(&engine);
+	mainWindow.showMaximized();
 
 	Baryon::Mesh mesh;
 	int i = 30;
@@ -67,7 +40,7 @@ int main(int argc, char *argv[])
 	while (BaryonEditorApp::running)
 	{
 		QApplication::processEvents();
-		w.onResize(w.size());
+		mainWindow.tick();
 		engine.mainLoopIteration();
 	}
 	engine.terminate();

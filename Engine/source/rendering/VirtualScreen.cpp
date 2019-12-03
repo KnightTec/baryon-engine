@@ -145,13 +145,13 @@ void VirtualScreen::releaseBuffers()
 bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
 {
 	assert(initialized);
+	releaseBuffers();
+	swapChain->resize(resolution.x, resolution.y);
+	configureBuffers();
 	if (activeCamera)
 	{
 		activeCamera->setAspectRatio(getAspectRatio());
 	}
-	releaseBuffers();
-	swapChain->resize(resolution.x, resolution.y);
-	configureBuffers();
 	return true;
 }
 
