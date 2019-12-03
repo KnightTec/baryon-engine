@@ -1,4 +1,5 @@
 # Baryon Engine
+This is a game engine I am working on for educational purposes.
 ## Current features
 * deffered rendering
 * height based fog
