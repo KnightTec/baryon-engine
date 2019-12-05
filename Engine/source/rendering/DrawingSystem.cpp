@@ -1,46 +1,31 @@
-#include "Renderer.h"
-#include "VirtualScreen.h"
-#include "Mesh.h"
-#include "DXErr.h"
+#include "DrawingSystem.h"
 #include "Shader.h"
-#include "Window.h"
+#include "GpuData.h"
+#include "DXErr.h"
+#include "../Camera.h"
+#include "VirtualScreen.h"
+
+#include "DirectXMath.h"
 
 using namespace Baryon;
 using namespace DirectX;
 using namespace Microsoft::WRL;
+	
 
-
-struct VS_CONSTANT_BUFFER
-{
-	XMFLOAT4X4 mWorldViewProj;
-	XMFLOAT4X4 mWorldNormals;
-};
-
-struct PS_CONSTANT_BUFFER
-{
-	XMFLOAT4X4 invViewProj;
-	XMFLOAT4 cameraPosition;
-};
-
-struct POST_PROCESS_CBUFFER
-{
-	XMFLOAT4X4 invViewProj;
-	XMFLOAT4X4 prevFrameViewProj;
-};
 static POST_PROCESS_CBUFFER postProcessData = {};
 
-ComPtr<ID3D11RasterizerState1> rasterState;
-ComPtr<ID3D11SamplerState> samplerState;
-ComPtr<ID3D11DepthStencilState> depthStencilState;
+static ComPtr<ID3D11RasterizerState1> rasterState;
+static ComPtr<ID3D11SamplerState> samplerState;
+static ComPtr<ID3D11DepthStencilState> depthStencilState;
 
-static VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl", 1};
-static PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
 
-static VertexShader postVS{L"../../Engine/shaders/FullscreenVS.hlsl"};
-static PixelShader lightPS{L"../../Engine/shaders/LightPS.hlsl", 1};
-static PixelShader postPS{ L"../../Engine/shaders/PostProcessPS.hlsl", 1};
 
-bool Renderer::initialize()
+
+DrawingSystem::DrawingSystem(EntityManager* entityManager, std::vector<VirtualScreen>& virtualScreens)
+	: System<StaticMesh>(entityManager), virtualScreens(virtualScreens)
+{
+}
+void DrawingSystem::initialize()
 {
 	vs.compile();
 	ps.compile();
@@ -62,7 +47,7 @@ bool Renderer::initialize()
 	rasterizerState.MultisampleEnable = false;
 	rasterizerState.AntialiasedLineEnable = false;
 	rasterizerState.ForcedSampleCount = 0;
-	HR(getDevice()->CreateRasterizerState1(&rasterizerState, rasterState.GetAddressOf()));
+	HRF(getDevice()->CreateRasterizerState1(&rasterizerState, rasterState.GetAddressOf()));
 	getContext()->RSSetState(rasterState.Get());
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
@@ -71,7 +56,7 @@ bool Renderer::initialize()
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
-	HR(getDevice()->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf()));
+	HRF(getDevice()->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf()));
 
 	getContext()->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 
@@ -92,7 +77,7 @@ bool Renderer::initialize()
 	dsDesc.FrontFace = defaultStencilOp;
 	dsDesc.BackFace = defaultStencilOp;
 
-	HR(getDevice()->CreateDepthStencilState(&dsDesc, depthStencilState.GetAddressOf()));
+	HRF(getDevice()->CreateDepthStencilState(&dsDesc, depthStencilState.GetAddressOf()));
 
 	getContext()->OMSetDepthStencilState(depthStencilState.Get(), 0);
 
@@ -101,32 +86,12 @@ bool Renderer::initialize()
 	  Depth Stencil State
 	  Sampler State
 	 */
-
-	return true;
 }
-
-void Renderer::terminate()
+void DrawingSystem::terminate()
 {
-	for (VirtualScreen& screen : virtualScreens)
-	{
-		screen.terminate();
-	}
-}
 
-bool Renderer::createVirtualScreen(Window& targetWindow)
-{
-	virtualScreens.emplace_back(VirtualScreen{});
-	if (!virtualScreens.back().initialize(targetWindow))
-	{
-		virtualScreens.pop_back();
-		return false;
-	}
-	targetWindow.screen = &virtualScreens.back();
-	targetWindow.setResolution(targetWindow.getResolution());
-	return true;
 }
-
-void Renderer::render()
+void DrawingSystem::tick()
 {
 	vs.apply();
 	ps.apply();
@@ -137,34 +102,7 @@ void Renderer::render()
 
 	// render geometry pass
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	for (const Entity* entity : entities)
-	{
-		XMMATRIX worldMatrix = entity->transform.getWorldMatrix();
-
-		uint32_t strides = sizeof(Vertex);
-		uint32_t offsets = 0;
-		ID3D11Buffer* vertexBuffer = entity->mesh.getVertexBuffer();
-		getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
-		getContext()->IASetIndexBuffer(entity->mesh.getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-		for (VirtualScreen& screen : virtualScreens)
-		{
-			Camera* cam = screen.getActiveCamera();
-			if (cam)
-			{
-				screen.setupIntermediateViewport();
-				screen.setupGeometryPass();
-
-				// update constant buffer (matrices)
-				VS_CONSTANT_BUFFER data = {};
-				XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(worldMatrix * cam->getViewProjMatrix()));
-				XMStoreFloat4x4(&data.mWorldNormals, XMMatrixInverse(nullptr, worldMatrix));
-				vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
-
-				getContext()->DrawIndexed(entity->mesh.getIndexCount(), 0, 0);
-			}
-		}
-	}
+	super::tick();
 
 	// render light pass
 	postVS.apply();
@@ -214,6 +152,34 @@ void Renderer::render()
 		}
 	}
 
-	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr};
+	ID3D11ShaderResourceView* nulls[] = { nullptr, nullptr };
 	getContext()->PSSetShaderResources(0, 2, nulls);
+}
+void DrawingSystem::update(StaticMesh& staticMesh)
+{
+	XMMATRIX worldMatrix = XMLoadFloat4x3(&staticMesh.worldMatrix);
+
+	uint32_t strides = sizeof(Vertex);
+	uint32_t offsets = 0;
+	ID3D11Buffer* vertexBuffer = staticMesh.mesh->getVertexBuffer();
+	getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
+	getContext()->IASetIndexBuffer(staticMesh.mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+	for (VirtualScreen& screen : virtualScreens)
+	{
+		Camera* cam = screen.getActiveCamera();
+		if (cam)
+		{
+			screen.setupIntermediateViewport();
+			screen.setupGeometryPass();
+
+			// update constant buffer (matrices)
+			VS_CONSTANT_BUFFER data = {};
+			XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(worldMatrix * cam->getViewProjMatrix()));
+			XMStoreFloat4x4(&data.mWorldNormals, XMMatrixInverse(nullptr, worldMatrix));
+			vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
+
+			getContext()->DrawIndexed(staticMesh.mesh->getIndexCount(), 0, 0);
+		}
+	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "GraphicsDeviceInterface.h"
+#include "wrl/client.h"
 
 #include <string>
 #include <vector>

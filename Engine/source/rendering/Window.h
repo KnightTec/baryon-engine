@@ -1,8 +1,6 @@
 #pragma once
 #include "VirtualScreen.h"
-#include "../WindowsApplication.h"
-
-#include <DirectXMath.h>
+#include "Size.h"
 
 #include "windows.h"
 
@@ -11,21 +9,21 @@ namespace Baryon
 class Window
 {
 	friend class Renderer;
+	friend class RenderingEngine;
 public:
-	Window(DirectX::XMUINT2 resolution);
+	Window(Size2D resolution);
 	HWND getHwnd() const;
 	void setActiveCamera(Camera* camera);
-	DirectX::XMUINT2 getResolution() const;
-
-	virtual void setResolution(DirectX::XMUINT2 resolution);
+	Size2D getResolution() const;
+	virtual void setResolution(Size2D resolution);
 protected:
 	HWND hwnd;
 	VirtualScreen* screen;
-	DirectX::XMUINT2 resolution;
+	Size2D resolution;
 };
 
 
-inline Window::Window(DirectX::XMUINT2 resolution) 
+inline Window::Window(Size2D resolution) 
 	: hwnd{nullptr}, screen{nullptr}, resolution{resolution}
 {
 }
@@ -39,14 +37,14 @@ inline void Window::setActiveCamera(Camera* camera)
 		screen->setActiveCamera(camera);
 	}
 }
-inline void Window::setResolution(DirectX::XMUINT2 resolution)
+inline void Window::setResolution(Size2D resolution)
 {
 	this->resolution = resolution;
 	if (screen) {
 		screen->resize(resolution);
 	}
 }
-inline DirectX::XMUINT2 Window::getResolution() const
+inline Size2D Window::getResolution() const
 {
 	return resolution;
 }

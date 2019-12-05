@@ -31,7 +31,7 @@ MainWindow::MainWindow(Baryon::Engine* engine)
 	: engine(engine), camera(80, 1, 0.01, 1000, { 0, 20, 0 })
 {
 	dockEditor = new QDockWidget(tr("World View"), this);
-	editor = new Editor(&engine->getRenderer(), dockEditor);
+	editor = new Editor(engine, dockEditor);
 	
 
 	editor->setActiveCamera(&camera);

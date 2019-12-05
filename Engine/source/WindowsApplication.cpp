@@ -33,9 +33,9 @@ HWND WindowsApplication::getWindowHandle()
 	return CreateWindowExW(0, wc.lpszClassName, L"", 0, 0, 0, 0, 0, nullptr, nullptr, wc.hInstance, nullptr);
 }
 
-DirectX::XMUINT2 WindowsApplication::getDisplayResolution()
+Size2D WindowsApplication::getDisplayResolution()
 {
-	return { static_cast<uint32_t>(GetSystemMetrics(SM_CXSCREEN)), static_cast<uint32_t>(GetSystemMetrics(SM_CYSCREEN)) };
+	return { GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
 }
 
 LRESULT CALLBACK WindowsApplication::windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

@@ -15,12 +15,15 @@ typedef uint64_t EntityId;
 
 struct TypeInfo
 {
+	using Constructor = void(void*);
+
 	TypeId typeId;
 	const char* name;
 	TypeFlag flag;
 	size_t sizeInBytes;
 	size_t alignment;
 	int countPerChunk;
+	Constructor* constructor;
 };
 
 class ComponentRegistry
@@ -55,11 +58,13 @@ void ComponentRegistry::registerComponentType(const char* typeName, size_t count
 		auto& typeInfo = idMap[typeId<T>()];
 		typeInfo.typeId = typeId<T>();
 		typeInfo.name = typeName;
-		typeInfo.flag = 1 << (idMap.size() - 1);
+		typeInfo.flag = 1ll << (idMap.size() - 1);
 		typeInfo.sizeInBytes = sizeof T;
 		typeInfo.alignment = alignof(T);
 		typeInfo.countPerChunk = countPerChunk;
-
+		typeInfo.constructor = [](void* p) {
+			new(p) T{};
+		};
 		flagMap[typeInfo.flag] = typeInfo;
 	}
 }
@@ -93,12 +98,7 @@ inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeId typeId)
 #define REGISTER_COMPONENT_TYPE(...) GET_3RD_ARG(__VA_ARGS__, REGISTER_COMPONENT_TYPE_2_ARGS, REGISTER_COMPONENT_TYPE_1_ARG)(__VA_ARGS__)
 
 
-struct Transform
-{
-	DirectX::XMFLOAT4 rotationQuaternion;
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT3 size;
-};
+
 
 struct StaticMesh
 {

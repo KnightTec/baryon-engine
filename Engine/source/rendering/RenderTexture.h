@@ -4,6 +4,7 @@
 
 #include <DirectXMath.h>
 #include <dxgi.h>
+#include "wrl/client.h"
 
 namespace Baryon
 {

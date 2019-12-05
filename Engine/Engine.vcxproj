@@ -11,44 +11,48 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\core\Archetype.h" />
+    <ClInclude Include="source\entity\Archetype.h" />
     <ClInclude Include="source\Camera.h" />
-    <ClInclude Include="source\core\Components.h" />
+    <ClInclude Include="source\entity\ComponentRegistry.h" />
     <ClInclude Include="source\core\Memory.h" />
     <ClInclude Include="source\core\ConstantHashMap.h" />
     <ClInclude Include="source\core\Size.h" />
-    <ClInclude Include="source\core\System.h" />
+    <ClInclude Include="source\entity\components\Transform.h" />
+    <ClInclude Include="source\entity\System.h" />
     <ClInclude Include="source\Entity.h" />
-    <ClInclude Include="source\core\EntityManager.h" />
+    <ClInclude Include="source\entity\EntityManager.h" />
+    <ClInclude Include="source\rendering\DrawingSystem.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
+    <ClInclude Include="source\rendering\GpuData.h" />
     <ClInclude Include="source\rendering\GraphicsDeviceInterface.h" />
     <ClInclude Include="source\Engine.h" />
     <ClInclude Include="source\input\VirtualInputDevice.h" />
     <ClInclude Include="source\input\Input.h" />
+    <ClInclude Include="source\rendering\RenderingEngine.h" />
+    <ClInclude Include="source\rendering\WorldMatrixCalculatorSystem.h" />
     <ClInclude Include="source\rendering\SwapChain.h" />
     <ClInclude Include="source\resource\Mesh.h" />
     <ClInclude Include="source\core\Observer.h" />
-    <ClInclude Include="source\rendering\Renderer.h" />
     <ClInclude Include="source\rendering\RenderTexture.h" />
     <ClInclude Include="source\rendering\Shader.h" />
     <ClInclude Include="source\rendering\VirtualScreen.h" />
     <ClInclude Include="source\resource\ResourceManager.h" />
-    <ClInclude Include="source\TransformOld.h" />
     <ClInclude Include="source\rendering\Window.h" />
     <ClInclude Include="source\WindowsApplication.h" />
+    <ClInclude Include="source\World.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\core\Archetype.cpp" />
+    <ClCompile Include="source\entity\Archetype.cpp" />
     <ClCompile Include="source\Camera.cpp" />
-    <ClCompile Include="source\core\Components.cpp" />
-    <ClCompile Include="source\core\EntityManager.cpp" />
+    <ClCompile Include="source\entity\ComponentRegistry.cpp" />
+    <ClCompile Include="source\entity\EntityManager.cpp" />
     <ClCompile Include="source\input\VirtualInputDevice.cpp" />
+    <ClCompile Include="source\rendering\DrawingSystem.cpp" />
     <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
     <ClCompile Include="source\input\Input.cpp" />
     <ClCompile Include="source\rendering\SwapChain.cpp" />
     <ClCompile Include="source\resource\Mesh.cpp" />
-    <ClCompile Include="source\rendering\Renderer.cpp" />
     <ClCompile Include="source\rendering\RenderTexture.cpp" />
     <ClCompile Include="source\rendering\Shader.cpp" />
     <ClCompile Include="source\rendering\VirtualScreen.cpp" />
@@ -137,7 +141,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\resource;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\resource;$(ProjectDir)source\entity;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,7 +161,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\resource;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)source\core;$(ProjectDir)source\input;$(ProjectDir)source\resource;$(ProjectDir)source\entity;$(ProjectDir)source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

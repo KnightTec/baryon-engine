@@ -67,7 +67,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Engine\source\resource;$(SolutionDir)\Engine\source\rendering;$(SolutionDir)\Engine\source\input;$(SolutionDir)\Engine\source\core;$(SolutionDir)\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Engine\source\entity;$(SolutionDir)\Engine\source\resource;$(SolutionDir)\Engine\source\rendering;$(SolutionDir)\Engine\source\input;$(SolutionDir)\Engine\source\core;$(SolutionDir)\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(Qt_DEFINES_);%(PreprocessorDefinitions);BARYON_EDITOR;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -84,7 +84,7 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Engine\source\resource;$(SolutionDir)\Engine\source\rendering;$(SolutionDir)\Engine\source\input;$(SolutionDir)\Engine\source\core;$(SolutionDir)\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Engine\source\entity;$(SolutionDir)\Engine\source\resource;$(SolutionDir)\Engine\source\rendering;$(SolutionDir)\Engine\source\input;$(SolutionDir)\Engine\source\core;$(SolutionDir)\Engine\source;%(AdditionalIncludeDirectories);$(Qt_INCLUDEPATH_)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(Qt_DEFINES_);%(PreprocessorDefinitions);BARYON_EDITOR;</PreprocessorDefinitions>
     </ClCompile>
     <Link>

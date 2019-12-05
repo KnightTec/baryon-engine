@@ -1,4 +1,5 @@
 #include "EntityManager.h"
+#include "components/Transform.h"
 
 using namespace Baryon;
 
@@ -9,17 +10,17 @@ EntityManager::EntityManager()
 EntityId EntityManager::createEntity()
 {
 	TypeFlag flag = ComponentRegistry::getTypeInfo<Transform>().flag;
-	if (archetypes[flag] == nullptr)
+	if (archetypes.find(flag) == archetypes.end())
 	{
-		archetypes[flag] = new Archetype(flag, &archetypeAllocator);
+		archetypes.emplace(flag, Archetype(flag, &archetypeAllocator));
 	}
-	archetypes[flag]->addEntity(nextFreeId);
+	archetypes[flag].addEntity(nextFreeId, true);
 	entityToComponentsMap[nextFreeId] = flag;
 	return nextFreeId++;
 }
 void EntityManager::destroyEntity(EntityId entityId)
 {
-	archetypes[entityToComponentsMap[entityId]]->removeEntity(entityId);
+	archetypes[entityToComponentsMap[entityId]].removeEntity(entityId);
 	entityToComponentsMap.erase(entityId);
 }
 void EntityManager::getArchetypesWithComponents(TypeFlag componentTypesFlag, Archetype** archetypePtrBuffer, int& numArchetypes)
@@ -29,7 +30,7 @@ void EntityManager::getArchetypesWithComponents(TypeFlag componentTypesFlag, Arc
 	{
 		if ((archetype.first & componentTypesFlag) == componentTypesFlag)
 		{
-			archetypePtrBuffer[archetypeCount++] = archetype.second;
+			archetypePtrBuffer[archetypeCount++] = &archetype.second;
 		}
 	}
 	if (archetypeCount > numArchetypes)
@@ -46,12 +47,12 @@ void EntityManager::changeArchetype(EntityId entityId, TypeFlag newFlag)
 {
 	TypeFlag& oldFlag = entityToComponentsMap[entityId];
 	if (oldFlag != newFlag) {
-		Archetype*& newArchetype = archetypes[newFlag];
-		if (newArchetype == nullptr)
+		if (archetypes.find(newFlag) == archetypes.end())
 		{
-			newArchetype = new Archetype(newFlag, &archetypeAllocator);
+			archetypes.emplace(newFlag, Archetype(newFlag, &archetypeAllocator));
 		}
-		archetypes[oldFlag]->moveEntity(newArchetype, newFlag, entityId);
+		Archetype* newArchetype = &archetypes[newFlag];
+		archetypes[oldFlag].moveEntity(newArchetype, newFlag, entityId);
 		oldFlag = newFlag;
 	}
 }

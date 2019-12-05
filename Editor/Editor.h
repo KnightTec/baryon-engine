@@ -11,7 +11,7 @@ class Editor : public QWidget, public Baryon::Window
 	Q_OBJECT
 
 public:
-	Editor(Baryon::Renderer* renderer, QWidget *parent = Q_NULLPTR);
+	Editor(Baryon::Engine* engine, QWidget *parent = Q_NULLPTR);
 	bool eventFilter(QObject* watched, QEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void timerEvent(QTimerEvent* event) override;
@@ -21,7 +21,7 @@ public:
 	void onResize(const QSize& size);
 private:
 	Ui::EditorClass ui;
-	Baryon::Renderer* renderer;
+	Baryon::Engine* engine;
 	int resizeTimerId;
 };
 

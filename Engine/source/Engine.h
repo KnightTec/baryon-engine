@@ -1,28 +1,11 @@
 #pragma once
-#include "Renderer.h"
 #include "EntityManager.h"
-#include "System.h"
-
+#include "RenderingEngine.h"
 
 
 namespace Baryon
 {
-	class testsys : public System<Transform, StaticMesh>
-	{
-		using super = System<Transform, StaticMesh>;
-	public:
-		testsys(EntityManager*  entityManager) : super(entityManager)
-		{
-
-		}
-		void update(Transform& t, StaticMesh& sm) override
-		{
-			t.position.x += 1;
-			int i = 1 + 3;
-			i--;
-		}
-	};
-
+class Window;
 
 /*
  * The core class of the Baryon Engine
@@ -37,22 +20,21 @@ public:
 	bool initialize();
 	void mainLoopIteration();
 	void terminate();
-	Renderer& getRenderer();
+	void createVirtualScreen(Window& targetWindow);
+	//Renderer& getRenderer();
 private:
-	Renderer renderer;
+	//Renderer renderer;
 	EntityManager em;
-	testsys tst;
+	RenderingEngine renderingEngine;
 };
 
-inline Engine::Engine() : tst(&em)
+inline Engine::Engine() : renderingEngine(&em)
 {
-	
 }
 
 
-inline Renderer& Engine::getRenderer()
-{
-	return renderer;
-}
-
+//inline Renderer& Engine::getRenderer()
+//{
+//	return renderer;
+//}
 }

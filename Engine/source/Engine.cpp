@@ -1,13 +1,11 @@
 #include "Engine.h"
 #include "GraphicsDeviceInterface.h"
-
 #include "windows.h"
 #include "Input.h"
-#include "Components.h"
-
+#include "Window.h"
+#include "components/Transform.h"
 
 using namespace Baryon;
-
 
 
 bool Engine::initialize()
@@ -23,19 +21,20 @@ bool Engine::initialize()
 		            MB_OK | MB_ICONERROR);
 		return false;
 	}
-	if (!renderer.initialize())
+	renderingEngine.initialize();
+	//if (!renderer.initialize())
 	{
-		MessageBoxW(nullptr, L"Error: Failed to initialize Renderer.", L"Baryon Engine", MB_OK | MB_ICONERROR);
-		return false;
+		//MessageBoxW(nullptr, L"Error: Failed to initialize Renderer.", L"Baryon Engine", MB_OK | MB_ICONERROR);
+		//return false;
 	}
 
-	EntityId id = em.createEntity();
-	em.addComponent<StaticMesh>(id);
-	auto* t = em.getComponent<Transform>(id);
-	t->position.x = 1;
-	t = em.getComponent<Transform>(id);
-	id = em.createEntity();
-	em.addComponent<StaticMesh>(id);
+	EntityId id0 = em.createEntity();
+	auto* t = em.getComponent<Transform>(id0);
+	t->scale(5, 30, 4);
+	em.addComponent<StaticMesh>(id0);
+	auto* mesh = em.getComponent<StaticMesh>(id0);
+	mesh->mesh = new Mesh;
+	
 
 
 	return true;
@@ -44,14 +43,21 @@ bool Engine::initialize()
 void Engine::mainLoopIteration()
 {
 	Input::handleGameInput();
-	tst.tick();
-	renderer.render();
+	renderingEngine.render();
+	//renderer.render();
 }
 
 
 void Engine::terminate()
 {
-	renderer.terminate();
+	//renderer.terminate();
+	renderingEngine.terminate();
 	GraphicsDeviceInterface::terminate();
 }
+
+void Engine::createVirtualScreen(Window& targetWindow)
+{
+	renderingEngine.createVirtualScreen(targetWindow);
+}
+
 

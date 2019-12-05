@@ -3,7 +3,7 @@
 
 using namespace Baryon;
 
-GameWindow::GameWindow(const wchar_t* title, DirectX::XMUINT2 resolution = VirtualScreen::getSupportedResolutions()[0])
+GameWindow::GameWindow(const wchar_t* title, Size2D resolution = VirtualScreen::getSupportedResolutions()[0])
 	: Window(resolution), style{WINDOWED}
 {
 	hwnd = WindowsApplication::getWindowHandle();
@@ -36,16 +36,15 @@ void GameWindow::setStyle(STYLE newStyle)
 	}
 	style = newStyle;
 }
-void GameWindow::setResolution(DirectX::XMUINT2 resolution)
+void GameWindow::setResolution(Size2D resolution)
 {
 	Window::setResolution(resolution);
 	resize(resolution);
 }
-void GameWindow::resize(DirectX::XMUINT2 clientSize)
+void GameWindow::resize(Size2D newSize)
 {
 	assert(hwnd);
-	const DirectX::XMINT2 screenSize = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
-	const DirectX::XMINT2 newSize{static_cast<int32_t>(clientSize.x), static_cast<int32_t>(clientSize.y)};
+	const Size2D screenSize{GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
 
 	RECT rect;
 	rect.left = 0;

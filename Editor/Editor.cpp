@@ -4,12 +4,12 @@
 #include <QScreen>
 
 #include "MainWindow.h"
-#include "Renderer.h"
+#include "Engine.h"
 #include <QMessageBox>
 
 
-Editor::Editor(Baryon::Renderer* renderer, QWidget* parent)
-	: QWidget(parent), Window({(uint32_t)size().width(), (uint32_t)size().height()}), renderer(renderer), resizeTimerId(0)
+Editor::Editor(Baryon::Engine* engine, QWidget* parent)
+	: QWidget(parent), Window({size().width(), size().height()}), engine(engine), resizeTimerId(0)
 {
 	ui.setupUi(this);
 	ui.frame->installEventFilter(this);
@@ -21,11 +21,8 @@ Editor::Editor(Baryon::Renderer* renderer, QWidget* parent)
 	flags = ui.frame->windowFlags();
 	ui.frame->setWindowFlags(flags | Qt::FramelessWindowHint);
 
-	if (!renderer->createVirtualScreen(*this))
-	{
-		QMessageBox::critical(nullptr, "Baryon Engine", "Error: Failed to create VirtualScreen.");
-		exit(EXIT_FAILURE);
-	}
+	engine->createVirtualScreen(*this);
+
 }
 
 bool Editor::eventFilter(QObject* watched, QEvent* event)
@@ -58,14 +55,14 @@ void Editor::resizeEvent(QResizeEvent* event)
 		QSize screenSize = screen->size();
 		if (screenSize.width() >= screenSize.height())
 		{
-			setResolution({(uint32_t)screenSize.width(), (uint32_t)screenSize.width()});
+			setResolution({screenSize.width(), screenSize.width()});
 		}
 		else
 		{
-			setResolution({(uint32_t)screenSize.height(), (uint32_t)screenSize.height()});
+			setResolution({screenSize.height(), screenSize.height()});
 		}
 
-		renderer->render();
+		//renderer->render();
 	}
 	resizeTimerId = startTimer(20000);
 	const QSize& size = event->size();
@@ -76,7 +73,7 @@ void Editor::timerEvent(QTimerEvent* event)
 	if (event->timerId() == resizeTimerId)
 	{
 		const QSize& s = ui.frame->size();
-		setResolution({ (uint32_t)s.width(), (uint32_t)s.height() });
+		setResolution({s.width(), s.height()});
 		ui.frame->setGeometry(0, 0, s.width(), s.height());
 		killTimer(resizeTimerId);
 		resizeTimerId = 0;

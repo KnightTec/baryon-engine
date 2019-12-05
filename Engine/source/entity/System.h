@@ -28,7 +28,7 @@ inline ISystem::ISystem(EntityManager* entityManager)
 
 
 template <typename... HandledComponents>
-class System : ISystem
+class System : public ISystem
 {
 public:
 	System(EntityManager* entityManager);

@@ -40,11 +40,15 @@ Archetype::Archetype(TypeFlag componentTypes, StackAllocator* allocator)
 		nextOffset = it.second + typeInfo.sizeInBytes;
 	}
 }
-void Archetype::addEntity(EntityId entityId)
+void Archetype::addEntity(EntityId entityId, bool constructEntity)
 {
-	for (auto& type : typeOffsets)
+	if (constructEntity)
 	{
-		ZeroMemory(buffer + type.second + numEntities, ComponentRegistry::getTypeInfo(type.first).sizeInBytes);
+		for (auto& type : typeOffsets)
+		{
+			const TypeInfo& info = ComponentRegistry::getTypeInfo(type.first);
+			info.constructor(buffer + type.second + numEntities * info.sizeInBytes);
+		}
 	}
 	entityToComponentIndexMap[entityId] = numEntities;
 	entityIds[numEntities++] = entityId;
@@ -66,7 +70,7 @@ void Archetype::removeEntity(EntityId entityId)
 }
 void Archetype::moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId)
 {
-	targetArchetype->addEntity(entityId);
+	targetArchetype->addEntity(entityId, false);
 	Index entityIndex = entityToComponentIndexMap[entityId];
 	Index targetEntityIndex = targetArchetype->numEntities - 1;
 	uint8_t* targetBuffer = targetArchetype->buffer;
@@ -85,8 +89,6 @@ void Archetype::moveEntity(Archetype* targetArchetype, TypeFlag targetComponentT
 }
 void* Archetype::getComponent(EntityId entityId, TypeId componentType)
 {
-	//TODO: seems to return the wrong memory address
-
 	auto entityIndexIt = entityToComponentIndexMap.find(entityId);
 	if (entityIndexIt == entityToComponentIndexMap.end())
 	{

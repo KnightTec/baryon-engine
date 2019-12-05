@@ -1,7 +1,9 @@
 #pragma once
+#include "Size.h"
+
 #include "windows.h"
 #include <vector>
-#include <DirectXMath.h>
+
 
 namespace Baryon
 {
@@ -27,7 +29,7 @@ public:
 	 * Create a unspecified window
 	 */
 	static HWND getWindowHandle();
-	static DirectX::XMUINT2 getDisplayResolution();
+	static Size2D getDisplayResolution();
 private:
 	static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

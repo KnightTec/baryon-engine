@@ -3,12 +3,13 @@
 #include "GraphicsDeviceInterface.h"
 #include "RenderTexture.h"
 #include "SwapChain.h"
+#include "DXErr.h"
 
 #include "wrl/client.h"
 #include "d3d11_4.h"
-#include "DirectXMath.h"
+
 #include <vector>
-#include "DXErr.h"
+
 
 
 namespace Baryon
@@ -21,13 +22,13 @@ class Window;
 class VirtualScreen : GraphicsDeviceInterface
 {
 public:
-	static const std::vector<DirectX::XMUINT2>& getSupportedResolutions();
+	static const std::vector<Size2D>& getSupportedResolutions();
 
 	VirtualScreen();
 
 	bool initialize(const Window& window);
 	void terminate();
-	bool resize(DirectX::XMUINT2 resolution);
+	bool resize(Size2D resolution);
 	void present();
 	void clear();
 	bool setFullscreen(bool fullscreen);
@@ -42,7 +43,9 @@ public:
 	void setupFinalViewport();
 
 	RenderTexture worldNormals{DXGI_FORMAT_R32G32B32A32_FLOAT};
+	RenderTexture gBufferTexture1{DXGI_FORMAT_R16G16B16A16_UNORM}; // RGB color, A specular intensity 
 	RenderTexture litScene{DXGI_FORMAT_R16G16B16A16_UNORM};
+
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthBufferSRV;
 private:

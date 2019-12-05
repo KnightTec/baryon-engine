@@ -57,7 +57,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Engine\source\core;$(SolutionDir)Engine\source;$(SolutionDir)Engine\source\input;$(SolutionDir)Engine\source\resource;$(SolutionDir)Engine\source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\source\entity;$(SolutionDir)Engine\source\core;$(SolutionDir)Engine\source;$(SolutionDir)Engine\source\input;$(SolutionDir)Engine\source\resource;$(SolutionDir)Engine\source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -76,7 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Engine\source\core;$(SolutionDir)Engine\source;$(SolutionDir)Engine\source\input;$(SolutionDir)Engine\source\resource;$(SolutionDir)Engine\source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\source\entity;$(SolutionDir)Engine\source\core;$(SolutionDir)Engine\source;$(SolutionDir)Engine\source\input;$(SolutionDir)Engine\source\resource;$(SolutionDir)Engine\source\rendering;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

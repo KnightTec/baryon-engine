@@ -1,5 +1,5 @@
 #pragma once
-#include "Components.h"
+#include "ComponentRegistry.h"
 #include "Memory.h"
 
 
@@ -10,8 +10,9 @@ typedef uint32_t Index;
 class Archetype
 {
 public:
+	Archetype() = default;
 	Archetype(TypeFlag componentTypes, StackAllocator* allocator);
-	void addEntity(EntityId entityId);
+	void addEntity(EntityId entityId, bool constructEntity);
 	void removeEntity(EntityId entityId);
 	void moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId);
 	void* getComponent(EntityId entityId, TypeId componentType);

@@ -1,8 +1,5 @@
 #pragma once
-
-#include "wrl/client.h"
 #include "d3d11_4.h"
-#include <cassert>
 
 namespace Baryon
 {

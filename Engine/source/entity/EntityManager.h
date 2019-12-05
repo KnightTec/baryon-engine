@@ -1,6 +1,6 @@
 #pragma once
 #include "Archetype.h"
-#include "Components.h"
+#include "ComponentRegistry.h"
 #include "Memory.h"
 
 #include <unordered_map>
@@ -27,7 +27,7 @@ private:
 	void changeArchetype(EntityId entityId, TypeFlag newFlag);
 
 	StackAllocator archetypeAllocator;
-	std::unordered_map<TypeFlag, Archetype*> archetypes;
+	std::unordered_map<TypeFlag, Archetype> archetypes;
 	std::unordered_map<EntityId, TypeFlag> entityToComponentsMap;
 	EntityId nextFreeId;
 };
@@ -64,7 +64,7 @@ T* EntityManager::getComponent(EntityId entityId)
 	{
 		return nullptr;
 	}
-	Archetype* archetype = archetypeIt->second;
+	Archetype* archetype = &archetypeIt->second;
 	return reinterpret_cast<T*>(archetype->getComponent(entityId, typeId<T>()));
 }
 

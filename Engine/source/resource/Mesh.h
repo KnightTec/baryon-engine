@@ -2,6 +2,7 @@
 #include "GraphicsDeviceInterface.h"
 
 #include <DirectXMath.h>
+#include "wrl/client.h"
 
 #include <cstdint>
 #include <string>

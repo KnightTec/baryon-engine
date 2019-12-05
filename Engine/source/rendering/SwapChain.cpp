@@ -46,19 +46,15 @@ void SwapChain::setup()
 }
 void SwapChain::reset()
 {
-//	HRF(d3dSwapChain->SetFullscreenState(false, nullptr));
 	renderTargetView.Reset();
 	backBuffer.Reset();
 }
 void SwapChain::resize(int width, int height)
 {
-	//reset();
-
 	DXGI_MODE_DESC mode = {};
 	mode.Width = width;
 	mode.Height = height;
 	mode.Format = format;
-	/*mode.RefreshRate = refreshRate;*/
 	mode.RefreshRate = {0, 1};
 
 	if (isFullscreen)
@@ -66,7 +62,6 @@ void SwapChain::resize(int width, int height)
 		HRF(d3dSwapChain->ResizeTarget(&mode));
 	}
 	HRF(d3dSwapChain->ResizeBuffers(0, width, height, format, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
-	//setup();
 	backBufferResolution.x = width;
 	backBufferResolution.y = height;
 }

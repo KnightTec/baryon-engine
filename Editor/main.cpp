@@ -23,20 +23,6 @@ int main(int argc, char *argv[])
 	MainWindow mainWindow(&engine);
 	mainWindow.showMaximized();
 
-	Baryon::Mesh mesh;
-	int i = 30;
-	std::vector<Baryon::Entity> entities(i * i, Baryon::Entity{ mesh });
-
-	for (int y = 0; y < i; y++)
-	{
-		for (int x = 0; x < i; x++)
-		{
-			entities[x + y * i].transform.translate(5 * x - 10, 5, 5 * y - 10);
-			entities[x + y * i].transform.scale(1, (rand() % 12 + 1), 1);
-			engine.getRenderer().submitEntity(&entities[x + y * i]);
-		}
-	}
-
 	while (BaryonEditorApp::running)
 	{
 		QApplication::processEvents();

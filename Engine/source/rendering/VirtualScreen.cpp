@@ -12,7 +12,7 @@ using namespace Microsoft::WRL;
 static const DXGI_FORMAT swapChainFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 static DXGI_RATIONAL refreshRate = {0, 1};
 
-static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
+static std::vector<Size2D> retrieveSupportedResolutions()
 {
 	ComPtr<IDXGIFactory> factory;
 	CreateDXGIFactory1(__uuidof(IDXGIFactory), reinterpret_cast<void**>(factory.GetAddressOf()));
@@ -31,14 +31,14 @@ static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 	displayModes = new DXGI_MODE_DESC[numModes];
 	output->GetDisplayModeList(format, 0, &numModes, displayModes);
 
-	std::vector<DirectX::XMUINT2> resolutions;
-	resolutions.emplace_back(DirectX::XMUINT2{displayModes[0].Width, displayModes[0].Height});
+	std::vector<Size2D> resolutions;
+	resolutions.emplace_back(Size2D{static_cast<int>(displayModes[0].Width), static_cast<int>(displayModes[0].Height)});
 	for (UINT i = 1; i < numModes; i++)
 	{
 		// skip duplicates
 		if (displayModes[i].Width != displayModes[i - 1].Width && displayModes[i].Height != displayModes[i - 1].Height)
 		{
-			resolutions.emplace_back(DirectX::XMUINT2{displayModes[i].Width, displayModes[i].Height});
+			resolutions.emplace_back(Size2D{static_cast<int>(displayModes[i].Width), static_cast<int>(displayModes[i].Height)});
 		}
 		// get the maximal refresh rate
 		DXGI_RATIONAL refreshRateTmp = displayModes[i].RefreshRate;
@@ -51,13 +51,13 @@ static std::vector<DirectX::XMUINT2> retrieveSupportedResolutions()
 	return resolutions;
 }
 
-const std::vector<DirectX::XMUINT2>& VirtualScreen::getSupportedResolutions()
+const std::vector<Size2D>& VirtualScreen::getSupportedResolutions()
 {
-	static const std::vector<DirectX::XMUINT2> supportedResolutions = retrieveSupportedResolutions();
+	static const std::vector<Size2D> supportedResolutions = retrieveSupportedResolutions();
 	return supportedResolutions;
 }
 
-VirtualScreen::VirtualScreen() : initialized{false},/* fullscreen{false},*/ activeCamera{nullptr} //,resolution{0, 0}
+VirtualScreen::VirtualScreen() : initialized{ false }, activeCamera{ nullptr }
 {
 	// call to initialize the refresh rate
 	getSupportedResolutions();
@@ -122,8 +122,8 @@ bool VirtualScreen::configureBuffers()
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	worldNormals.create({resolution});
-	litScene.create({resolution});
+	worldNormals.create(resolution);
+	litScene.create(resolution);
 
 	return true;
 }
@@ -142,11 +142,11 @@ void VirtualScreen::releaseBuffers()
 	getContext()->Flush();
 }
 
-bool VirtualScreen::resize(DirectX::XMUINT2 resolution)
+bool VirtualScreen::resize(Size2D resolution)
 {
 	assert(initialized);
 	releaseBuffers();
-	swapChain->resize(resolution.x, resolution.y);
+	swapChain->resize(resolution);
 	configureBuffers();
 	if (activeCamera)
 	{
