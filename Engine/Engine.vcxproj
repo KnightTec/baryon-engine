@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\core\Singleton.h" />
     <ClInclude Include="source\entity\Archetype.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\entity\ComponentRegistry.h" />

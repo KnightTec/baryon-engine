@@ -102,6 +102,9 @@
     <ClInclude Include="source\rendering\GpuData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\core\Singleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Engine.cpp">
