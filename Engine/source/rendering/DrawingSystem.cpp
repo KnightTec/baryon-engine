@@ -19,8 +19,6 @@ static ComPtr<ID3D11SamplerState> samplerState;
 static ComPtr<ID3D11DepthStencilState> depthStencilState;
 
 
-
-
 DrawingSystem::DrawingSystem(EntityManager* entityManager, std::vector<VirtualScreen>& virtualScreens)
 	: System<StaticMesh>(entityManager), virtualScreens(virtualScreens)
 {

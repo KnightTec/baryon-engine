@@ -4,6 +4,7 @@
 #include "d3dcompiler.h"
 
 #include <vector>
+#include <cassert>
 
 using namespace Baryon;
 using namespace Microsoft::WRL;

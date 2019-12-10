@@ -5,6 +5,8 @@
 #include "Window.h"
 #include "components/Transform.h"
 
+#include "StringId.h"
+
 using namespace Baryon;
 
 
@@ -22,11 +24,6 @@ bool Engine::initialize()
 		return false;
 	}
 	renderingEngine.initialize();
-	//if (!renderer.initialize())
-	{
-		//MessageBoxW(nullptr, L"Error: Failed to initialize Renderer.", L"Baryon Engine", MB_OK | MB_ICONERROR);
-		//return false;
-	}
 
 	EntityId id0 = em.createEntity();
 	auto* t = em.getComponent<Transform>(id0);
@@ -34,7 +31,6 @@ bool Engine::initialize()
 	em.addComponent<StaticMesh>(id0);
 	auto* mesh = em.getComponent<StaticMesh>(id0);
 	mesh->mesh = new Mesh;
-	
 
 
 	return true;

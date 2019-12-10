@@ -103,7 +103,6 @@ inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeId typeId)
 struct StaticMesh
 {
 	DirectX::XMFLOAT4X3 worldMatrix;
-	//TODO: replace with path
 	Mesh* mesh;
 };
 }
