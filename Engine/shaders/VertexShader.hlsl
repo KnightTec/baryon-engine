@@ -8,6 +8,7 @@ struct VSInput
 {
 	float3 pos : POSITION;
 	float3 nor : NORMAL;
+    float2 tex : TEXCOORD;
 };
 struct VSOutput 
 {

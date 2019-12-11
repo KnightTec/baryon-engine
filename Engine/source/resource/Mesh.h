@@ -13,6 +13,7 @@ struct Vertex
 {
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 normal;
+	DirectX::XMFLOAT2 texCoord;
 };
 
 class Mesh : GraphicsDeviceInterface
@@ -22,7 +23,7 @@ public:
 	bool load(const char* filename);
 
 	// returns the path of the converted mesh
-	static std::string import(const char* source);
+	static void import(const char* source);
 
 	ID3D11Buffer* getVertexBuffer() const;
 	ID3D11Buffer* getIndexBuffer() const;
@@ -31,6 +32,11 @@ private:
 	uint32_t indexCount;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+
+	static const char* resTypeId;
+	static const uint16_t resTypeIdLength;
+	static const uint16_t version;
+	static const uint16_t vertexSize;
 };
 
 

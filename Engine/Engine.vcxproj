@@ -12,15 +12,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\core\Singleton.h" />
+    <ClInclude Include="source\core\StringId.h" />
     <ClInclude Include="source\entity\Archetype.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\entity\ComponentRegistry.h" />
     <ClInclude Include="source\core\Memory.h" />
-    <ClInclude Include="source\core\ConstantHashMap.h" />
     <ClInclude Include="source\core\Size.h" />
     <ClInclude Include="source\entity\components\Transform.h" />
     <ClInclude Include="source\entity\System.h" />
-    <ClInclude Include="source\Entity.h" />
+    <ClInclude Include="source\entity\Entity.h" />
     <ClInclude Include="source\entity\EntityManager.h" />
     <ClInclude Include="source\rendering\DrawingSystem.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
@@ -32,6 +32,7 @@
     <ClInclude Include="source\rendering\RenderingEngine.h" />
     <ClInclude Include="source\rendering\WorldMatrixCalculatorSystem.h" />
     <ClInclude Include="source\rendering\SwapChain.h" />
+    <ClInclude Include="source\resource\IOUtil.h" />
     <ClInclude Include="source\resource\Mesh.h" />
     <ClInclude Include="source\core\Observer.h" />
     <ClInclude Include="source\rendering\RenderTexture.h" />
@@ -43,6 +44,7 @@
     <ClInclude Include="source\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\core\StringId.cpp" />
     <ClCompile Include="source\entity\Archetype.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\entity\ComponentRegistry.cpp" />
@@ -94,6 +96,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="source\resource\ResourceFileFormats.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

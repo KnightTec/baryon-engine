@@ -5,7 +5,8 @@
 
 namespace Baryon
 {
-	class VirtualScreen;
+class VirtualScreen;
+
 class DrawingSystem : public System<StaticMesh>, GraphicsDeviceInterface
 {
 	using super = System<StaticMesh>;
@@ -19,11 +20,11 @@ private:
 
 	std::vector<VirtualScreen>& virtualScreens;
 
-	VertexShader vs{ L"../../Engine/shaders/VertexShader.hlsl", 1 };
-	PixelShader ps{ L"../../Engine/shaders/PixelShader.hlsl" };
+	VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl", 1};
+	PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
 
-	VertexShader postVS{ L"../../Engine/shaders/FullscreenVS.hlsl" };
-	PixelShader lightPS{ L"../../Engine/shaders/LightPS.hlsl", 1 };
-	PixelShader postPS{ L"../../Engine/shaders/PostProcessPS.hlsl", 1 };
+	VertexShader postVS{L"../../Engine/shaders/FullscreenVS.hlsl"};
+	PixelShader lightPS{L"../../Engine/shaders/LightPS.hlsl", 1};
+	PixelShader postPS{L"../../Engine/shaders/PostProcessPS.hlsl", 1};
 };
 }

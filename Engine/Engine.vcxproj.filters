@@ -54,16 +54,10 @@
     <ClInclude Include="source\resource\ResourceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\core\Memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\rendering\Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\core\ConstantHashMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\rendering\SwapChain.h">
@@ -103,6 +97,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\core\Singleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\core\StringId.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\entity\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\resource\IOUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -152,6 +155,9 @@
     <ClCompile Include="source\rendering\DrawingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\core\StringId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\VertexShader.hlsl" />
@@ -161,5 +167,8 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\FullscreenVS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="source\resource\ResourceFileFormats.txt" />
   </ItemGroup>
 </Project>

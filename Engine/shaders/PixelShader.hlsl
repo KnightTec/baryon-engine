@@ -7,7 +7,9 @@ struct VSOutput
 
 float4 main(in VSOutput input) : SV_Target0
 {
-	float3 nor = cross(ddx(input.wPos), ddy(input.wPos));
-	nor = normalize(nor);
-    return float4(nor, 1);
+    // flat shading
+	//float3 nor = cross(ddx(input.wPos), ddy(input.wPos));
+	//nor = normalize(nor);
+    float3 normal = normalize(input.nor);
+    return float4(normal, 1);
 }
