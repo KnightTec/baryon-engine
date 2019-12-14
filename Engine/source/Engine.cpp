@@ -29,6 +29,7 @@ bool Engine::initialize()
 	em.addComponent<WorldMatrixComponent>(id0);
 	auto* t = em.getComponent<Transform>(id0);
 	t->translate(0, 10, 0);
+	t->scale(5, 5, 5);
 	em.addComponent<MeshComponent>(id0);
 	auto* mesh = em.getComponent<MeshComponent>(id0);
 
