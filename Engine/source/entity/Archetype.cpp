@@ -37,7 +37,7 @@ Archetype::Archetype(TypeFlag componentTypes, StackAllocator* allocator)
 		size_t mask = typeInfo.alignment - 1;
 		it.second += typeInfo.alignment - (mask & typeAddress);
 
-		nextOffset = it.second + typeInfo.sizeInBytes;
+		nextOffset = it.second + typeInfo.sizeInBytes * maxEntitiesPerChunk;
 	}
 }
 void Archetype::addEntity(EntityId entityId, bool constructEntity)
@@ -80,14 +80,13 @@ void Archetype::moveEntity(Archetype* targetArchetype, EntityId entityId)
 		const TypeInfo& info = ComponentRegistry::getTypeInfo(targetTypeOffset.first);
 		if (typeOffset != typeOffsets.end())
 		{
-			size_t typeSize = info.sizeInBytes;
-			void* src = buffer + typeOffset->second + typeSize * entityIndex;
-			void* dst = targetBuffer + targetTypeOffset.second + typeSize * targetEntityIndex;
-			memcpy(dst, src, typeSize);
+			void* src = buffer + typeOffset->second + info.sizeInBytes * entityIndex;
+			void* dst = targetBuffer + targetTypeOffset.second + info.sizeInBytes * targetEntityIndex;
+			memcpy(dst, src, info.sizeInBytes);
 		}
 		else
 		{
-			info.constructor(buffer + targetTypeOffset.second + numEntities * info.sizeInBytes);
+			info.constructor(targetBuffer + targetTypeOffset.second + info.sizeInBytes * targetEntityIndex);
 		}
 	}
 	removeEntity(entityId);

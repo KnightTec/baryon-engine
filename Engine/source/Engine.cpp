@@ -33,7 +33,18 @@ bool Engine::initialize()
 	auto* t = em.getComponent<Transform>(id);
 	t->translate(0, 10, 0);
 	t->scale(5, 5, 5);
-	em.getComponent<MeshComponent>(id)->mesh = ResourceManager::get().getMesh(meshPath);
+	auto* m = em.getComponent<MeshComponent>(id);
+	m->mesh = ResourceManager::get().getMesh(meshPath);
+
+	id = em.createEntity();
+	em.addComponents<WorldMatrixComponent, MeshComponent>(id);
+	t = em.getComponent<Transform>(id);
+	t->translate(0, 15, 0);
+	t->scale(2, 2, 2);
+
+	m = em.getComponent<MeshComponent>(id);
+	m->mesh = ResourceManager::get().getMesh(meshPath);
+
 
 	return true;
 }

@@ -2,7 +2,6 @@
 #include "GraphicsDeviceInterface.h"
 #include "Size.h"
 
-#include <DirectXMath.h>
 #include <dxgi.h>
 #include "wrl/client.h"
 

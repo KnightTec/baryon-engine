@@ -1,5 +1,6 @@
 #include "RenderTexture.h"
 #include "DXErr.h"
+#include "Size.h"
 
 using namespace Baryon;
 
