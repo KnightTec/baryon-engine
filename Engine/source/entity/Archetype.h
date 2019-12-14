@@ -17,7 +17,7 @@ public:
 	Archetype(TypeFlag componentTypes, StackAllocator* allocator);
 	void addEntity(EntityId entityId, bool constructEntity);
 	void removeEntity(EntityId entityId);
-	void moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId);
+	void moveEntity(Archetype* targetArchetype, EntityId entityId);
 	void* getComponent(EntityId entityId, TypeId componentType);
 	int getEntityCount() const;
 	/*

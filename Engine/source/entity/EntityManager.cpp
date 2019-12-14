@@ -52,7 +52,7 @@ void EntityManager::changeArchetype(EntityId entityId, TypeFlag newFlag)
 			archetypes.emplace(newFlag, Archetype(newFlag, &archetypeAllocator));
 		}
 		Archetype* newArchetype = &archetypes[newFlag];
-		archetypes[oldFlag].moveEntity(newArchetype, newFlag, entityId);
+		archetypes[oldFlag].moveEntity(newArchetype, entityId);
 		oldFlag = newFlag;
 	}
 }

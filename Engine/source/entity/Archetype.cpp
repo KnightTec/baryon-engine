@@ -68,7 +68,7 @@ void Archetype::removeEntity(EntityId entityId)
 	entityToComponentIndexMap[movedEntityId] = removedEntityIndex;
 	entityToComponentIndexMap.erase(entityId);
 }
-void Archetype::moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId)
+void Archetype::moveEntity(Archetype* targetArchetype, EntityId entityId)
 {
 	targetArchetype->addEntity(entityId, false);
 	Index entityIndex = entityToComponentIndexMap[entityId];
@@ -77,12 +77,17 @@ void Archetype::moveEntity(Archetype* targetArchetype, TypeFlag targetComponentT
 	for (auto& targetTypeOffset : targetArchetype->typeOffsets)
 	{
 		auto typeOffset = typeOffsets.find(targetTypeOffset.first);
+		const TypeInfo& info = ComponentRegistry::getTypeInfo(targetTypeOffset.first);
 		if (typeOffset != typeOffsets.end())
 		{
-			size_t typeSize = ComponentRegistry::getTypeInfo(targetTypeOffset.first).sizeInBytes;
+			size_t typeSize = info.sizeInBytes;
 			void* src = buffer + typeOffset->second + typeSize * entityIndex;
 			void* dst = targetBuffer + targetTypeOffset.second + typeSize * targetEntityIndex;
 			memcpy(dst, src, typeSize);
+		}
+		else
+		{
+			info.constructor(buffer + targetTypeOffset.second + numEntities * info.sizeInBytes);
 		}
 	}
 	removeEntity(entityId);

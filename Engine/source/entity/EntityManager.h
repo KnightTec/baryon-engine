@@ -14,9 +14,10 @@ public:
 	EntityManager();
 	EntityId createEntity();
 	void destroyEntity(EntityId entityId);
-	template <typename T>
-	void addComponent(EntityId entityId);
-	void addComponent(EntityId entityId, TypeFlag componentTypesFlag);
+	template <typename T, typename... Args>
+	void addComponents(EntityId entityId);
+	void addComponents(EntityId entityId);
+	void addComponents(EntityId entityId, TypeFlag componentTypesFlag);
 	template <typename T>
 	void removeComponent(EntityId entityId);
 	void removeComponent(EntityId entityId, TypeFlag componentTypesFlag);
@@ -33,12 +34,17 @@ private:
 };
 
 
-template <typename T>
-void EntityManager::addComponent(EntityId entityId)
+template <typename T, typename... Args>
+void EntityManager::addComponents(EntityId entityId)
 {
-	addComponent(entityId, ComponentRegistry::getTypeInfo<T>().flag);
+	TypeFlag componentsFlag = ComponentRegistry::getTypeInfo<T>().flag;
+	using expander = int[];
+	(void)expander {
+		0, ((void)(componentsFlag |= ComponentRegistry::getTypeInfo(typeId<Args>()).flag), 0)...
+	};
+	addComponents(entityId, componentsFlag);
 }
-inline void EntityManager::addComponent(EntityId entityId, TypeFlag componentTypesFlag)
+inline void EntityManager::addComponents(EntityId entityId, TypeFlag componentTypesFlag)
 {
 	changeArchetype(entityId, entityToComponentsMap[entityId] | componentTypesFlag);
 }
