@@ -7,6 +7,9 @@ namespace Baryon
 {
 typedef uint32_t Index;
 
+/*
+ * All entites with the same set of components belong to the same Archetype.
+ */
 class Archetype
 {
 public:
@@ -17,6 +20,9 @@ public:
 	void moveEntity(Archetype* targetArchetype, TypeFlag targetComponentTypes, EntityId entityId);
 	void* getComponent(EntityId entityId, TypeId componentType);
 	int getEntityCount() const;
+	/*
+	 * Returns a pointer to the first component of type T
+	 */
 	template <typename T>
 	T* getComponentArray();
 private:
@@ -38,5 +44,4 @@ T* Archetype::getComponentArray()
 {
 	return reinterpret_cast<T*>(buffer + typeOffsets[typeId<T>()]);
 }
-
 }

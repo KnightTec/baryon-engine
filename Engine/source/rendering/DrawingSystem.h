@@ -2,21 +2,22 @@
 #include "System.h"
 #include "GraphicsDeviceInterface.h"
 #include "Shader.h"
+#include "components/Components.h"
 
 namespace Baryon
 {
 class VirtualScreen;
 
-class DrawingSystem : public System<StaticMesh>, GraphicsDeviceInterface
+class DrawingSystem : public System<WorldMatrixComponent, MeshComponent>, GraphicsDeviceInterface
 {
-	using super = System<StaticMesh>;
+	using super = System<WorldMatrixComponent, MeshComponent>;
 public:
 	explicit DrawingSystem(EntityManager* entityManager, std::vector<VirtualScreen>& virtualScreens);
 	void initialize() override;
 	void terminate() override;
 	void tick() override;
 private:
-	void update(StaticMesh& staticMesh) override;
+	void update(WorldMatrixComponent& wmc, MeshComponent& mesh) override;
 
 	std::vector<VirtualScreen>& virtualScreens;
 

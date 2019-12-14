@@ -21,9 +21,7 @@ public:
 	void mainLoopIteration();
 	void terminate();
 	void createVirtualScreen(Window& targetWindow);
-	//Renderer& getRenderer();
 private:
-	//Renderer renderer;
 	EntityManager em;
 	RenderingEngine renderingEngine;
 };
@@ -33,8 +31,4 @@ inline Engine::Engine() : renderingEngine(&em)
 }
 
 
-//inline Renderer& Engine::getRenderer()
-//{
-//	return renderer;
-//}
 }

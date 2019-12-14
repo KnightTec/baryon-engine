@@ -45,11 +45,10 @@ void applyFog(in float2 texCoords, inout float3 color)
 
     float3 fogColor = float3(0.8, 0.8, 0.8);
 
-    float3 lightDir = normalize(float3(1, 3, -4));
+    float3 lightDir = normalize(float3(8, 3, -4));
     float sunFactor = saturate(dot(lightDir, viewDir));
 
     fogColor = lerp(float3(0.55, 0.6, 0.75), float3(1, 0.8, 0.75), sunFactor);
-
 
     color = fogFactor * fogColor + (1 - fogFactor) * color;
 }
@@ -58,7 +57,7 @@ float4 main(in VSOutput input) : SV_Target0
 {
     float3 nor = normalTex.Sample(texSampler, input.tex).xyz;    
     
-    float3 lightDir = normalize(float3(1, 3, -4));
+    float3 lightDir = normalize(float3(8, 3, -4));
 
     float3 surfaceColor = float3(0.4, 0.4, 0.4);
 

@@ -5,7 +5,7 @@
 #include "wrl/client.h"
 
 #include <cstdint>
-#include <string>
+
 
 namespace Baryon
 {
@@ -22,7 +22,6 @@ public:
 	Mesh();
 	bool load(const char* filename);
 
-	// returns the path of the converted mesh
 	static void import(const char* source);
 
 	ID3D11Buffer* getVertexBuffer() const;
@@ -32,17 +31,9 @@ private:
 	uint32_t indexCount;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
-
-	static const char* resTypeId;
-	static const uint16_t resTypeIdLength;
-	static const uint16_t version;
-	static const uint16_t vertexSize;
 };
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-// Inline function implementations 
-///////////////////////////////////////////////////////////////////////////////////////////////
 inline ID3D11Buffer* Mesh::getVertexBuffer() const
 {
 	return vertexBuffer.Get();

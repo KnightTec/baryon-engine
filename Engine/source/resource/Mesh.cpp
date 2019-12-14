@@ -12,10 +12,14 @@
 using namespace Baryon;
 using namespace DirectX;
 
-const char* Mesh::resTypeId = "BarResMesh";
-const uint16_t Mesh::resTypeIdLength = strlen(resTypeId) + 1;
-const uint16_t Mesh::version = 1;
-const uint16_t Mesh::vertexSize = sizeof(Vertex);
+namespace
+{
+	// values needed for the binary file
+	const char* resTypeId = "BarResMesh";
+	const uint16_t resTypeIdLength = strlen(resTypeId) + 1;
+	const uint16_t version = 1;
+	const uint16_t vertexSize = sizeof(Vertex);
+}
 
 Mesh::Mesh() : indexCount(0)
 {
@@ -104,7 +108,7 @@ bool Mesh::load(const char* filename)
 }
 
 /*
- * import a .obj-file
+ * import a .obj-file into a custom binary format
  */
 void Mesh::import(const char* source)
 {

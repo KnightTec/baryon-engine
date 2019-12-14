@@ -1,0 +1,21 @@
+STRING
+{
+    dataLength    U16
+    data          U8[dataLength]
+}
+
+MESH
+{
+    resTypeId		STRING
+//	crc32			U32
+//	name			STRING
+	version			U16
+    vertexOffset	U32
+	indexOffset		U32
+	vertexSize		U16
+	vertexCount		U32
+	indexCount		U32
+
+	vertexData		U8[vertexCount * vertexSize]
+	indexData		U32[indexCount]
+}

@@ -1,12 +1,20 @@
 #include "StringId.h"
+#include <cassert>
 
 namespace Baryon
 {
+std::unordered_map<uint64_t, const char*> StringId::stringIdMap;
+
 StringId::StringId(const char* str) : hash(computeHash(str, strlen(str)))
 {
-	if (stringIdMap.find(hash) == stringIdMap.end())
+	auto it = stringIdMap.find(hash);
+	if (it == stringIdMap.end())
 	{
 		stringIdMap[hash] = _strdup(str);
+	}
+	else
+	{
+		assert(strcmp(str, it->second) == 0);
 	}
 }
 

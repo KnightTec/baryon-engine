@@ -20,7 +20,7 @@ static ComPtr<ID3D11DepthStencilState> depthStencilState;
 
 
 DrawingSystem::DrawingSystem(EntityManager* entityManager, std::vector<VirtualScreen>& virtualScreens)
-	: System<StaticMesh>(entityManager), virtualScreens(virtualScreens)
+	: super(entityManager), virtualScreens(virtualScreens)
 {
 }
 void DrawingSystem::initialize()
@@ -106,7 +106,7 @@ void DrawingSystem::tick()
 	postVS.apply();
 	lightPS.apply();
 
-	getContext()->IASetInputLayout(nullptr);
+	//getContext()->IASetInputLayout(nullptr);
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	for (VirtualScreen& screen : virtualScreens)
@@ -153,15 +153,19 @@ void DrawingSystem::tick()
 	ID3D11ShaderResourceView* nulls[] = { nullptr, nullptr };
 	getContext()->PSSetShaderResources(0, 2, nulls);
 }
-void DrawingSystem::update(StaticMesh& staticMesh)
+void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 {
-	XMMATRIX worldMatrix = XMLoadFloat4x3(&staticMesh.worldMatrix);
+	if (mesh.mesh == nullptr)
+	{
+		return;
+	}
+	XMMATRIX worldMatrix = XMLoadFloat4x3(&wmc.worldMatrix);
 
 	uint32_t strides = sizeof(Vertex);
 	uint32_t offsets = 0;
-	ID3D11Buffer* vertexBuffer = staticMesh.mesh->getVertexBuffer();
+	ID3D11Buffer* vertexBuffer = mesh.mesh->getVertexBuffer();
 	getContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
-	getContext()->IASetIndexBuffer(staticMesh.mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+	getContext()->IASetIndexBuffer(mesh.mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 	for (VirtualScreen& screen : virtualScreens)
 	{
@@ -177,7 +181,7 @@ void DrawingSystem::update(StaticMesh& staticMesh)
 			XMStoreFloat4x4(&data.mWorldNormals, XMMatrixInverse(nullptr, worldMatrix));
 			vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
 
-			getContext()->DrawIndexed(staticMesh.mesh->getIndexCount(), 0, 0);
+			getContext()->DrawIndexed(mesh.mesh->getIndexCount(), 0, 0);
 		}
 	}
 }

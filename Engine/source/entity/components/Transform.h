@@ -1,4 +1,6 @@
 #pragma once
+#include "ComponentRegistry.h"
+
 #include "DirectXMath.h"
 
 namespace Baryon
@@ -15,13 +17,11 @@ struct Transform
 	void translate(float x, float y, float z, SPACE space = SPACE::LOCAL);
 	void rotate(float pitch, float yaw, float roll, SPACE space = SPACE::LOCAL);
 	void scale(float x, float y, float z, SPACE space = SPACE::LOCAL);
-	DirectX::XMMATRIX computeWorldMatrix() const;
-private:
+
 	DirectX::XMFLOAT4 orientation;
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 size;
 };
-
 
 
 inline Transform::Transform() : orientation(0, 0, 0, 1), position(0, 0, 0), size(1, 1, 1)
@@ -54,12 +54,5 @@ inline void Transform::scale(float x, float y, float z, SPACE space)
 	size.x *= x;
 	size.y *= y;
 	size.z *= z;
-}
-inline DirectX::XMMATRIX Transform::computeWorldMatrix() const
-{
-	using namespace DirectX;
-	return XMMatrixScalingFromVector(XMLoadFloat3(&size)) *
-		XMMatrixRotationQuaternion(XMLoadFloat4(&orientation)) *
-		XMMatrixTranslationFromVector(XMLoadFloat3(&position));
 }
 }

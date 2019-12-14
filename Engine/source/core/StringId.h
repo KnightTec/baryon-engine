@@ -4,12 +4,16 @@
 
 namespace Baryon
 {
+/*
+ * Hashed strings
+ */
 class StringId
 {
 	friend class StringIdSentry;
 public:
 	StringId(const char* str);
 	const char* c_str() const;
+	uint64_t getHash() const;
 private:
 	constexpr StringId(uint64_t hash);
 
@@ -31,6 +35,10 @@ private:
 inline const char* StringId::c_str() const
 {
 	return stringIdMap[hash];
+}
+inline uint64_t StringId::getHash() const
+{
+	return hash;
 }
 constexpr StringId::StringId(uint64_t hash) : hash(hash)
 {

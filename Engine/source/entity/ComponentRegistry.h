@@ -29,7 +29,6 @@ struct TypeInfo
 class ComponentRegistry
 {
 public:
-	static void initialize();
 	template <typename T>
 	static void registerComponentType(const char* typeName, size_t countPerChunk = 4096);
 	template <typename T>
@@ -84,25 +83,11 @@ inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeId typeId)
 	return idMap[typeId];
 }
 
-#define REGISTER_COMPONENT_TYPE_X(T)\
+#define REGISTER_COMPONENT_TYPE(T)\
 	struct T##_registrator{\
 		T##_registrator() {\
 			ComponentRegistry::registerComponentType<T>(#T);\
 		}\
 	};\
 	static T##_registrator global_##T##_registrator;
-
-#define REGISTER_COMPONENT_TYPE_1_ARG(type)							ComponentRegistry::registerComponentType<type>(#type)
-#define REGISTER_COMPONENT_TYPE_2_ARGS(type, componentsPerChunk)	ComponentRegistry::registerComponentType<type>(#type, componentsPerChunk)
-#define GET_3RD_ARG(arg1, arg2, arg3, ...) arg3
-#define REGISTER_COMPONENT_TYPE(...) GET_3RD_ARG(__VA_ARGS__, REGISTER_COMPONENT_TYPE_2_ARGS, REGISTER_COMPONENT_TYPE_1_ARG)(__VA_ARGS__)
-
-
-
-
-struct StaticMesh
-{
-	DirectX::XMFLOAT4X3 worldMatrix;
-	Mesh* mesh;
-};
 }

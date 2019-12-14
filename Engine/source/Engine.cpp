@@ -6,6 +6,7 @@
 #include "components/Transform.h"
 
 #include "StringId.h"
+#include "ResourceManager.h"
 
 using namespace Baryon;
 
@@ -15,7 +16,6 @@ bool Engine::initialize()
 	SetProcessDPIAware();
 
 	Input::initialize();
-	ComponentRegistry::initialize();
 
 	if (!GraphicsDeviceInterface::initialize())
 	{
@@ -26,12 +26,17 @@ bool Engine::initialize()
 	renderingEngine.initialize();
 
 	EntityId id0 = em.createEntity();
+	em.addComponent<WorldMatrixComponent>(id0);
 	auto* t = em.getComponent<Transform>(id0);
-	t->scale(5, 30, 4);
-	em.addComponent<StaticMesh>(id0);
-	auto* mesh = em.getComponent<StaticMesh>(id0);
-	mesh->mesh = new Mesh;
+	t->translate(0, 10, 0);
+	em.addComponent<MeshComponent>(id0);
+	auto* mesh = em.getComponent<MeshComponent>(id0);
 
+	
+	Mesh::import("../../untitled.obj");
+
+	StringId meshPath("mesh.bass");
+	mesh->mesh = ResourceManager::get().getMesh(meshPath);
 
 	return true;
 }
@@ -40,13 +45,11 @@ void Engine::mainLoopIteration()
 {
 	Input::handleGameInput();
 	renderingEngine.render();
-	//renderer.render();
 }
 
 
 void Engine::terminate()
 {
-	//renderer.terminate();
 	renderingEngine.terminate();
 	GraphicsDeviceInterface::terminate();
 }

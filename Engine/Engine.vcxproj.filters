@@ -105,6 +105,9 @@
     <ClInclude Include="source\entity\Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\entity\components\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="source\resource\IOUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -156,6 +159,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\core\StringId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\resource\ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

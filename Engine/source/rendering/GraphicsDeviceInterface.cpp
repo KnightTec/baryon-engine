@@ -51,12 +51,15 @@ bool GraphicsDeviceInterface::initialize()
 }
 void GraphicsDeviceInterface::terminate()
 {
+#ifdef _DEBUG
 	ID3D11Debug* debug;
 	d3dDevice->QueryInterface(IID_PPV_ARGS(&debug));
-
+#endif
 	d3dContext->Release();
 	d3dDevice->Release();
-
+#ifdef _DEBUG
 	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	debug->Release();
+#endif
+
 }

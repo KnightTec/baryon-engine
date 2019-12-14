@@ -12,5 +12,6 @@ public:
 	void save(const char* path);
 private:
 	EntityManager* entityManager;
+	//Terrain
 };
 }

@@ -18,6 +18,7 @@
     <ClInclude Include="source\entity\ComponentRegistry.h" />
     <ClInclude Include="source\core\Memory.h" />
     <ClInclude Include="source\core\Size.h" />
+    <ClInclude Include="source\entity\components\Components.h" />
     <ClInclude Include="source\entity\components\Transform.h" />
     <ClInclude Include="source\entity\System.h" />
     <ClInclude Include="source\entity\Entity.h" />
@@ -59,6 +60,7 @@
     <ClCompile Include="source\rendering\RenderTexture.cpp" />
     <ClCompile Include="source\rendering\Shader.cpp" />
     <ClCompile Include="source\rendering\VirtualScreen.cpp" />
+    <ClCompile Include="source\resource\ResourceManager.cpp" />
     <ClCompile Include="source\WindowsApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
