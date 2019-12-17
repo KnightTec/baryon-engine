@@ -25,7 +25,7 @@ class ConstantBuffer : public Singleton<ConstantBuffer<T>>, GraphicsDeviceInterf
 {
 	friend class Singleton<ConstantBuffer<T>>;
 public:
-	void initialize(int registerNumber, uint8_t shaderStages);
+	void initialize(int registerNumber, SHADER_STAGE shaderStages);
 	void uploadBuffer();
 	T* operator->();
 private:
@@ -39,7 +39,7 @@ private:
 
 
 template <typename T>
-void ConstantBuffer<T>::initialize(int registerNumber, uint8_t shaderStages)
+void ConstantBuffer<T>::initialize(int registerNumber, SHADER_STAGE shaderStages)
 {
 	assert(registerNumber <= D3D11_COMMONSHADER_CONSTANT_BUFFER_HW_SLOT_COUNT);
 

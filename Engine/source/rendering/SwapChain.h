@@ -21,7 +21,6 @@ public:
 	void setFullscreen(bool fullscreen);
 	Size2D getBackBufferResolution() const;
 	ID3D11RenderTargetView* getRenderTargetView() const;
-	ID3D11RenderTargetView* const* getRenderTargetViewAddress() const;
 private:
 	bool isFullscreen;
 	DXGI_FORMAT format;
@@ -47,9 +46,5 @@ inline Size2D SwapChain::getBackBufferResolution() const
 inline ID3D11RenderTargetView* SwapChain::getRenderTargetView() const
 {
 	return renderTargetView.Get();
-}
-inline ID3D11RenderTargetView* const* SwapChain::getRenderTargetViewAddress() const
-{
-	return renderTargetView.GetAddressOf();
 }
 }

@@ -119,22 +119,19 @@ void DrawingSystem::tick()
 		lightPS.apply();
 		screen.setupIntermediateViewport();
 		screen.setupLightPass();
-		ID3D11ShaderResourceView* srvs[] = {screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView()};
-		getContext()->PSSetShaderResources(0, 2, srvs);
+
 		getContext()->Draw(3, 0);
 
 		// render post processing
 		postPS.apply();
 		screen.setupFinalViewport();
 		screen.setupPostProcessPass();
-		ID3D11ShaderResourceView* srvs2[] = {screen.litScene.getShaderResourceView()};
-		getContext()->PSSetShaderResources(1, 1, srvs2);
 		getContext()->Draw(3, 0);
 		screen.present();
 	}
 
-	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr};
-	getContext()->PSSetShaderResources(0, 2, nulls);
+	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr, nullptr, nullptr};
+	getContext()->PSSetShaderResources(0, 4, nulls);
 }
 void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 {

@@ -1,11 +1,5 @@
 #include "Baryon.hlsl"
 
-Texture2D<float> depthTex : register(t0);
-Texture2D sceneTex : register(t1);
-
-SamplerState texSampler : register(s0);
-
-
 struct VSOutput
 {
     float4 pos : SV_POSITION;
@@ -15,7 +9,7 @@ struct VSOutput
 float3 getNDC(float2 texCoords)
 {
     float3 ndc;
-    ndc.z = depthTex.Sample(texSampler, texCoords);
+    ndc.z = depthTexture.Sample(texSampler, texCoords);
     ndc.xy = texCoords * 2 - 1;
     ndc.y *= -1;
     return ndc;
@@ -39,7 +33,7 @@ float InterleavedGradientNoise(float2 uv)
 
 float4 main(in VSOutput input) : SV_Target0
 {
-    float3 color = sceneTex.Sample(texSampler, input.tex).xyz;
+    float3 color = hdrScene.Sample(texSampler, input.tex).xyz;
 
     // perform camera motion blur
     float3 worldPos = getWorldPos(input.tex);
@@ -57,8 +51,8 @@ float4 main(in VSOutput input) : SV_Target0
     float sum = 1;
     for (int i = 1; i < numSamples; ++i, texPos += velocity, texNeg -= velocity)
     {
-        color += sceneTex.Sample(texSampler, texPos).xyz;
-        color += sceneTex.Sample(texSampler, texNeg).xyz;
+        color += hdrScene.Sample(texSampler, texPos).xyz;
+        color += hdrScene.Sample(texSampler, texNeg).xyz;
         sum += 2;
     }
 

@@ -1,15 +1,15 @@
 struct VSOutput
 {
-	float4 pos : SV_POSITION;
-	float3 nor : NORMAL;
-	float3 wPos : POSITION;
+	float4 position : SV_POSITION;
+	float3 normal : NORMAL;
 };
 
-float4 main(in VSOutput input) : SV_Target0
+void main(in VSOutput input, out float4 gBuffer0 : SV_Target0, out float4 gBuffer1 : SV_Target1)
 {
     // flat shading
 	//float3 nor = cross(ddx(input.wPos), ddy(input.wPos));
 	//nor = normalize(nor);
-    float3 normal = normalize(input.nor);
-    return float4(normal, 1);
+    float3 normal = normalize(input.normal);
+    gBuffer0 = float4(1, 0, 0, 1);
+    gBuffer1 = float4(normal, 1);
 }

@@ -1,23 +1,21 @@
 #include "Baryon.hlsl"
 
-struct VSInput
+struct MeshVertex
 {
-	float3 pos : POSITION;
-	float3 nor : NORMAL;
-    float2 tex : TEXCOORD;
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+    float2 texCoord : TEXCOORD;
 };
 struct VSOutput 
 {
-	float4 pos : SV_POSITION;
-	float3 nor : NORMAL;
-	float3 wPos : POSITION;
+	float4 position : SV_POSITION;
+	float3 normal : NORMAL;
 };
 
-VSOutput main(in VSInput input)
+VSOutput main(in MeshVertex input)
 {
 	VSOutput output;
-    output.pos = mul(float4(input.pos, 1), worldViewProjMat);
-    output.nor = mul(float4(input.nor, 0), worldNormalsMat).xyz;
-	output.wPos = input.pos;
+    output.position = mul(float4(input.position, 1), worldViewProjMat);
+    output.normal = mul(float4(input.normal, 0), worldNormalsMat).xyz;
 	return output;
 }

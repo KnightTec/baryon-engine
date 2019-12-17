@@ -35,6 +35,7 @@
     <ClInclude Include="source\rendering\WorldMatrixCalculatorSystem.h" />
     <ClInclude Include="source\rendering\SwapChain.h" />
     <ClInclude Include="source\resource\IOUtil.h" />
+    <ClInclude Include="source\resource\Material.h" />
     <ClInclude Include="source\resource\Mesh.h" />
     <ClInclude Include="source\core\Observer.h" />
     <ClInclude Include="source\rendering\RenderTexture.h" />

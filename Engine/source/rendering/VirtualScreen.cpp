@@ -57,7 +57,7 @@ const std::vector<Size2D>& VirtualScreen::getSupportedResolutions()
 	return supportedResolutions;
 }
 
-VirtualScreen::VirtualScreen() : initialized{ false }, activeCamera{ nullptr }
+VirtualScreen::VirtualScreen() : initialized{false}, activeCamera{nullptr}
 {
 	// call to initialize the refresh rate
 	getSupportedResolutions();
@@ -122,8 +122,9 @@ bool VirtualScreen::configureBuffers()
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	worldNormals.create(resolution);
-	litScene.create(resolution);
+	gBufferTexture0.create(resolution);
+	gBufferTexture1.create(resolution);
+	hdrScene.create(resolution);
 
 	return true;
 }
@@ -132,8 +133,9 @@ void VirtualScreen::releaseBuffers()
 {
 	assert(initialized);
 
-	litScene.release();
-	worldNormals.release();
+	hdrScene.release();
+	gBufferTexture0.release();
+	gBufferTexture1.release();
 	depthBufferSRV.Reset();
 	depthStencilView.Reset();
 	depthStencilBuffer.Reset();
@@ -165,18 +167,27 @@ bool VirtualScreen::setFullscreen(bool fullscreen)
 
 void VirtualScreen::setupGeometryPass()
 {
-	ID3D11RenderTargetView* rtvs[] = {worldNormals.getRenderTargetView()};
-	getContext()->OMSetRenderTargets(1, rtvs, depthStencilView.Get());
+	ID3D11RenderTargetView* rtvs[] = {gBufferTexture0.getRenderTargetView(), gBufferTexture1.getRenderTargetView()};
+	getContext()->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
 }
 
 void VirtualScreen::setupLightPass()
 {
-	ID3D11RenderTargetView* rtvs[] = {litScene.getRenderTargetView()};
-	getContext()->OMSetRenderTargets(1, rtvs, nullptr);
+	ID3D11RenderTargetView* rtvs[] = { hdrScene.getRenderTargetView(), nullptr, nullptr };
+	getContext()->OMSetRenderTargets(3, rtvs, nullptr);
+	ID3D11ShaderResourceView* srvs[] = {
+		gBufferTexture0.getShaderResourceView(),
+		gBufferTexture1.getShaderResourceView(),
+		depthBufferSRV.Get()
+	};
+	getContext()->PSSetShaderResources(0, 3, srvs);
 }
 void VirtualScreen::setupPostProcessPass()
 {
-	getContext()->OMSetRenderTargets(1, swapChain->getRenderTargetViewAddress(), nullptr);
+	ID3D11RenderTargetView* rtvs[] = { swapChain->getRenderTargetView() };
+	getContext()->OMSetRenderTargets(1, rtvs, nullptr);
+	ID3D11ShaderResourceView* srvs2[] = { hdrScene.getShaderResourceView() };
+	getContext()->PSSetShaderResources(3, 1, srvs2);
 }
 void VirtualScreen::setViewportSize(int width, int height)
 {

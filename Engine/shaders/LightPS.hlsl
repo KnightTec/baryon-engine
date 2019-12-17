@@ -1,10 +1,5 @@
 #include "Baryon.hlsl"
 
-Texture2D<float> depthTex : register(t0);
-Texture2D<float4> normalTex : register(t1);
-
-SamplerState texSampler : register(s0);
-
 struct VSOutput
 {
     float4 pos : SV_POSITION;
@@ -14,7 +9,7 @@ struct VSOutput
 float3 getWorldPos(float2 texCoords)
 {
     float3 ndc;
-    ndc.z = depthTex.Sample(texSampler, texCoords);
+    ndc.z = depthTexture.Sample(texSampler, texCoords);
     ndc.xy = texCoords * 2 - 1;
     ndc.y *= -1;
 
@@ -51,11 +46,11 @@ void applyFog(in float2 texCoords, inout float3 color)
 
 float4 main(in VSOutput input) : SV_Target0
 {
-    float3 nor = normalTex.Sample(texSampler, input.tex).xyz;    
+    float3 nor = gBufferTexture1.Sample(texSampler, input.tex).xyz;    
     
     float3 lightDir = normalize(float3(8, 3, -4));
 
-    float3 surfaceColor = float3(0.4, 0.4, 0.4);
+    float3 surfaceColor = gBufferTexture0.Sample(texSampler, input.tex).rgb;
 
     float3 worldPos = getWorldPos(input.tex);
     float3 viewDir = normalize(cameraPosition.xyz - worldPos);
