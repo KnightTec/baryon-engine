@@ -111,6 +111,12 @@
     <ClInclude Include="source\resource\IOUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\rendering\ConstantBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Engine.cpp">
@@ -164,15 +170,17 @@
     <ClCompile Include="source\resource\ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\rendering\RenderingEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\VertexShader.hlsl" />
     <None Include="shaders\PixelShader.hlsl" />
     <None Include="shaders\LightPS.hlsl" />
     <None Include="shaders\PostProcessPS.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="shaders\FullscreenVS.hlsl" />
+    <None Include="shaders\FullscreenVS.hlsl" />
+    <None Include="shaders\Baryon.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="source\resource\ResourceFileFormats.txt" />

@@ -1,20 +1,51 @@
 #pragma once
 #include <DirectXMath.h>
 
-struct VS_CONSTANT_BUFFER
+namespace Baryon
 {
-	DirectX::XMFLOAT4X4 mWorldViewProj;
-	DirectX::XMFLOAT4X4 mWorldNormals;
+class GPUMatrix
+{
+public:
+	GPUMatrix() = default;
+	GPUMatrix(DirectX::XMMATRIX& xmMatrix);
+	GPUMatrix(DirectX::XMMATRIX&& xmMatrix);
+	GPUMatrix& operator=(DirectX::XMMATRIX& xmMatrix);
+	GPUMatrix& operator=(DirectX::XMMATRIX&& xmMatrix);
+private:
+	DirectX::XMFLOAT4X4 matrix;
 };
 
-struct PS_CONSTANT_BUFFER
+struct PER_OBJECT_DATA
 {
-	DirectX::XMFLOAT4X4 invViewProj;
+	GPUMatrix worldViewProjMat;
+	GPUMatrix worldNormalsMat;
+};
+struct PER_CAMERA_DATA
+{
+	GPUMatrix invViewProj;
+	GPUMatrix prevFrameViewProjMat;
 	DirectX::XMFLOAT4 cameraPosition;
+	DirectX::XMFLOAT4 cameraLinearVelocity;
+	DirectX::XMFLOAT4 cameraAngularVelocity;
 };
 
-struct POST_PROCESS_CBUFFER
+
+inline GPUMatrix::GPUMatrix(DirectX::XMMATRIX& xmMatrix)
 {
-	DirectX::XMFLOAT4X4 invViewProj;
-	DirectX::XMFLOAT4X4 prevFrameViewProj;
-};
+	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixTranspose(xmMatrix));
+}
+inline GPUMatrix::GPUMatrix(DirectX::XMMATRIX&& xmMatrix)
+{
+	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixTranspose(xmMatrix));
+}
+inline GPUMatrix& GPUMatrix::operator=(DirectX::XMMATRIX& xmMatrix)
+{
+	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixTranspose(xmMatrix));
+	return *this;
+}
+inline GPUMatrix& GPUMatrix::operator=(DirectX::XMMATRIX&& xmMatrix)
+{
+	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixTranspose(xmMatrix));
+	return *this;
+}
+}

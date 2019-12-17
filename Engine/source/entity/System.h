@@ -26,7 +26,9 @@ inline ISystem::ISystem(EntityManager* entityManager)
 {
 }
 
-
+/*
+ * A System processes all HandledComponents
+ */
 template <typename... HandledComponents>
 class System : public ISystem
 {
@@ -34,6 +36,10 @@ public:
 	System(EntityManager* entityManager);
 	virtual void tick() override;
 protected:
+	/*
+	 * Here a subclass can define how the components of each entity,
+	 * that has all HandledComponents, should be processed
+	 */
 	virtual void update(HandledComponents&...) = 0;
 private:
 	template <size_t...I>

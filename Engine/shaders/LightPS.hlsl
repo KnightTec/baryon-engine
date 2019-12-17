@@ -1,13 +1,9 @@
+#include "Baryon.hlsl"
+
 Texture2D<float> depthTex : register(t0);
 Texture2D<float4> normalTex : register(t1);
 
 SamplerState texSampler : register(s0);
-
-cbuffer PS_CONSTANT_BUFFER : register(b0)
-{
-    matrix invViewProj;
-    float3 cameraPosition;
-};
 
 struct VSOutput
 {
@@ -62,9 +58,9 @@ float4 main(in VSOutput input) : SV_Target0
     float3 surfaceColor = float3(0.4, 0.4, 0.4);
 
     float3 worldPos = getWorldPos(input.tex);
-    float3 viewDir = normalize(cameraPosition - worldPos);
+    float3 viewDir = normalize(cameraPosition.xyz - worldPos);
     float3 halfVec = normalize(lightDir + viewDir);
-    float specularExponent = 30;
+    float specularExponent = 50;
     float specularIntensity = 1;
     specularIntensity *= pow(saturate(dot(nor, halfVec)), specularExponent);
     float3 specularColor = float3(1, 0.8, 0.75);
@@ -79,7 +75,7 @@ float4 main(in VSOutput input) : SV_Target0
   
     if (length(nor) == 0)
     {
-        color = float3(0.01, 0.01, 0.01);
+        color = float3(0.00, 0.00, 0.00);
     }
 
     applyFog(input.tex, color);

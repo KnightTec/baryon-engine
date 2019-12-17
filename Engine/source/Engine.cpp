@@ -28,23 +28,18 @@ bool Engine::initialize()
 	Mesh::import("../../untitled.obj");
 	StringId meshPath("mesh.bass");
 
-	EntityId id = em.createEntity();
-	em.addComponents<WorldMatrixComponent, MeshComponent>(id);
-	auto* t = em.getComponent<Transform>(id);
-	t->translate(0, 10, 0);
-	t->scale(5, 5, 5);
-	auto* m = em.getComponent<MeshComponent>(id);
-	m->mesh = ResourceManager::get().getMesh(meshPath);
-
-	id = em.createEntity();
-	em.addComponents<WorldMatrixComponent, MeshComponent>(id);
-	t = em.getComponent<Transform>(id);
-	t->translate(0, 15, 0);
-	t->scale(2, 2, 2);
-
-	m = em.getComponent<MeshComponent>(id);
-	m->mesh = ResourceManager::get().getMesh(meshPath);
-
+	for (int x = 0; x < 20; x++)
+	{
+		for (int y = 0; y < 20; y++) {
+			EntityId id = em.createEntity();
+			em.addComponents<WorldMatrixComponent, MeshComponent>(id);
+			auto* t = em.getComponent<Transform>(id);
+			t->translate(x * 14, 10, y * 14);
+			t->scale(5, 5, 5);
+			auto* m = em.getComponent<MeshComponent>(id);
+			m->mesh = ResourceManager::get().getMesh(meshPath);
+		}
+	}
 
 	return true;
 }

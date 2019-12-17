@@ -23,6 +23,7 @@
     <ClInclude Include="source\entity\System.h" />
     <ClInclude Include="source\entity\Entity.h" />
     <ClInclude Include="source\entity\EntityManager.h" />
+    <ClInclude Include="source\rendering\ConstantBuffer.h" />
     <ClInclude Include="source\rendering\DrawingSystem.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
     <ClInclude Include="source\rendering\GpuData.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="source\rendering\VirtualScreen.h" />
     <ClInclude Include="source\resource\ResourceManager.h" />
     <ClInclude Include="source\rendering\Window.h" />
+    <ClInclude Include="source\Time.h" />
     <ClInclude Include="source\WindowsApplication.h" />
     <ClInclude Include="source\World.h" />
   </ItemGroup>
@@ -55,6 +57,7 @@
     <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
     <ClCompile Include="source\input\Input.cpp" />
+    <ClCompile Include="source\rendering\RenderingEngine.cpp" />
     <ClCompile Include="source\rendering\SwapChain.cpp" />
     <ClCompile Include="source\resource\Mesh.cpp" />
     <ClCompile Include="source\rendering\RenderTexture.cpp" />
@@ -80,13 +83,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\FullscreenVS.hlsl">
+    <None Include="shaders\FullscreenVS.hlsl">
       <FileType>Document</FileType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
+    </None>
     <None Include="shaders\LightPS.hlsl">
       <FileType>Document</FileType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -101,6 +104,11 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="source\resource\ResourceFileFormats.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\Baryon.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

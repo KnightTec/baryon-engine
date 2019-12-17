@@ -4,15 +4,14 @@
 #include "DXErr.h"
 #include "../Camera.h"
 #include "VirtualScreen.h"
+#include "ConstantBuffer.h"
 
 #include "DirectXMath.h"
 
 using namespace Baryon;
 using namespace DirectX;
 using namespace Microsoft::WRL;
-	
 
-static POST_PROCESS_CBUFFER postProcessData = {};
 
 static ComPtr<ID3D11RasterizerState1> rasterState;
 static ComPtr<ID3D11SamplerState> samplerState;
@@ -67,10 +66,12 @@ void DrawingSystem::initialize()
 	dsDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
 
 	const D3D11_DEPTH_STENCILOP_DESC defaultStencilOp =
-	{ D3D11_STENCIL_OP_KEEP,
-	  D3D11_STENCIL_OP_KEEP,
-	  D3D11_STENCIL_OP_KEEP,
-	  D3D11_COMPARISON_ALWAYS };
+	{
+		D3D11_STENCIL_OP_KEEP,
+		D3D11_STENCIL_OP_KEEP,
+		D3D11_STENCIL_OP_KEEP,
+		D3D11_COMPARISON_ALWAYS
+	};
 
 	dsDesc.FrontFace = defaultStencilOp;
 	dsDesc.BackFace = defaultStencilOp;
@@ -81,13 +82,10 @@ void DrawingSystem::initialize()
 
 	/*
 	 * TODO: Blend State
-	  Depth Stencil State
-	  Sampler State
 	 */
 }
 void DrawingSystem::terminate()
 {
-
 }
 void DrawingSystem::tick()
 {
@@ -102,55 +100,40 @@ void DrawingSystem::tick()
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	super::tick();
 
-	// render light pass
 	postVS.apply();
-	lightPS.apply();
-
-	//getContext()->IASetInputLayout(nullptr);
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
 	for (VirtualScreen& screen : virtualScreens)
 	{
 		Camera* cam = screen.getActiveCamera();
-		if (cam != nullptr) {
-
-			PS_CONSTANT_BUFFER data = {};
-			XMStoreFloat4x4(&data.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, cam->getViewProjMatrix())));
-			XMStoreFloat4(&data.cameraPosition, cam->getPostion());
-			lightPS.updateConstantBufferByIndex(&data, sizeof(data), 0);
-
-			screen.setupIntermediateViewport();
-			screen.setupLightPass();
-
-			ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView() };
-			getContext()->PSSetShaderResources(0, 2, srvs);
-
-			getContext()->Draw(3, 0);
+		if (cam == nullptr)
+		{
+			continue;
 		}
+		auto& cameraData = cBuffer(PER_CAMERA_DATA);
+		cameraData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjMatrix());
+		XMStoreFloat4(&cameraData->cameraPosition, cam->getPosition());
+		cameraData.uploadBuffer();
+		cameraData->prevFrameViewProjMat = cam->getViewProjMatrix();
+
+		// render light pass
+		lightPS.apply();
+		screen.setupIntermediateViewport();
+		screen.setupLightPass();
+		ID3D11ShaderResourceView* srvs[] = {screen.depthBufferSRV.Get(), screen.worldNormals.getShaderResourceView()};
+		getContext()->PSSetShaderResources(0, 2, srvs);
+		getContext()->Draw(3, 0);
+
+		// render post processing
+		postPS.apply();
+		screen.setupFinalViewport();
+		screen.setupPostProcessPass();
+		ID3D11ShaderResourceView* srvs2[] = {screen.litScene.getShaderResourceView()};
+		getContext()->PSSetShaderResources(1, 1, srvs2);
+		getContext()->Draw(3, 0);
+		screen.present();
 	}
 
-	// render post processing
-	postPS.apply();
-	for (VirtualScreen& screen : virtualScreens)
-	{
-		Camera* cam = screen.getActiveCamera();
-		if (cam != nullptr) {
-			XMStoreFloat4x4(&postProcessData.invViewProj, XMMatrixTranspose(XMMatrixInverse(nullptr, cam->getViewProjMatrix())));
-			postPS.updateConstantBufferByIndex(&postProcessData, sizeof postProcessData, 0);
-
-			screen.setupFinalViewport();
-			screen.setupPostProcessPass();
-			ID3D11ShaderResourceView* srvs[] = { screen.depthBufferSRV.Get(), screen.litScene.getShaderResourceView() };
-			getContext()->PSSetShaderResources(0, 2, srvs);
-
-			getContext()->Draw(3, 0);
-			screen.present();
-
-			XMStoreFloat4x4(&postProcessData.prevFrameViewProj, XMMatrixTranspose(cam->getViewProjMatrix()));
-		}
-	}
-
-	ID3D11ShaderResourceView* nulls[] = { nullptr, nullptr };
+	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr};
 	getContext()->PSSetShaderResources(0, 2, nulls);
 }
 void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
@@ -170,18 +153,19 @@ void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 	for (VirtualScreen& screen : virtualScreens)
 	{
 		Camera* cam = screen.getActiveCamera();
-		if (cam)
+		if (cam == nullptr)
 		{
-			screen.setupIntermediateViewport();
-			screen.setupGeometryPass();
-
-			// update constant buffer (matrices)
-			VS_CONSTANT_BUFFER data = {};
-			XMStoreFloat4x4(&data.mWorldViewProj, XMMatrixTranspose(worldMatrix * cam->getViewProjMatrix()));
-			XMStoreFloat4x4(&data.mWorldNormals, XMMatrixInverse(nullptr, worldMatrix));
-			vs.updateConstantBufferByIndex(&data, sizeof(data), 0);
-
-			getContext()->DrawIndexed(mesh.mesh->getIndexCount(), 0, 0);
+			continue;
 		}
+		screen.setupIntermediateViewport();
+		screen.setupGeometryPass();
+
+		// update constant buffer (matrices)
+		auto& buffer = cBuffer(PER_OBJECT_DATA);
+		buffer->worldViewProjMat = worldMatrix * cam->getViewProjMatrix();
+		buffer->worldNormalsMat = XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix));
+		buffer.uploadBuffer();
+
+		getContext()->DrawIndexed(mesh.mesh->getIndexCount(), 0, 0);
 	}
 }

@@ -16,7 +16,6 @@ public:
 	void destroyEntity(EntityId entityId);
 	template <typename T, typename... Args>
 	void addComponents(EntityId entityId);
-	void addComponents(EntityId entityId);
 	void addComponents(EntityId entityId, TypeFlag componentTypesFlag);
 	template <typename T>
 	void removeComponent(EntityId entityId);

@@ -42,8 +42,9 @@ public:
 	void setupIntermediateViewport();
 	void setupFinalViewport();
 
-	RenderTexture worldNormals{DXGI_FORMAT_R32G32B32A32_FLOAT};
-	RenderTexture gBufferTexture1{DXGI_FORMAT_R16G16B16A16_UNORM}; // RGB color, A specular intensity 
+	
+	RenderTexture gBufferTexture1{DXGI_FORMAT_R16G16B16A16_UNORM};	// RGB color, A specular intensity 
+	RenderTexture worldNormals{ DXGI_FORMAT_R32G32B32A32_FLOAT };	// world space normals	
 	RenderTexture litScene{DXGI_FORMAT_R16G16B16A16_UNORM};
 
 
@@ -85,10 +86,9 @@ inline Camera* VirtualScreen::getActiveCamera() const
 }
 inline void VirtualScreen::clear()
 {
-	static const float clearColor[] = {0.01f, 0.01f, 0.01f, 1.000f};
+	static const float clearColor[] = {0.f, 0.f, 0.f, 1.f};
 	getContext()->ClearRenderTargetView(swapChain->getRenderTargetView(), clearColor);
-	float clearColor2[] = {0, 0, 0, 1};
-	getContext()->ClearRenderTargetView(worldNormals.getRenderTargetView(), clearColor2);
+	getContext()->ClearRenderTargetView(worldNormals.getRenderTargetView(), clearColor);
 	getContext()->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 0.0f, 0);
 }
 inline void VirtualScreen::setupIntermediateViewport()

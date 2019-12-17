@@ -13,10 +13,13 @@ namespace Baryon
 {
 class ResourceManager : public Singleton<ResourceManager>
 {
+	friend class Singleton<ResourceManager>;
 public:
-	~ResourceManager();
 	Mesh* getMesh(StringId path);
 private:
+	ResourceManager() = default;
+	~ResourceManager();
+
 	//TODO: add reference counting
 	// maps the string hash of the path of the resource to the mesh 
 	std::unordered_map<uint64_t, Mesh*> meshes;

@@ -1,8 +1,4 @@
-cbuffer VS_CONSTANT_BUFFER : register(b0)
-{
-	matrix worldViewProj;
-    matrix mWorldNormals;
-};
+#include "Baryon.hlsl"
 
 struct VSInput
 {
@@ -20,8 +16,8 @@ struct VSOutput
 VSOutput main(in VSInput input)
 {
 	VSOutput output;
-	output.pos = mul(float4(input.pos, 1), worldViewProj);
-    output.nor = mul(float4(input.nor, 0), mWorldNormals).xyz;
+    output.pos = mul(float4(input.pos, 1), worldViewProjMat);
+    output.nor = mul(float4(input.nor, 0), worldNormalsMat).xyz;
 	output.wPos = input.pos;
 	return output;
 }

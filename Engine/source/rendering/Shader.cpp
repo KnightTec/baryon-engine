@@ -10,37 +10,6 @@ using namespace Baryon;
 using namespace Microsoft::WRL;
 
 
-bool Shader::updateConstantBufferByIndex(void* data, uint32_t dataSizeInBytes, uint32_t index)
-{
-	assert(index < cBuffers.size());
-	if (!cBuffers[index]) {
-		// create the constant buffer
-
-		D3D11_BUFFER_DESC cbDesc;
-		cbDesc.ByteWidth = dataSizeInBytes;
-		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbDesc.MiscFlags = 0;
-		cbDesc.StructureByteStride = 0;
-
-		char dummyData[1];
-
-		D3D11_SUBRESOURCE_DATA initData;
-		initData.pSysMem = dummyData;
-		initData.SysMemPitch = 0;
-		initData.SysMemSlicePitch = 0;
-
-		HR(getDevice()->CreateBuffer(&cbDesc, &initData, &cBuffers[index]));
-	}
-	// update the constant buffer
-	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(getContext()->Map(cBuffers[index], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-	memcpy_s(mappedData.pData, dataSizeInBytes, data, dataSizeInBytes);
-	getContext()->Unmap(cBuffers[index], 0);
-	return true;
-}
-
 bool VertexShader::compile()
 {
 	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;

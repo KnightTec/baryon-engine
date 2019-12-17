@@ -1,14 +1,9 @@
+#include "Baryon.hlsl"
+
 Texture2D<float> depthTex : register(t0);
 Texture2D sceneTex : register(t1);
 
 SamplerState texSampler : register(s0);
-
-cbuffer CONSTANT_DATA : register(b0)
-{
-    matrix invViewProj;
-    matrix prevViewProj;
-};
-
 
 
 struct VSOutput
@@ -54,19 +49,17 @@ float4 main(in VSOutput input) : SV_Target0
     float2 velocity = (ndc.xy - previousNdc.xy) / 2;
     
     int numSamples = 64;
-    float intensity = 1;
+    float intensity = 0.5;
     velocity /= numSamples;
     velocity *= intensity;
     float2 texPos = input.tex + velocity;
     float2 texNeg = input.tex - velocity;
     float sum = 1;
-    float factor = (numSamples - 1) / (float) numSamples;
     for (int i = 1; i < numSamples; ++i, texPos += velocity, texNeg -= velocity)
     {
-        color += sceneTex.Sample(texSampler, texPos).xyz * factor;
-        color += sceneTex.Sample(texSampler, texNeg).xyz * factor;
-        sum += 2 * factor;
-        factor -= 1 / numSamples;
+        color += sceneTex.Sample(texSampler, texPos).xyz;
+        color += sceneTex.Sample(texSampler, texNeg).xyz;
+        sum += 2;
     }
 
     color = color / sum;
@@ -85,5 +78,4 @@ float4 main(in VSOutput input) : SV_Target0
     //color.xyz = pow(color.xyz, 2.2);
     
     return float4(color, 1);
-    //return float4(float3(1, 1, 1) * vignette, 1);
 }

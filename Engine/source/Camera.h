@@ -18,7 +18,7 @@ public:
 	DirectX::XMMATRIX getViewMatrix();
 	DirectX::XMMATRIX getProjectionMatrix() const;
 	DirectX::XMMATRIX getViewProjMatrix();
-	DirectX::XMVECTOR getPostion()
+	DirectX::XMVECTOR getPosition()
 	{
 		return XMLoadFloat3(&position);
 	}

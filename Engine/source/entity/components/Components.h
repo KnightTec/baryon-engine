@@ -11,7 +11,6 @@ struct WorldMatrixComponent
 };
 struct MeshComponent
 {
-	
 	Mesh* mesh;
 };
 }

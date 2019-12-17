@@ -4,6 +4,7 @@
 #include "ui_Editor.h"
 
 #include "Window.h"
+#include "Engine.h"
 
 
 class Editor : public QWidget, public Baryon::Window
