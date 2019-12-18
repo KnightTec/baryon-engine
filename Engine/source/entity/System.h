@@ -8,7 +8,7 @@ namespace Baryon
 class ISystem
 {
 public:
-	explicit ISystem(EntityManager* entityManager);
+	ISystem(EntityManager* entityManager);
 	virtual ~ISystem() = default;
 	virtual void initialize()
 	{
