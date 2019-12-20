@@ -83,7 +83,7 @@ bool VirtualScreen::configureBuffers()
 {
 	assert(initialized);
 	swapChain->setup();
-	Size2D resolution = swapChain->getBackBufferResolution();
+	resolution = swapChain->getBackBufferResolution();
 
 	// Create depth/stencil buffer and view
 	D3D11_TEXTURE2D_DESC1 depthStencilDesc;
@@ -156,7 +156,6 @@ bool VirtualScreen::resize(Size2D resolution)
 	}
 	return true;
 }
-
 bool VirtualScreen::setFullscreen(bool fullscreen)
 {
 	releaseBuffers();
@@ -164,13 +163,11 @@ bool VirtualScreen::setFullscreen(bool fullscreen)
 	configureBuffers();
 	return true;
 }
-
 void VirtualScreen::setupGeometryPass()
 {
 	ID3D11RenderTargetView* rtvs[] = {gBufferTexture0.getRenderTargetView(), gBufferTexture1.getRenderTargetView()};
 	getContext()->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
 }
-
 void VirtualScreen::setupLightPass()
 {
 	ID3D11RenderTargetView* rtvs[] = { hdrScene.getRenderTargetView(), nullptr, nullptr };

@@ -40,6 +40,7 @@ public:
 	void setViewportSize(int width, int height);
 	void setupIntermediateViewport();
 	void setupFinalViewport();
+	const Size2D& getResolution() const;
 private:
 	bool configureBuffers();
 	void releaseBuffers();
@@ -48,12 +49,14 @@ private:
 	Camera* activeCamera;
 	D3D11_VIEWPORT viewport;
 	SwapChain* swapChain;
+	Size2D resolution;
+	DirectX::XMFLOAT4X3 taaJitterMatrix;
 
-	RenderTexture hdrScene{ DXGI_FORMAT_R16G16B16A16_FLOAT };
+	RenderTexture hdrScene{DXGI_FORMAT_R16G16B16A16_FLOAT};
 
 	// G-Buffer
-	RenderTexture gBufferTexture0{ DXGI_FORMAT_R8G8B8A8_UNORM }; // RGB color, A specular intensity 
-	RenderTexture gBufferTexture1{ DXGI_FORMAT_R32G32B32A32_FLOAT }; // world space normals
+	RenderTexture gBufferTexture0{DXGI_FORMAT_R8G8B8A8_UNORM}; // RGB color, A specular intensity 
+	RenderTexture gBufferTexture1{DXGI_FORMAT_R32G32B32A32_FLOAT}; // world space normals
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthBufferSRV;
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D1> depthStencilBuffer;
@@ -101,5 +104,9 @@ inline void VirtualScreen::setupIntermediateViewport()
 inline void VirtualScreen::setupFinalViewport()
 {
 	getContext()->RSSetViewports(1, &viewport);
+}
+inline const Size2D& VirtualScreen::getResolution() const
+{
+	return resolution;
 }
 }

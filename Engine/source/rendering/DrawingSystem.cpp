@@ -87,6 +87,7 @@ void DrawingSystem::initialize()
 void DrawingSystem::terminate()
 {
 }
+static uint64_t i = 0;
 void DrawingSystem::tick()
 {
 	vs.apply();
@@ -109,6 +110,7 @@ void DrawingSystem::tick()
 		{
 			continue;
 		}
+
 		auto& cameraData = cBuffer(PER_CAMERA_DATA);
 		cameraData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjMatrix());
 		XMStoreFloat4(&cameraData->cameraPosition, cam->getPosition());
@@ -132,7 +134,9 @@ void DrawingSystem::tick()
 
 	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr, nullptr, nullptr};
 	getContext()->PSSetShaderResources(0, 4, nulls);
+	i++;
 }
+
 void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 {
 	if (mesh.mesh == nullptr)
@@ -157,9 +161,20 @@ void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 		screen.setupIntermediateViewport();
 		screen.setupGeometryPass();
 
+		XMMATRIX jitter{};
+		const Size2D& screenResolution = screen.getResolution();
+		if (i % 2 == 0)
+		{
+			jitter = XMMatrixTranslation(-1.0f / screenResolution.x, -1.0f / screenResolution.y, 0);
+		}
+		else
+		{
+			jitter = XMMatrixTranslation(1.0f / screenResolution.x, 1.0f / screenResolution.y, 0);
+		}
+
 		// update constant buffer (matrices)
 		auto& buffer = cBuffer(PER_OBJECT_DATA);
-		buffer->worldViewProjMat = worldMatrix * cam->getViewProjMatrix();
+		buffer->worldViewProjMat = worldMatrix * cam->getViewProjMatrix() * jitter;
 		buffer->worldNormalsMat = XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix));
 		buffer.uploadBuffer();
 
