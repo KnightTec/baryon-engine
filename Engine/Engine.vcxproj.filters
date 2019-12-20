@@ -18,9 +18,6 @@
     <ClInclude Include="source\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\WindowsApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -126,12 +123,18 @@
     <ClInclude Include="source\rendering\CameraSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\entity\components\ScriptComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\core\Function.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\entity\ScriptSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\WindowsApplication.cpp">

@@ -14,16 +14,19 @@ struct CameraComponent
 	DirectX::XMFLOAT3 linearVelocity;
 	DirectX::XMFLOAT3 angularVelocity;
 
+	DirectX::XMFLOAT3 position;
+
 	float fov = 70;
 	float aspectRatio = 1;
 	float nearZ = 0.01;
 	float farZ = 1000;
 
-	DirectX::XMFLOAT3 getPosition() const;
+	DirectX::XMMATRIX getViewProjectionXM() const;
 };
 
-inline DirectX::XMFLOAT3 CameraComponent::getPosition() const
+inline DirectX::XMMATRIX CameraComponent::getViewProjectionXM() const
 {
-	return DirectX::XMFLOAT3(viewMatrix._41, viewMatrix._42, viewMatrix._43);
+	using namespace DirectX;
+	return XMLoadFloat4x3(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
 }
 }

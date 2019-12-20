@@ -2,6 +2,7 @@
 #include "EntityManager.h"
 #include "RenderingEngine.h"
 #include "World.h"
+#include "ScriptSystem.h"
 
 
 namespace Baryon
@@ -25,11 +26,12 @@ public:
 	World* createWorld();
 private:
 	EntityManager entityManager;
+	ScriptSystem scriptSystem;
 	RenderingEngine renderingEngine;
 	World world;
 };
 
-inline Engine::Engine() : renderingEngine(&entityManager), world(&entityManager)
+inline Engine::Engine() : scriptSystem(&entityManager), renderingEngine(&entityManager), world(&entityManager)
 {
 }
 inline World* Engine::createWorld()

@@ -2,7 +2,6 @@
 #include "Shader.h"
 #include "GpuData.h"
 #include "DXErr.h"
-#include "../Camera.h"
 #include "VirtualScreen.h"
 #include "ConstantBuffer.h"
 
@@ -104,16 +103,16 @@ void DrawingSystem::tick()
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	for (VirtualScreen& screen : virtualScreens)
 	{
-		Camera* cam = screen.getActiveCamera();
+		CameraComponent* cam = screen.getActiveCamera();
 		if (cam == nullptr)
 		{
 			continue;
 		}
 		auto& cameraData = cBuffer(PER_CAMERA_DATA);
-		cameraData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjMatrix());
-		XMStoreFloat4(&cameraData->cameraPosition, cam->getPosition());
+		cameraData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjectionXM());
+		cameraData->cameraPosition = cam->position;
 		cameraData.uploadBuffer();
-		cameraData->prevFrameViewProjMat = cam->getViewProjMatrix();
+		cameraData->prevFrameViewProjMat = cam->getViewProjectionXM();
 
 		// render light pass
 		lightPS.apply();
@@ -149,7 +148,7 @@ void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 
 	for (VirtualScreen& screen : virtualScreens)
 	{
-		Camera* cam = screen.getActiveCamera();
+		CameraComponent* cam = screen.getActiveCamera();
 		if (cam == nullptr)
 		{
 			continue;
@@ -159,7 +158,7 @@ void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 
 		// update constant buffer (matrices)
 		auto& buffer = cBuffer(PER_OBJECT_DATA);
-		buffer->worldViewProjMat = worldMatrix * cam->getViewProjMatrix();
+		buffer->worldViewProjMat = worldMatrix * cam->getViewProjectionXM();
 		buffer->worldNormalsMat = XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix));
 		buffer.uploadBuffer();
 

@@ -64,7 +64,7 @@ void Input::Axis::handleInput()
 	{
 		axisValue += gamepad.getInputValue(input.first) * input.second;
 	}
-	for (auto function : callbacks)
+	for (auto& function : callbacks)
 	{
 		function(axisValue);
 	}
@@ -138,7 +138,7 @@ void Input::Action::handleInput()
 			actionBuffer.push_back(RELEASED);
 		}
 	}
-	for (const auto& callback : callbacks)
+	for (auto& callback : callbacks)
 	{
 		for (TYPE type : actionBuffer)
 		{
@@ -226,7 +226,7 @@ bool Input::bindAction(const std::string& actionName, Action::TYPE type, void (*
 	{
 		return false;
 	}
-	action->second.callbacks.emplace_back(std::pair<void(*)(), Action::TYPE>(function, type));
+	action->second.callbacks.emplace_back(std::pair<Function<>, Action::TYPE>(function, type));
 	return true;
 }
 

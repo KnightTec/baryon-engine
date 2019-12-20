@@ -10,7 +10,7 @@ float3 getNDC(float2 texCoords)
 {
     float3 ndc;
     ndc.z = depthTexture.Sample(texSampler, texCoords);
-    ndc.xy = texCoords * 2 - 1;
+    ndc.xy = texCoords.x * 2 - 1;
     ndc.y *= -1;
     return ndc;
 }
@@ -40,7 +40,9 @@ float4 main(in VSOutput input) : SV_Target0
     float4 previousNdc = mul(float4(worldPos, 1), prevViewProj);
     previousNdc /= previousNdc.w;
     float3 ndc = getNDC(input.tex);
-    float2 velocity = (ndc.xy - previousNdc.xy) / 2;
+    float2 velocity = (ndc.xy - previousNdc.xy);
+	//TODO: find out why this fixes motion blur
+	velocity.x *= -1;
     
     int numSamples = 64;
     float intensity = 0.5;

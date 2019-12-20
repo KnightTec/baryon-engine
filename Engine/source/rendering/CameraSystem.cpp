@@ -10,6 +10,7 @@ CameraSystem::CameraSystem(EntityManager* entityManager)
 void CameraSystem::update(Transform& transform, CameraComponent& camera)
 {
 	using namespace DirectX;
+	camera.position = transform.position;
 	XMStoreFloat4x4(&camera.projectionMatrix, XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(camera.fov), camera.aspectRatio, camera.farZ, camera.nearZ));
 

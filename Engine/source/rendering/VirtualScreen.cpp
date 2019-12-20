@@ -144,7 +144,7 @@ void VirtualScreen::releaseBuffers()
 	getContext()->Flush();
 }
 
-bool VirtualScreen::resize(Size2D resolution)
+bool VirtualScreen::resize(const Size2D& resolution)
 {
 	assert(initialized);
 	releaseBuffers();
@@ -152,7 +152,11 @@ bool VirtualScreen::resize(Size2D resolution)
 	configureBuffers();
 	if (activeCamera)
 	{
-		activeCamera->setAspectRatio(getAspectRatio());
+		CameraComponent* cam = activeCamera->getComponent<CameraComponent>();
+		if (cam)
+		{
+			cam->aspectRatio = getAspectRatio();
+		}
 	}
 	return true;
 }
@@ -164,16 +168,31 @@ bool VirtualScreen::setFullscreen(bool fullscreen)
 	configureBuffers();
 	return true;
 }
-
+void VirtualScreen::setActiveCamera(Entity* entity)
+{
+	activeCamera = entity;
+	auto* cam = entity->getComponent<CameraComponent>();
+	if (cam)
+	{
+		cam->aspectRatio = getAspectRatio();
+	}
+}
+CameraComponent* VirtualScreen::getActiveCamera()
+{
+	if (activeCamera == nullptr)
+	{
+		return nullptr;
+	}
+	return activeCamera->getComponent<CameraComponent>();
+}
 void VirtualScreen::setupGeometryPass()
 {
 	ID3D11RenderTargetView* rtvs[] = {gBufferTexture0.getRenderTargetView(), gBufferTexture1.getRenderTargetView()};
 	getContext()->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
 }
-
 void VirtualScreen::setupLightPass()
 {
-	ID3D11RenderTargetView* rtvs[] = { hdrScene.getRenderTargetView(), nullptr, nullptr };
+	ID3D11RenderTargetView* rtvs[] = {hdrScene.getRenderTargetView(), nullptr, nullptr};
 	getContext()->OMSetRenderTargets(3, rtvs, nullptr);
 	ID3D11ShaderResourceView* srvs[] = {
 		gBufferTexture0.getShaderResourceView(),
@@ -184,9 +203,9 @@ void VirtualScreen::setupLightPass()
 }
 void VirtualScreen::setupPostProcessPass()
 {
-	ID3D11RenderTargetView* rtvs[] = { swapChain->getRenderTargetView() };
+	ID3D11RenderTargetView* rtvs[] = {swapChain->getRenderTargetView()};
 	getContext()->OMSetRenderTargets(1, rtvs, nullptr);
-	ID3D11ShaderResourceView* srvs2[] = { hdrScene.getShaderResourceView() };
+	ID3D11ShaderResourceView* srvs2[] = {hdrScene.getShaderResourceView()};
 	getContext()->PSSetShaderResources(3, 1, srvs2);
 }
 void VirtualScreen::setViewportSize(int width, int height)

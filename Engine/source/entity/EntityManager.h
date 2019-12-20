@@ -13,8 +13,10 @@ class EntityManager
 {
 public:
 	EntityManager();
+	void clear();
 	template <typename... Components>
 	EntityId createEntity();
+	EntityId duplicateEntity();
 	void destroyEntity(EntityId entityId);
 	template <typename T, typename... Args>
 	void addComponents(EntityId entityId);

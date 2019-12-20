@@ -28,13 +28,14 @@ void BaryonEditorApp::initialize() {
 
 
 MainWindow::MainWindow(Baryon::Engine* engine)
-	: engine(engine), camera(80, 1, 0.01, 1000, { 0, 20, 0 })
+	: engine(engine)
 {
 	dockEditor = new QDockWidget(tr("World View"), this);
 	editor = new Editor(engine, dockEditor);
-	
+	Baryon::World* world = engine->createWorld();
+	Baryon::Entity* camera = world->addCamera();
 
-	editor->setActiveCamera(&camera);
+	editor->setActiveCamera(camera);
 	dockEditor->setWidget(editor);
 	addDockWidget(Qt::RightDockWidgetArea, dockEditor, Qt::Horizontal);
 }

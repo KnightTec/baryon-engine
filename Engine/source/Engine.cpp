@@ -5,9 +5,6 @@
 #include "Window.h"
 #include "components/Transform.h"
 
-#include "StringId.h"
-#include "ResourceManager.h"
-
 using namespace Baryon;
 
 
@@ -31,6 +28,7 @@ bool Engine::initialize()
 void Engine::mainLoopIteration()
 {
 	Input::handleGameInput();
+	scriptSystem.tick();
 	renderingEngine.render();
 }
 

@@ -1,9 +1,10 @@
 #pragma once
-#include "../Camera.h"
 #include "GraphicsDeviceInterface.h"
 #include "RenderTexture.h"
 #include "SwapChain.h"
 #include "DXErr.h"
+#include "components/CameraComponent.h"
+#include "Entity.h"
 
 #include "wrl/client.h"
 #include "d3d11_4.h"
@@ -27,16 +28,19 @@ public:
 
 	bool initialize(const Window& window);
 	void terminate();
-	bool resize(Size2D resolution);
+	bool resize(const Size2D& resolution);
 	void present();
 	void clear();
 	bool setFullscreen(bool fullscreen);
-	void setActiveCamera(Camera* camera);
+
+	void setActiveCamera(Entity* entity);
+	CameraComponent* getActiveCamera();
+
 	void setupGeometryPass();
 	void setupLightPass();
 	void setupPostProcessPass();
 	float getAspectRatio() const;
-	Camera* getActiveCamera() const;
+	
 	void setViewportSize(int width, int height);
 	void setupIntermediateViewport();
 	void setupFinalViewport();
@@ -45,7 +49,9 @@ private:
 	void releaseBuffers();
 
 	bool initialized;
-	Camera* activeCamera;
+
+	Entity* activeCamera = nullptr;
+
 	D3D11_VIEWPORT viewport;
 	SwapChain* swapChain;
 
@@ -68,19 +74,10 @@ inline void VirtualScreen::present()
 {
 	swapChain->present();
 }
-inline void VirtualScreen::setActiveCamera(Camera* camera)
-{
-	activeCamera = camera;
-	activeCamera->setAspectRatio(getAspectRatio());
-}
 inline float VirtualScreen::getAspectRatio() const
 {
 	Size2D resolution = swapChain->getBackBufferResolution();
 	return static_cast<float>(resolution.x) / static_cast<float>(resolution.y);
-}
-inline Camera* VirtualScreen::getActiveCamera() const
-{
-	return activeCamera;
 }
 inline void VirtualScreen::clear()
 {

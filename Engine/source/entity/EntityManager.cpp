@@ -4,7 +4,7 @@
 using namespace Baryon;
 
 EntityManager::EntityManager()
-	: archetypeAllocator(1073741824/*1 Gigabyte*/), entityToComponentsMap(1024), nextFreeId(0)
+	: archetypeAllocator(1073741824/*1 Gigabyte*/), entityToComponentsMap(1024), nextFreeId(1)
 {
 }
 void EntityManager::destroyEntity(EntityId entityId)

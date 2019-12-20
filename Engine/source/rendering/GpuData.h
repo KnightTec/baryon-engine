@@ -24,7 +24,8 @@ struct PER_CAMERA_DATA
 {
 	GPUMatrix invViewProj;
 	GPUMatrix prevFrameViewProjMat;
-	DirectX::XMFLOAT4 cameraPosition;
+	DirectX::XMFLOAT3 cameraPosition;
+	float pad0;
 	DirectX::XMFLOAT4 cameraLinearVelocity;
 	DirectX::XMFLOAT4 cameraAngularVelocity;
 };
