@@ -24,7 +24,12 @@ void RenderingEngine::terminate()
 }
 void RenderingEngine::render()
 {
+	for (VirtualScreen& screen : virtualScreens)
+	{
+		screen.tick();
+	}
 	matrixSys.tick();
+	cameraSys.tick();
 	drawSys.tick();
 }
 bool RenderingEngine::createVirtualScreen(Window& targetWindow)

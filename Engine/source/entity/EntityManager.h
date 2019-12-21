@@ -2,6 +2,7 @@
 #include "Archetype.h"
 #include "ComponentRegistry.h"
 #include "Memory.h"
+#include "components/Transform.h"
 
 #include <unordered_map>
 
@@ -12,7 +13,10 @@ class EntityManager
 {
 public:
 	EntityManager();
+	void clear();
+	template <typename... Components>
 	EntityId createEntity();
+	EntityId duplicateEntity();
 	void destroyEntity(EntityId entityId);
 	template <typename T, typename... Args>
 	void addComponents(EntityId entityId);
@@ -33,6 +37,22 @@ private:
 };
 
 
+template <typename... Components>
+EntityId EntityManager::createEntity()
+{
+	TypeFlag flag = ComponentRegistry::getTypeInfo<Transform>().flag;
+	using expander = int[];
+	(void)expander {
+		0, ((void)(flag |= ComponentRegistry::getTypeInfo(typeId<Components>()).flag), 0)...
+	};
+	if (archetypes.find(flag) == archetypes.end())
+	{
+		archetypes.emplace(flag, Archetype(flag, &archetypeAllocator));
+	}
+	archetypes[flag].addEntity(nextFreeId, true);
+	entityToComponentsMap[nextFreeId] = flag;
+	return nextFreeId++;
+}
 template <typename T, typename... Args>
 void EntityManager::addComponents(EntityId entityId)
 {

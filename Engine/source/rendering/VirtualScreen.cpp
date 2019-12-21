@@ -8,6 +8,7 @@
 
 using namespace Baryon;
 using namespace Microsoft::WRL;
+using namespace DirectX;
 
 static const DXGI_FORMAT swapChainFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 static DXGI_RATIONAL refreshRate = {0, 1};
@@ -78,6 +79,25 @@ void VirtualScreen::terminate()
 	delete swapChain;
 	initialized = false;
 }
+void VirtualScreen::tick()
+{
+	if (taaJitterCounter == 0)
+	{
+		XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(0.5f / float(resolution.x), 0.5f / float(resolution.y), 0));
+		historyFrame = &frameBuffer0;
+		currentFrame = &frameBuffer1;
+		blendedFrame = &frameBuffer2;
+	}
+	else
+	{
+		XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(-0.5f / float(resolution.x), -0.5f / float(resolution.y), 0));
+		historyFrame = &frameBuffer2;
+		currentFrame = &frameBuffer1;
+		blendedFrame = &frameBuffer0;
+	}
+	//XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(0, 0, 0));
+	taaJitterCounter = (taaJitterCounter + 1) % 2;
+}
 
 bool VirtualScreen::configureBuffers()
 {
@@ -124,7 +144,9 @@ bool VirtualScreen::configureBuffers()
 
 	gBufferTexture0.create(resolution);
 	gBufferTexture1.create(resolution);
-	hdrScene.create(resolution);
+	frameBuffer0.create(resolution);
+	frameBuffer1.create(resolution);
+	frameBuffer2.create(resolution);
 
 	return true;
 }
@@ -133,7 +155,9 @@ void VirtualScreen::releaseBuffers()
 {
 	assert(initialized);
 
-	hdrScene.release();
+	frameBuffer0.release();
+	frameBuffer1.release();
+	frameBuffer2.release();
 	gBufferTexture0.release();
 	gBufferTexture1.release();
 	depthBufferSRV.Reset();
@@ -144,7 +168,7 @@ void VirtualScreen::releaseBuffers()
 	getContext()->Flush();
 }
 
-bool VirtualScreen::resize(Size2D resolution)
+bool VirtualScreen::resize(const Size2D& resolution)
 {
 	assert(initialized);
 	releaseBuffers();
@@ -152,7 +176,11 @@ bool VirtualScreen::resize(Size2D resolution)
 	configureBuffers();
 	if (activeCamera)
 	{
-		activeCamera->setAspectRatio(getAspectRatio());
+		auto* cam = activeCamera->getComponent<CameraComponent>();
+		if (cam)
+		{
+			cam->aspectRatio = getAspectRatio();
+		}
 	}
 	return true;
 }
@@ -163,6 +191,23 @@ bool VirtualScreen::setFullscreen(bool fullscreen)
 	configureBuffers();
 	return true;
 }
+void VirtualScreen::setActiveCamera(Entity* entity)
+{
+	activeCamera = entity;
+	auto* cam = entity->getComponent<CameraComponent>();
+	if (cam)
+	{
+		cam->aspectRatio = getAspectRatio();
+	}
+}
+CameraComponent* VirtualScreen::getActiveCamera()
+{
+	if (activeCamera == nullptr)
+	{
+		return nullptr;
+	}
+	return activeCamera->getComponent<CameraComponent>();
+}
 void VirtualScreen::setupGeometryPass()
 {
 	ID3D11RenderTargetView* rtvs[] = {gBufferTexture0.getRenderTargetView(), gBufferTexture1.getRenderTargetView()};
@@ -170,7 +215,7 @@ void VirtualScreen::setupGeometryPass()
 }
 void VirtualScreen::setupLightPass()
 {
-	ID3D11RenderTargetView* rtvs[] = { hdrScene.getRenderTargetView(), nullptr, nullptr };
+	ID3D11RenderTargetView* rtvs[] = {currentFrame->getRenderTargetView(), nullptr, nullptr};
 	getContext()->OMSetRenderTargets(3, rtvs, nullptr);
 	ID3D11ShaderResourceView* srvs[] = {
 		gBufferTexture0.getShaderResourceView(),
@@ -179,11 +224,18 @@ void VirtualScreen::setupLightPass()
 	};
 	getContext()->PSSetShaderResources(0, 3, srvs);
 }
+void VirtualScreen::setupAAPass()
+{
+	ID3D11RenderTargetView* rtvs[] = { blendedFrame->getRenderTargetView(), nullptr, nullptr };
+	getContext()->OMSetRenderTargets(3, rtvs, nullptr);
+	ID3D11ShaderResourceView* srvs2[] = { historyFrame->getShaderResourceView(), currentFrame->getShaderResourceView() };
+	getContext()->PSSetShaderResources(4, 2, srvs2);
+}
 void VirtualScreen::setupPostProcessPass()
 {
-	ID3D11RenderTargetView* rtvs[] = { swapChain->getRenderTargetView() };
+	ID3D11RenderTargetView* rtvs[] = {swapChain->getRenderTargetView()};
 	getContext()->OMSetRenderTargets(1, rtvs, nullptr);
-	ID3D11ShaderResourceView* srvs2[] = { hdrScene.getShaderResourceView() };
+	ID3D11ShaderResourceView* srvs2[] = { blendedFrame->getShaderResourceView()};
 	getContext()->PSSetShaderResources(3, 1, srvs2);
 }
 void VirtualScreen::setViewportSize(int width, int height)

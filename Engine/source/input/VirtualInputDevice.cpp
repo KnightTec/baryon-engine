@@ -5,7 +5,7 @@ using namespace Baryon;
 
 void Mouse::onInput(MOUSE_INPUT inputId, float value)
 {
-	float sensitity = 0.5;
+	float sensitity = 0.2;
 	if (inputId == MOUSE_INPUT::AXIS_X || inputId == MOUSE_INPUT::AXIS_Y)
 	{
 		inputs[static_cast<int>(inputId)] += value * sensitity;

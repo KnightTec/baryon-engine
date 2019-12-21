@@ -30,7 +30,7 @@ class ComponentRegistry
 {
 public:
 	template <typename T>
-	static void registerComponentType(const char* typeName, size_t countPerChunk = 4096);
+	static void registerComponentType(const char* typeName, size_t countPerChunk);
 	template <typename T>
 	static const TypeInfo& getTypeInfo();
 	static const TypeInfo& getTypeInfo(TypeFlag flag);
@@ -83,11 +83,11 @@ inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeId typeId)
 	return idMap[typeId];
 }
 
-#define REGISTER_COMPONENT_TYPE(T)\
-	struct T##_registrator{\
-		T##_registrator() {\
-			ComponentRegistry::registerComponentType<T>(#T);\
+#define REGISTER_COMPONENT_TYPE(Type, countPerChunk)\
+	struct Type##_registrator{\
+		Type##_registrator() {\
+			ComponentRegistry::registerComponentType<Type>(#Type, countPerChunk);\
 		}\
 	};\
-	static T##_registrator global_##T##_registrator;
+	static Type##_registrator global_##Type##_registrator;
 }

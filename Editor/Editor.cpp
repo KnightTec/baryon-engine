@@ -21,7 +21,7 @@ Editor::Editor(Baryon::Engine* engine, QWidget* parent)
 	flags = ui.frame->windowFlags();
 	ui.frame->setWindowFlags(flags | Qt::FramelessWindowHint);
 
-	engine->createVirtualScreen(*this);
+	engine->injectVirtualScreen(*this);
 
 }
 

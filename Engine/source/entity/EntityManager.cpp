@@ -4,19 +4,8 @@
 using namespace Baryon;
 
 EntityManager::EntityManager()
-	: archetypeAllocator(1073741824/*1 Gigabyte*/), entityToComponentsMap(1024), nextFreeId(0)
+	: archetypeAllocator(1073741824/*1 Gigabyte*/), entityToComponentsMap(1024), nextFreeId(1)
 {
-}
-EntityId EntityManager::createEntity()
-{
-	TypeFlag flag = ComponentRegistry::getTypeInfo<Transform>().flag;
-	if (archetypes.find(flag) == archetypes.end())
-	{
-		archetypes.emplace(flag, Archetype(flag, &archetypeAllocator));
-	}
-	archetypes[flag].addEntity(nextFreeId, true);
-	entityToComponentsMap[nextFreeId] = flag;
-	return nextFreeId++;
 }
 void EntityManager::destroyEntity(EntityId entityId)
 {

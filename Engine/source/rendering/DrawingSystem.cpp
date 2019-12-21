@@ -2,7 +2,6 @@
 #include "Shader.h"
 #include "GpuData.h"
 #include "DXErr.h"
-#include "../Camera.h"
 #include "VirtualScreen.h"
 #include "ConstantBuffer.h"
 
@@ -27,6 +26,7 @@ void DrawingSystem::initialize()
 	vs.compile();
 	ps.compile();
 
+	TAA.compile();
 	postVS.compile();
 	lightPS.compile();
 	postPS.compile();
@@ -87,7 +87,6 @@ void DrawingSystem::initialize()
 void DrawingSystem::terminate()
 {
 }
-static uint64_t i = 0;
 void DrawingSystem::tick()
 {
 	vs.apply();
@@ -105,23 +104,30 @@ void DrawingSystem::tick()
 	getContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	for (VirtualScreen& screen : virtualScreens)
 	{
-		Camera* cam = screen.getActiveCamera();
+		CameraComponent* cam = screen.getActiveCamera();
 		if (cam == nullptr)
 		{
 			continue;
 		}
 
 		auto& cameraData = cBuffer(PER_CAMERA_DATA);
-		cameraData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjMatrix());
-		XMStoreFloat4(&cameraData->cameraPosition, cam->getPosition());
+		cameraData->screenResolution = screen.getResolution();
+		cameraData->viewProjection = cam->getViewProjectionXM();
+		cameraData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjectionXM());
+		cameraData->cameraPosition = cam->position;
+		cameraData->cameraLinearVelocity = cam->linearVelocity;
 		cameraData.uploadBuffer();
-		cameraData->prevFrameViewProjMat = cam->getViewProjMatrix();
+		cameraData->prevFrameViewProjMat = cam->getViewProjectionXM();
 
 		// render light pass
 		lightPS.apply();
 		screen.setupIntermediateViewport();
 		screen.setupLightPass();
+		getContext()->Draw(3, 0);
 
+		// anti-aliasing
+		TAA.apply();
+		screen.setupAAPass();
 		getContext()->Draw(3, 0);
 
 		// render post processing
@@ -132,9 +138,8 @@ void DrawingSystem::tick()
 		screen.present();
 	}
 
-	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr, nullptr, nullptr};
-	getContext()->PSSetShaderResources(0, 4, nulls);
-	i++;
+	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+	getContext()->PSSetShaderResources(0, 8, nulls);
 }
 
 void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
@@ -153,7 +158,7 @@ void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 
 	for (VirtualScreen& screen : virtualScreens)
 	{
-		Camera* cam = screen.getActiveCamera();
+		CameraComponent* cam = screen.getActiveCamera();
 		if (cam == nullptr)
 		{
 			continue;
@@ -161,20 +166,9 @@ void DrawingSystem::update(WorldMatrixComponent& wmc, MeshComponent& mesh)
 		screen.setupIntermediateViewport();
 		screen.setupGeometryPass();
 
-		XMMATRIX jitter{};
-		const Size2D& screenResolution = screen.getResolution();
-		if (i % 2 == 0)
-		{
-			jitter = XMMatrixTranslation(-1.0f / screenResolution.x, -1.0f / screenResolution.y, 0);
-		}
-		else
-		{
-			jitter = XMMatrixTranslation(1.0f / screenResolution.x, 1.0f / screenResolution.y, 0);
-		}
-
 		// update constant buffer (matrices)
 		auto& buffer = cBuffer(PER_OBJECT_DATA);
-		buffer->worldViewProjMat = worldMatrix * cam->getViewProjMatrix() * jitter;
+		buffer->worldViewProjMat = worldMatrix * cam->getViewProjectionXM() * screen.getTaaJitterMatrix();
 		buffer->worldNormalsMat = XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix));
 		buffer.uploadBuffer();
 

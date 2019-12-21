@@ -4,7 +4,6 @@
 
 #include "Editor.h"
 #include "Engine.h"
-#include "Camera.h"
 
 
 struct BaryonEditorApp : QApplication
@@ -24,7 +23,6 @@ public:
 	void closeEvent(QCloseEvent* event) override;
 private:
 	Baryon::Engine* engine;
-	Baryon::Camera camera;
 
 	Editor* editor;
 	QDockWidget* dockEditor;

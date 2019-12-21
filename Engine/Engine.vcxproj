@@ -11,18 +11,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\core\Function.h" />
     <ClInclude Include="source\core\Singleton.h" />
     <ClInclude Include="source\core\StringId.h" />
     <ClInclude Include="source\entity\Archetype.h" />
-    <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\entity\ComponentRegistry.h" />
     <ClInclude Include="source\core\Memory.h" />
     <ClInclude Include="source\core\Size.h" />
+    <ClInclude Include="source\entity\components\CameraComponent.h" />
     <ClInclude Include="source\entity\components\Components.h" />
+    <ClInclude Include="source\entity\components\ScriptComponent.h" />
     <ClInclude Include="source\entity\components\Transform.h" />
+    <ClInclude Include="source\entity\ScriptSystem.h" />
     <ClInclude Include="source\entity\System.h" />
     <ClInclude Include="source\entity\Entity.h" />
     <ClInclude Include="source\entity\EntityManager.h" />
+    <ClInclude Include="source\rendering\CameraSystem.h" />
     <ClInclude Include="source\rendering\ConstantBuffer.h" />
     <ClInclude Include="source\rendering\DrawingSystem.h" />
     <ClInclude Include="source\rendering\DXErr.h" />
@@ -32,7 +36,7 @@
     <ClInclude Include="source\input\VirtualInputDevice.h" />
     <ClInclude Include="source\input\Input.h" />
     <ClInclude Include="source\rendering\RenderingEngine.h" />
-    <ClInclude Include="source\rendering\WorldMatrixCalculatorSystem.h" />
+    <ClInclude Include="source\rendering\WorldMatrixSystem.h" />
     <ClInclude Include="source\rendering\SwapChain.h" />
     <ClInclude Include="source\resource\IOUtil.h" />
     <ClInclude Include="source\resource\Material.h" />
@@ -50,16 +54,17 @@
   <ItemGroup>
     <ClCompile Include="source\core\StringId.cpp" />
     <ClCompile Include="source\entity\Archetype.cpp" />
-    <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\entity\ComponentRegistry.cpp" />
     <ClCompile Include="source\entity\EntityManager.cpp" />
     <ClCompile Include="source\input\VirtualInputDevice.cpp" />
+    <ClCompile Include="source\rendering\CameraSystem.cpp" />
     <ClCompile Include="source\rendering\DrawingSystem.cpp" />
     <ClCompile Include="source\rendering\GraphicsDeviceInterface.cpp" />
     <ClCompile Include="source\Engine.cpp" />
     <ClCompile Include="source\input\Input.cpp" />
     <ClCompile Include="source\rendering\RenderingEngine.cpp" />
     <ClCompile Include="source\rendering\SwapChain.cpp" />
+    <ClCompile Include="source\rendering\WorldMatrixSystem.cpp" />
     <ClCompile Include="source\resource\Mesh.cpp" />
     <ClCompile Include="source\rendering\RenderTexture.cpp" />
     <ClCompile Include="source\rendering\Shader.cpp" />
@@ -97,17 +102,22 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </None>
-    <None Include="shaders\PostProcessPS.hlsl">
+    <FxCompile Include="shaders\PostProcessPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <FileType>Document</FileType>
-    </None>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="source\resource\ResourceFileFormats.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\Baryon.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\AntiAliasing.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

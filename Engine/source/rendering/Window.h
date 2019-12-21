@@ -13,7 +13,7 @@ class Window
 public:
 	Window(Size2D resolution);
 	HWND getHwnd() const;
-	void setActiveCamera(Camera* camera);
+	void setActiveCamera(Entity* entity);
 	Size2D getResolution() const;
 	virtual void setResolution(Size2D resolution);
 protected:
@@ -31,12 +31,14 @@ inline HWND Window::getHwnd() const
 {
 	return hwnd;
 }
-inline void Window::setActiveCamera(Camera* camera)
+inline void Window::setActiveCamera(Entity* entity)
 {
-	if (screen) {
-		screen->setActiveCamera(camera);
+	if (screen)
+	{
+		screen->setActiveCamera(entity);
 	}
 }
+
 inline void Window::setResolution(Size2D resolution)
 {
 	this->resolution = resolution;

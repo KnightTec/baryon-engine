@@ -6,22 +6,9 @@ struct VSOutput
     float2 tex : TEXCOORD;
 };
 
-float3 getWorldPos(float2 texCoords)
-{
-    float3 ndc;
-    ndc.z = depthTexture.Sample(texSampler, texCoords);
-    ndc.xy = texCoords * 2 - 1;
-    ndc.y *= -1;
-
-    float4 worldPos = mul(float4(ndc, 1), invViewProj);
-    worldPos /= worldPos.w;
-
-    return worldPos.xyz;
-}
-
 void applyFog(in float2 texCoords, inout float3 color)
 {
-    float3 worldPos = getWorldPos(texCoords);
+    float3 worldPos = getWorldSpacePosition(texCoords);
     float3 viewDir = worldPos - cameraPosition;
     float distance = length(viewDir);
     viewDir = normalize(viewDir);
@@ -52,7 +39,7 @@ float4 main(in VSOutput input) : SV_Target0
 
     float3 surfaceColor = gBufferTexture0.Sample(texSampler, input.tex).rgb;
 
-    float3 worldPos = getWorldPos(input.tex);
+    float3 worldPos = getWorldSpacePosition(input.tex);
     float3 viewDir = normalize(cameraPosition.xyz - worldPos);
     float3 halfVec = normalize(lightDir + viewDir);
     float specularExponent = 50;

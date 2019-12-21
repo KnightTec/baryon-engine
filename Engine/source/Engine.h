@@ -1,6 +1,8 @@
 #pragma once
 #include "EntityManager.h"
 #include "RenderingEngine.h"
+#include "World.h"
+#include "ScriptSystem.h"
 
 
 namespace Baryon
@@ -20,15 +22,24 @@ public:
 	bool initialize();
 	void mainLoopIteration();
 	void terminate();
-	void createVirtualScreen(Window& targetWindow);
+	void injectVirtualScreen(Window& targetWindow);
+	World* createWorld();
 private:
-	EntityManager em;
+	EntityManager entityManager;
+	ScriptSystem scriptSystem;
 	RenderingEngine renderingEngine;
+	World world;
 };
 
-inline Engine::Engine() : renderingEngine(&em)
+inline Engine::Engine() : scriptSystem(&entityManager), renderingEngine(&entityManager), world(&entityManager)
 {
 }
+inline World* Engine::createWorld()
+{
+	//TODO: actually create a new world
+	return &world;
+}
+
 
 
 }

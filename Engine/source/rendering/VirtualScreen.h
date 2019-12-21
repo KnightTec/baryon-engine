@@ -1,9 +1,10 @@
 #pragma once
-#include "../Camera.h"
 #include "GraphicsDeviceInterface.h"
 #include "RenderTexture.h"
 #include "SwapChain.h"
 #include "DXErr.h"
+#include "components/CameraComponent.h"
+#include "Entity.h"
 
 #include "wrl/client.h"
 #include "d3d11_4.h"
@@ -27,32 +28,48 @@ public:
 
 	bool initialize(const Window& window);
 	void terminate();
-	bool resize(Size2D resolution);
+	void tick();
+	bool resize(const Size2D& resolution);
 	void present();
 	void clear();
 	bool setFullscreen(bool fullscreen);
-	void setActiveCamera(Camera* camera);
+
+	void setActiveCamera(Entity* entity);
+	CameraComponent* getActiveCamera();
+
 	void setupGeometryPass();
 	void setupLightPass();
+	void setupAAPass();
 	void setupPostProcessPass();
 	float getAspectRatio() const;
-	Camera* getActiveCamera() const;
+
 	void setViewportSize(int width, int height);
 	void setupIntermediateViewport();
 	void setupFinalViewport();
 	const Size2D& getResolution() const;
+
+	DirectX::XMMATRIX getTaaJitterMatrix() const;
 private:
 	bool configureBuffers();
 	void releaseBuffers();
 
 	bool initialized;
-	Camera* activeCamera;
+
+	Entity* activeCamera = nullptr;
 	D3D11_VIEWPORT viewport;
 	SwapChain* swapChain;
 	Size2D resolution;
+
+	int taaJitterCounter;
 	DirectX::XMFLOAT4X3 taaJitterMatrix;
 
-	RenderTexture hdrScene{DXGI_FORMAT_R16G16B16A16_FLOAT};
+	RenderTexture frameBuffer0{DXGI_FORMAT_R16G16B16A16_FLOAT};
+	RenderTexture frameBuffer1{DXGI_FORMAT_R16G16B16A16_FLOAT};
+	RenderTexture frameBuffer2{DXGI_FORMAT_R16G16B16A16_FLOAT};
+
+	RenderTexture* historyFrame;
+	RenderTexture* currentFrame;
+	RenderTexture* blendedFrame;
 
 	// G-Buffer
 	RenderTexture gBufferTexture0{DXGI_FORMAT_R8G8B8A8_UNORM}; // RGB color, A specular intensity 
@@ -71,19 +88,10 @@ inline void VirtualScreen::present()
 {
 	swapChain->present();
 }
-inline void VirtualScreen::setActiveCamera(Camera* camera)
-{
-	activeCamera = camera;
-	activeCamera->setAspectRatio(getAspectRatio());
-}
 inline float VirtualScreen::getAspectRatio() const
 {
 	Size2D resolution = swapChain->getBackBufferResolution();
 	return static_cast<float>(resolution.x) / static_cast<float>(resolution.y);
-}
-inline Camera* VirtualScreen::getActiveCamera() const
-{
-	return activeCamera;
 }
 inline void VirtualScreen::clear()
 {
@@ -108,5 +116,9 @@ inline void VirtualScreen::setupFinalViewport()
 inline const Size2D& VirtualScreen::getResolution() const
 {
 	return resolution;
+}
+inline DirectX::XMMATRIX VirtualScreen::getTaaJitterMatrix() const
+{
+	return DirectX::XMLoadFloat4x3(&taaJitterMatrix);
 }
 }

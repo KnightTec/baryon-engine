@@ -26,5 +26,8 @@
     <ClInclude Include="source\GameWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\CameraScript.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

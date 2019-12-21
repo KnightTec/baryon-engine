@@ -24,6 +24,7 @@ private:
 	VertexShader vs{L"../../Engine/shaders/VertexShader.hlsl"};
 	PixelShader ps{L"../../Engine/shaders/PixelShader.hlsl"};
 
+	PixelShader TAA{ L"../../Engine/shaders/AntiAliasing.hlsl" };
 	VertexShader postVS{L"../../Engine/shaders/FullscreenVS.hlsl"};
 	PixelShader lightPS{L"../../Engine/shaders/LightPS.hlsl"};
 	PixelShader postPS{L"../../Engine/shaders/PostProcessPS.hlsl"};

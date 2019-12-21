@@ -43,6 +43,25 @@ private:
 	Element* firstFree;
 };
 
+template <typename T>
+class PooledType
+{
+public:
+	static void* operator new(size_t size)
+	{
+		return (void*)pool.allocate();
+	}
+	static void operator delete(void* ptr)
+	{
+		pool.free((T*)ptr);
+	}
+private:
+	static PoolAllocator<T> pool;
+};
+
+template <typename T>
+PoolAllocator<T> PooledType<T>::pool;
+
 
 inline StackAllocator::StackAllocator(size_t stackSize)
 	: stackSize(stackSize), allocatedSize(0), stackBase(static_cast<uint8_t*>(malloc(stackSize)))

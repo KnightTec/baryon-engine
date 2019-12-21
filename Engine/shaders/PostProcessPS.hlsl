@@ -6,25 +6,6 @@ struct VSOutput
     float2 tex : TEXCOORD;
 };
 
-float3 getNDC(float2 texCoords)
-{
-    float3 ndc;
-    ndc.z = depthTexture.Sample(texSampler, texCoords);
-    ndc.xy = texCoords * 2 - 1;
-    ndc.y *= -1;
-    return ndc;
-}
-
-float3 getWorldPos(float2 texCoords)
-{
-    float3 ndc = getNDC(texCoords);
-
-    float4 worldPos = mul(float4(ndc, 1), invViewProj);
-    worldPos /= worldPos.w;
-
-    return worldPos.xyz;
-}
-
 float InterleavedGradientNoise(float2 uv)
 {
     float3 magic = { 0.06711056, 0.00583715, 52.9829189 };
@@ -36,11 +17,14 @@ float4 main(in VSOutput input) : SV_Target0
     float3 color = hdrScene.Sample(texSampler, input.tex).xyz;
 
     // perform camera motion blur
-    float3 worldPos = getWorldPos(input.tex);
+    float3 worldPos = getWorldSpacePosition(input.tex);    
+    
     float4 previousNdc = mul(float4(worldPos, 1), prevViewProj);
     previousNdc /= previousNdc.w;
-    float3 ndc = getNDC(input.tex);
-    float2 velocity = (ndc.xy - previousNdc.xy) / 2;
+    float2 ndc = input.tex * 2 - 1;
+    ndc.y *= -1;
+    float2 velocity = (previousNdc.xy - ndc) / 2;
+    velocity.y *= -1;
     
     int numSamples = 64;
     float intensity = 0.5;
@@ -51,17 +35,23 @@ float4 main(in VSOutput input) : SV_Target0
     float sum = 1;
     for (int i = 1; i < numSamples; ++i, texPos += velocity, texNeg -= velocity)
     {
-        color += hdrScene.Sample(texSampler, texPos).xyz;
-        color += hdrScene.Sample(texSampler, texNeg).xyz;
-        sum += 2;
+        if (texPos.x > 0 && texPos.y > 0 && texPos.x < 1 && texPos.y < 1)
+        {
+            color += hdrScene.Sample(texSampler, texPos).xyz;
+            sum += 1;
+        }
+        if (texNeg.x > 0 && texNeg.y > 0 && texNeg.x < 1 && texNeg.y < 1)
+        {
+            color += hdrScene.Sample(texSampler, texNeg).xyz;
+            sum += 1;
+        }
     }
-
     color = color / sum;
 
     // add vignette
     float distanceFromCenter = length(input.tex - float2(0.5, 0.5));
-    float x = saturate(distanceFromCenter - 0.15);
-    float vignette = pow(x, 6) * 24;
+    float x = saturate(distanceFromCenter - 0.05);
+    float vignette = pow(x, 8) * 24;
     color = color * (1 - vignette);
 
     // apply dithering (http://enbseries.enbdev.com/forum/viewtopic.php?f=7&t=5220)
