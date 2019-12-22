@@ -58,7 +58,7 @@ const std::vector<Size2D>& VirtualScreen::getSupportedResolutions()
 	return supportedResolutions;
 }
 
-VirtualScreen::VirtualScreen() : initialized{false}, activeCamera{nullptr}
+VirtualScreen::VirtualScreen() : initialized{false}, activeCamera{nullptr}, taaJitterCounter(0)
 {
 	// call to initialize the refresh rate
 	getSupportedResolutions();
@@ -81,22 +81,29 @@ void VirtualScreen::terminate()
 }
 void VirtualScreen::tick()
 {
-	if (taaJitterCounter == 0)
+	static const XMFLOAT2 rgssOffsets[] = {
+		{0.75, -0.25}, {-0.25, -0.75},
+		{-0.75, 0.25}, {0.25, 0.75}
+	};
+	XMFLOAT2 jitter = {
+		rgssOffsets[taaJitterCounter].x / float(resolution.x),
+		rgssOffsets[taaJitterCounter].y / float(resolution.y)
+	};
+	XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(jitter.x, jitter.y, 0));
+	//XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(0, 0, 0));
+	if (taaJitterCounter % 2)
 	{
-		XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(0.5f / float(resolution.x), 0.5f / float(resolution.y), 0));
 		historyFrame = &frameBuffer0;
 		currentFrame = &frameBuffer1;
 		blendedFrame = &frameBuffer2;
 	}
 	else
 	{
-		XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(-0.5f / float(resolution.x), -0.5f / float(resolution.y), 0));
 		historyFrame = &frameBuffer2;
 		currentFrame = &frameBuffer1;
 		blendedFrame = &frameBuffer0;
 	}
-	//XMStoreFloat4x3(&taaJitterMatrix, XMMatrixTranslation(0, 0, 0));
-	taaJitterCounter = (taaJitterCounter + 1) % 2;
+	taaJitterCounter = (taaJitterCounter + 1) % 4;
 }
 
 bool VirtualScreen::configureBuffers()
@@ -226,16 +233,16 @@ void VirtualScreen::setupLightPass()
 }
 void VirtualScreen::setupAAPass()
 {
-	ID3D11RenderTargetView* rtvs[] = { blendedFrame->getRenderTargetView(), nullptr, nullptr };
+	ID3D11RenderTargetView* rtvs[] = {blendedFrame->getRenderTargetView(), nullptr, nullptr};
 	getContext()->OMSetRenderTargets(3, rtvs, nullptr);
-	ID3D11ShaderResourceView* srvs2[] = { historyFrame->getShaderResourceView(), currentFrame->getShaderResourceView() };
+	ID3D11ShaderResourceView* srvs2[] = {historyFrame->getShaderResourceView(), currentFrame->getShaderResourceView()};
 	getContext()->PSSetShaderResources(4, 2, srvs2);
 }
 void VirtualScreen::setupPostProcessPass()
 {
 	ID3D11RenderTargetView* rtvs[] = {swapChain->getRenderTargetView()};
 	getContext()->OMSetRenderTargets(1, rtvs, nullptr);
-	ID3D11ShaderResourceView* srvs2[] = { blendedFrame->getShaderResourceView()};
+	ID3D11ShaderResourceView* srvs2[] = {blendedFrame->getShaderResourceView()};
 	getContext()->PSSetShaderResources(3, 1, srvs2);
 }
 void VirtualScreen::setViewportSize(int width, int height)

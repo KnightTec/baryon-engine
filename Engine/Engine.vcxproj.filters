@@ -196,12 +196,14 @@
     <None Include="shaders\VertexShader.hlsl" />
     <None Include="shaders\PixelShader.hlsl" />
     <None Include="shaders\LightPS.hlsl" />
-    <None Include="shaders\PostProcessPS.hlsl" />
     <None Include="shaders\FullscreenVS.hlsl" />
     <None Include="shaders\Baryon.hlsl" />
     <None Include="shaders\AntiAliasing.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="source\resource\ResourceFileFormats.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
 </Project>

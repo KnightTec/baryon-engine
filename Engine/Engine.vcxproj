@@ -102,11 +102,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </None>
-    <FxCompile Include="shaders\PostProcessPS.hlsl">
+    <None Include="shaders\PostProcessPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <FileType>Document</FileType>
-    </FxCompile>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="source\resource\ResourceFileFormats.txt" />

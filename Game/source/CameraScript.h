@@ -11,6 +11,7 @@ public:
 	{
 		Input::bindAxis("MoveForward", this, &CameraScript::moveForward);
 		Input::bindAxis("MoveRight", this, &CameraScript::moveRight);
+		Input::bindAxis("MoveUp", this, &CameraScript::moveUp);
 		Input::bindAxis("Turn", this, &CameraScript::turn);
 		Input::bindAxis("LookUp", this, &CameraScript::lookUp);
 	}
@@ -21,6 +22,10 @@ public:
 	void moveRight(float inputValue)
 	{
 		entity.getComponent<Transform>()->translate(inputValue * 0.2f * speed, 0, 0);
+	}
+	void moveUp(float inputValue)
+	{
+		entity.getComponent<Transform>()->translate(0, inputValue * 0.2f * speed, 0);
 	}
 	void turn(float inputValue)
 	{

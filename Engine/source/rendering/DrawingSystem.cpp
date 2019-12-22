@@ -110,14 +110,15 @@ void DrawingSystem::tick()
 			continue;
 		}
 
-		auto& cameraData = cBuffer(PER_CAMERA_DATA);
-		cameraData->screenResolution = screen.getResolution();
-		cameraData->viewProjection = cam->getViewProjectionXM();
-		cameraData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjectionXM());
-		cameraData->cameraPosition = cam->position;
-		cameraData->cameraLinearVelocity = cam->linearVelocity;
-		cameraData.uploadBuffer();
-		cameraData->prevFrameViewProjMat = cam->getViewProjectionXM();
+		auto& bufferData = cBuffer(PER_CAMERA_DATA);
+		const Size2D& screenResolution = screen.getResolution();
+		bufferData->screenParams = {1.f / screenResolution.x, 1.f / screenResolution.y};
+		bufferData->viewProjection = cam->getViewProjectionXM();
+		bufferData->invViewProj = XMMatrixInverse(nullptr, cam->getViewProjectionXM());
+		bufferData->cameraPosition = cam->position;
+		bufferData->cameraLinearVelocity = cam->linearVelocity;
+		bufferData.uploadBuffer();
+		bufferData->prevFrameViewProjMat = cam->getViewProjectionXM();
 
 		// render light pass
 		lightPS.apply();
@@ -138,7 +139,7 @@ void DrawingSystem::tick()
 		screen.present();
 	}
 
-	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+	ID3D11ShaderResourceView* nulls[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 	getContext()->PSSetShaderResources(0, 8, nulls);
 }
 

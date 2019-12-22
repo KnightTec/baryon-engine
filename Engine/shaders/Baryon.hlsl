@@ -5,7 +5,7 @@ cbuffer PER_OBJECT_DATA : register(b0)
 };
 cbuffer PER_CAMERA_DATA : register(b1)
 {
-    float2 screenResolution;
+    float2 screenParams;
     matrix viewProj;
     matrix invViewProj;
     matrix prevViewProj;

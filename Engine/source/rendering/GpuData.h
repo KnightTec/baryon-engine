@@ -1,6 +1,5 @@
 #pragma once
 #include <DirectXMath.h>
-#include "Size.h"
 
 namespace Baryon
 {
@@ -23,8 +22,8 @@ struct PER_OBJECT_DATA
 };
 struct PER_CAMERA_DATA
 {
-	Size2D screenResolution;
-	float pad0[2];
+	DirectX::XMFLOAT2 screenParams;
+	float pad[2];
 	GPUMatrix viewProjection;
 	GPUMatrix invViewProj;
 	GPUMatrix prevFrameViewProjMat;

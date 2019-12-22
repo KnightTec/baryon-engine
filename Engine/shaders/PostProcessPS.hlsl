@@ -25,7 +25,7 @@ float4 main(in VSOutput input) : SV_Target0
     ndc.y *= -1;
     float2 velocity = (previousNdc.xy - ndc) / 2;
     velocity.y *= -1;
-    
+
     int numSamples = 64;
     float intensity = 0.5;
     velocity /= numSamples;
