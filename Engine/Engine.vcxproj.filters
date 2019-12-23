@@ -199,11 +199,9 @@
     <None Include="shaders\FullscreenVS.hlsl" />
     <None Include="shaders\Baryon.hlsl" />
     <None Include="shaders\AntiAliasing.hlsl" />
+    <None Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="source\resource\ResourceFileFormats.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="shaders\PostProcessPS.hlsl" />
   </ItemGroup>
 </Project>

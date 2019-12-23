@@ -7,8 +7,6 @@
 namespace Baryon
 {
 typedef const void* TypeId;
-template <typename T>
-TypeId typeId(T obj = T());
 
 typedef long long TypeFlag;
 typedef uint64_t EntityId;
@@ -29,6 +27,7 @@ struct TypeInfo
 class ComponentRegistry
 {
 public:
+	static void initialize();
 	template <typename T>
 	static void registerComponentType(const char* typeName, size_t countPerChunk);
 	template <typename T>
@@ -40,13 +39,43 @@ private:
 	static std::unordered_map<TypeFlag, TypeInfo> flagMap;
 };
 
+namespace Internal
+{
+extern int _typeIdCounter;
+}
 
 template <typename T>
-TypeId typeId(T obj)
+TypeId typeId()
 {
-	static const char typeId = 0;
+	static const int typeId = Internal::_typeIdCounter++;
 	return &typeId;
 }
+
+//namespace Internal
+//{
+//extern int _typeCounter;
+//
+//template <typename T>
+//TypeInfo& initTypeInfo(const char* typeName = nullptr, size_t countPerChunk = 0)
+//{
+//	static TypeInfo typeInfo = {
+//		typeId<T>(),
+//		typeName,
+//		1ll << ++_typeCounter,
+//		sizeof T,
+//		alignof(T),
+//		countPerChunk,
+//		[](void* p) { new(p) T(); }
+//	};
+//	return typeInfo;
+//}
+//}
+//
+//template <typename T>
+//const TypeInfo& typeInfo()
+//{
+//	return Internal::initTypeInfo<T>();
+//}
 
 template <typename T>
 void ComponentRegistry::registerComponentType(const char* typeName, size_t countPerChunk)
@@ -61,8 +90,9 @@ void ComponentRegistry::registerComponentType(const char* typeName, size_t count
 		typeInfo.sizeInBytes = sizeof T;
 		typeInfo.alignment = alignof(T);
 		typeInfo.countPerChunk = countPerChunk;
-		typeInfo.constructor = [](void* p) {
-			new(p) T{};
+		typeInfo.constructor = [](void* p)
+		{
+			new(p) T();
 		};
 		flagMap[typeInfo.flag] = typeInfo;
 	}
@@ -82,12 +112,4 @@ inline const TypeInfo& ComponentRegistry::getTypeInfo(TypeId typeId)
 	assert(idMap.find(typeId) != idMap.end());
 	return idMap[typeId];
 }
-
-#define REGISTER_COMPONENT_TYPE(Type, countPerChunk)\
-	struct Type##_registrator{\
-		Type##_registrator() {\
-			ComponentRegistry::registerComponentType<Type>(#Type, countPerChunk);\
-		}\
-	};\
-	static Type##_registrator global_##Type##_registrator;
 }

@@ -10,12 +10,15 @@ void RenderingEngine::initialize()
 {
 	ConstantBuffer<PER_OBJECT_DATA>::get().initialize(0, VERTEX_SHADER);
 	ConstantBuffer<PER_CAMERA_DATA>::get().initialize(1, PIXEL_SHADER);
+
 	matrixSys.initialize();
+	cameraSys.initialize();
 	drawSys.initialize();
 }
 void RenderingEngine::terminate()
 {
 	drawSys.terminate();
+	cameraSys.terminate();
 	matrixSys.terminate();
 	for (VirtualScreen& screen : virtualScreens)
 	{

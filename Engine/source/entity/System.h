@@ -61,10 +61,11 @@ System<HandledComponents...>::System(EntityManager* entityManager)
 	: ISystem(entityManager), componentFlags(0), archetypePtrBuffer{nullptr}
 {
 	using expander = int[];
-	(void)expander{
+	(void)expander {
 		0, ((void)(componentFlags |= ComponentRegistry::getTypeInfo(typeId<HandledComponents>()).flag), 0)...
 	};
 }
+
 template <typename ... HandledComponents>
 void System<HandledComponents...>::tick()
 {
