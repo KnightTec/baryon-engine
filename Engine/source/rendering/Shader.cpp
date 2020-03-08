@@ -138,3 +138,17 @@ bool PixelShader::compile()
 		d3dpixelShader.GetAddressOf()));
 	return true;
 }
+bool ComputeShader::compile()
+{
+	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+	ComPtr<ID3DBlob> shaderBlob = nullptr;
+	ComPtr<ID3DBlob> errorBlob = nullptr;
+	HR(D3DCompileFromFile(sourcePath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "cs_5_0", flags, 0,
+		shaderBlob.GetAddressOf(), errorBlob.GetAddressOf()));
+	HR(getDevice()->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr,
+		d3dComputeShader.GetAddressOf()));
+	return true;
+}

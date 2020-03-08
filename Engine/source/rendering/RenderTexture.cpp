@@ -19,7 +19,7 @@ bool RenderTexture::create(Size2D resolution)
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
-	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 	HR(getDevice()->CreateTexture2D(&texDesc, nullptr, texture.GetAddressOf()));
@@ -37,11 +37,18 @@ bool RenderTexture::create(Size2D resolution)
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	HR(getDevice()->CreateShaderResourceView(texture.Get(), &srvDesc, shaderResourceView.GetAddressOf()));
 
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = format;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+	HR(getDevice()->CreateUnorderedAccessView(texture.Get(), &uavDesc, unorderedAccessView.GetAddressOf()));
+
 	return true;
 }
 
 void RenderTexture::release()
 {
+	unorderedAccessView.Reset();
 	renderTargetView.Reset();
 	shaderResourceView.Reset();
 	texture.Reset();

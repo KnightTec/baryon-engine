@@ -79,12 +79,16 @@ void VirtualScreen::terminate()
 	delete swapChain;
 	initialized = false;
 }
+
+
+
 void VirtualScreen::tick()
 {
 	static const XMFLOAT2 rgssOffsets[] = {
 		{0.75, -0.25}, {-0.25, -0.75},
 		{-0.75, 0.25}, {0.25, 0.75}
 	};
+
 	XMFLOAT2 jitter = {
 		rgssOffsets[taaJitterCounter].x / float(resolution.x),
 		rgssOffsets[taaJitterCounter].y / float(resolution.y)

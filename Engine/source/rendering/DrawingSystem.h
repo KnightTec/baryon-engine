@@ -3,6 +3,7 @@
 #include "GraphicsDeviceInterface.h"
 #include "Shader.h"
 #include "components/Components.h"
+#include "RenderTexture.h"
 
 namespace Baryon
 {

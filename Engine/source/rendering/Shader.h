@@ -8,7 +8,6 @@
 
 namespace Baryon
 {
-
 class Shader : protected GraphicsDeviceInterface
 {
 public:
@@ -64,12 +63,28 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> d3dpixelShader;
 };
 
+class ComputeShader : public Shader
+{
+public:
+	using Shader::Shader;
+	/*
+	 * Compile HLSL compute shader file
+	 */
+	bool compile() override;
+	/*
+	 * Apply this compute shader to the rendering pipeline
+	 */
+	void apply() override;
+private:
+	Microsoft::WRL::ComPtr<ID3D11ComputeShader> d3dComputeShader;
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Inline function implementations 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 inline Shader::Shader(const std::wstring& sourcePath)
-	: sourcePath{ sourcePath }
+	: sourcePath{sourcePath}
 {
 }
 
@@ -92,5 +107,9 @@ inline void VertexShader::apply()
 inline void PixelShader::apply()
 {
 	getContext()->PSSetShader(d3dpixelShader.Get(), nullptr, 0);
+}
+inline void ComputeShader::apply()
+{
+	getContext()->CSSetShader(d3dComputeShader.Get(), nullptr, 0);
 }
 } // namespace Baryon

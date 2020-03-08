@@ -200,6 +200,7 @@
     <None Include="shaders\Baryon.hlsl" />
     <None Include="shaders\AntiAliasing.hlsl" />
     <None Include="shaders\PostProcessPS.hlsl" />
+    <None Include="shaders\TestCS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="source\resource\ResourceFileFormats.txt" />

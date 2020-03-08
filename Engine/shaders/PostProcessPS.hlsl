@@ -12,6 +12,7 @@ float InterleavedGradientNoise(float2 uv)
     return frac(magic.z * frac(dot(uv, magic.xy)));
 }
 
+
 float4 main(in VSOutput input) : SV_Target0
 {
     float3 color = hdrScene.Sample(texSampler, input.tex).xyz;
@@ -61,5 +62,5 @@ float4 main(in VSOutput input) : SV_Target0
     color.xyz = color.xyz + noise * min(color.xyz + 0.5 * pow(1.0 / 255.0, 2.2), 0.75 * (pow(256.0 / 255.0, 2.2) - 1.0));
     //color.xyz = pow(color.xyz, 2.2);
     
-    return float4(color, 1);
+    return float4(color.rgb, 1);
 }

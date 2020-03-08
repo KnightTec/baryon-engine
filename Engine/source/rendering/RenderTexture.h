@@ -7,7 +7,6 @@
 
 namespace Baryon
 {
-
 class RenderTexture : GraphicsDeviceInterface
 {
 public:
@@ -17,11 +16,13 @@ public:
 
 	ID3D11ShaderResourceView* getShaderResourceView();
 	ID3D11RenderTargetView* getRenderTargetView();
+	ID3D11UnorderedAccessView* getUnorderedAccessView();
 private:
 	DXGI_FORMAT format;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> unorderedAccessView;
 };
 
 
@@ -33,5 +34,9 @@ inline ID3D11ShaderResourceView* RenderTexture::getShaderResourceView()
 inline ID3D11RenderTargetView* RenderTexture::getRenderTargetView()
 {
 	return renderTargetView.Get();
+}
+inline ID3D11UnorderedAccessView* RenderTexture::getUnorderedAccessView()
+{
+	return unorderedAccessView.Get();
 }
 }
