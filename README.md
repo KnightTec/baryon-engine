@@ -1,5 +1,5 @@
 # Baryon Engine
-A small game engine framework written in C++ and using DirectX 11.
+A small game engine written in C++ and using DirectX 11.
 ## Features
 * Deffered rendering
 * Temporal anti-aliasing
