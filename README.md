@@ -13,4 +13,4 @@ A small game engine written in C++ and DirectX 11.
 |----------------------------------------------------------------------|-----------------------------------------------------------------------|
 |[Engine](Engine)                                                      |Core game engine framework                                             |
 |[Game](Game)                                                          |A sample application setting up a scene and camera control logic       |
-|[Editor](Editor)                                                      |Game editor application using a Qt based editor UI                     |
+|[Editor](Editor)                                                      |Game editor application using Qt                                       |
